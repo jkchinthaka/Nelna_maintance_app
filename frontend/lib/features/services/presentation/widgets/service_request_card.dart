@@ -164,8 +164,8 @@ class ServiceRequestCard extends StatelessWidget {
     final color = breached
         ? AppColors.error
         : (remaining != null && remaining.inHours < 4)
-            ? AppColors.warning
-            : AppColors.textSecondary;
+        ? AppColors.warning
+        : AppColors.textSecondary;
 
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
