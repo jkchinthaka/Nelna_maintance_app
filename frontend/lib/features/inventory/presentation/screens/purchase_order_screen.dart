@@ -59,9 +59,8 @@ class _PurchaseOrderScreenState extends ConsumerState<PurchaseOrderScreen>
     super.dispose();
   }
 
-  PurchaseOrderListParams get _params => PurchaseOrderListParams(
-    status: _statusTabs[_tabController.index],
-  );
+  PurchaseOrderListParams get _params =>
+      PurchaseOrderListParams(status: _statusTabs[_tabController.index]);
 
   @override
   Widget build(BuildContext context) {
@@ -88,8 +87,7 @@ class _PurchaseOrderScreenState extends ConsumerState<PurchaseOrderScreen>
           loading: () => _buildLoadingSkeleton(),
           error: (error, _) => ErrorView(
             message: error.toString(),
-            onRetry: () =>
-                ref.invalidate(purchaseOrderListProvider(_params)),
+            onRetry: () => ref.invalidate(purchaseOrderListProvider(_params)),
           ),
           data: (orders) {
             if (orders.isEmpty) return _buildEmptyState();
@@ -301,9 +299,9 @@ class _PurchaseOrderCard extends StatelessWidget {
         const SizedBox(width: 4),
         Text(
           label,
-          style: Theme.of(context).textTheme.bodySmall?.copyWith(
-            fontWeight: FontWeight.w600,
-          ),
+          style: Theme.of(
+            context,
+          ).textTheme.bodySmall?.copyWith(fontWeight: FontWeight.w600),
         ),
       ],
     );

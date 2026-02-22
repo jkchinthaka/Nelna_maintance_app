@@ -32,16 +32,24 @@ class AssetDetailScreen extends ConsumerWidget {
                       _handleMenuAction(context, ref, asset, value),
                   itemBuilder: (_) => [
                     const PopupMenuItem(
-                        value: 'edit', child: Text('Edit Asset')),
+                      value: 'edit',
+                      child: Text('Edit Asset'),
+                    ),
                     const PopupMenuItem(
-                        value: 'repair', child: Text('Report Repair')),
+                      value: 'repair',
+                      child: Text('Report Repair'),
+                    ),
                     const PopupMenuItem(
-                        value: 'transfer', child: Text('Transfer Asset')),
+                      value: 'transfer',
+                      child: Text('Transfer Asset'),
+                    ),
                     const PopupMenuDivider(),
                     const PopupMenuItem(
                       value: 'dispose',
-                      child: Text('Dispose Asset',
-                          style: TextStyle(color: AppColors.error)),
+                      child: Text(
+                        'Dispose Asset',
+                        style: TextStyle(color: AppColors.error),
+                      ),
                     ),
                   ],
                 ),
@@ -50,8 +58,7 @@ class AssetDetailScreen extends ConsumerWidget {
         ],
       ),
       body: assetAsync.when(
-        loading: () =>
-            const Center(child: CircularProgressIndicator()),
+        loading: () => const Center(child: CircularProgressIndicator()),
         error: (error, _) => ErrorView(
           message: error.toString(),
           onRetry: () => ref.invalidate(assetDetailProvider(assetId)),
@@ -84,7 +91,10 @@ class AssetDetailScreen extends ConsumerWidget {
   }
 
   void _showRepairDialog(
-      BuildContext context, WidgetRef ref, AssetEntity asset) {
+    BuildContext context,
+    WidgetRef ref,
+    AssetEntity asset,
+  ) {
     final descController = TextEditingController();
     String severity = 'Medium';
 
@@ -125,8 +135,9 @@ class AssetDetailScreen extends ConsumerWidget {
           ),
           actions: [
             TextButton(
-                onPressed: () => Navigator.pop(ctx),
-                child: const Text('Cancel')),
+              onPressed: () => Navigator.pop(ctx),
+              child: const Text('Cancel'),
+            ),
             FilledButton(
               onPressed: () async {
                 if (descController.text.isEmpty) return;
@@ -156,7 +167,10 @@ class AssetDetailScreen extends ConsumerWidget {
   }
 
   void _showDisposeDialog(
-      BuildContext context, WidgetRef ref, AssetEntity asset) {
+    BuildContext context,
+    WidgetRef ref,
+    AssetEntity asset,
+  ) {
     final reasonController = TextEditingController();
 
     showDialog(
@@ -182,8 +196,9 @@ class AssetDetailScreen extends ConsumerWidget {
         ),
         actions: [
           TextButton(
-              onPressed: () => Navigator.pop(ctx),
-              child: const Text('Cancel')),
+            onPressed: () => Navigator.pop(ctx),
+            child: const Text('Cancel'),
+          ),
           FilledButton(
             style: FilledButton.styleFrom(backgroundColor: AppColors.error),
             onPressed: () async {
@@ -197,9 +212,9 @@ class AssetDetailScreen extends ConsumerWidget {
               if (ctx.mounted) Navigator.pop(ctx);
               if (success && context.mounted) {
                 ref.invalidate(assetDetailProvider(assetId));
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(content: Text('Asset disposed')),
-                );
+                ScaffoldMessenger.of(
+                  context,
+                ).showSnackBar(const SnackBar(content: Text('Asset disposed')));
               }
             },
             child: const Text('Dispose'),
@@ -294,8 +309,11 @@ class _AssetDetailBody extends ConsumerWidget {
                     color: AppColors.primary.withOpacity(0.1),
                     borderRadius: BorderRadius.circular(14),
                   ),
-                  child: const Icon(Icons.inventory_2,
-                      color: AppColors.primary, size: 28),
+                  child: const Icon(
+                    Icons.inventory_2,
+                    color: AppColors.primary,
+                    size: 28,
+                  ),
                 ),
                 const SizedBox(width: 16),
                 Expanded(
@@ -328,8 +346,10 @@ class _AssetDetailBody extends ConsumerWidget {
               runSpacing: 8,
               children: [
                 _chipInfo(Icons.category, asset.category),
-                _chipInfo(Icons.location_on_outlined,
-                    asset.location ?? 'No location'),
+                _chipInfo(
+                  Icons.location_on_outlined,
+                  asset.location ?? 'No location',
+                ),
                 if (asset.branchName != null)
                   _chipInfo(Icons.business, asset.branchName!),
                 if (asset.assignedToName != null)
@@ -350,10 +370,7 @@ class _AssetDetailBody extends ConsumerWidget {
         const SizedBox(width: 4),
         Text(
           text,
-          style: const TextStyle(
-            fontSize: 13,
-            color: AppColors.textSecondary,
-          ),
+          style: const TextStyle(fontSize: 13, color: AppColors.textSecondary),
         ),
       ],
     );
@@ -389,13 +406,14 @@ class _DetailsTab extends StatelessWidget {
         if (asset.purchaseDate != null)
           _detailRow('Purchase Date', dateFmt.format(asset.purchaseDate!)),
         if (asset.purchasePrice != null)
-          _detailRow(
-              'Purchase Price', currencyFmt.format(asset.purchasePrice)),
+          _detailRow('Purchase Price', currencyFmt.format(asset.purchasePrice)),
         if (asset.currentValue != null)
           _detailRow('Current Value', currencyFmt.format(asset.currentValue)),
         if (asset.depreciationRate != null)
           _detailRow(
-              'Depreciation Rate', '${asset.depreciationRate}% per annum'),
+            'Depreciation Rate',
+            '${asset.depreciationRate}% per annum',
+          ),
 
         const SizedBox(height: 20),
         _sectionTitle(context, 'Warranty & Assignment'),
@@ -424,9 +442,9 @@ class _DetailsTab extends StatelessWidget {
       child: Text(
         title,
         style: Theme.of(context).textTheme.titleSmall?.copyWith(
-              fontWeight: FontWeight.w600,
-              color: AppColors.primary,
-            ),
+          fontWeight: FontWeight.w600,
+          color: AppColors.primary,
+        ),
       ),
     );
   }
@@ -450,10 +468,7 @@ class _DetailsTab extends StatelessWidget {
           Expanded(
             child: Text(
               value,
-              style: const TextStyle(
-                fontWeight: FontWeight.w500,
-                fontSize: 13,
-              ),
+              style: const TextStyle(fontWeight: FontWeight.w500, fontSize: 13),
             ),
           ),
         ],
@@ -500,13 +515,19 @@ class _RepairLogsTab extends ConsumerWidget {
             return Card(
               margin: const EdgeInsets.only(bottom: 12),
               shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(10)),
+                borderRadius: BorderRadius.circular(10),
+              ),
               child: ListTile(
                 contentPadding: const EdgeInsets.all(16),
                 leading: CircleAvatar(
-                  backgroundColor: _severityColor(log.severity).withOpacity(0.1),
-                  child: Icon(Icons.build,
-                      color: _severityColor(log.severity), size: 20),
+                  backgroundColor: _severityColor(
+                    log.severity,
+                  ).withOpacity(0.1),
+                  child: Icon(
+                    Icons.build,
+                    color: _severityColor(log.severity),
+                    size: 20,
+                  ),
                 ),
                 title: Text(
                   log.description,
@@ -520,9 +541,10 @@ class _RepairLogsTab extends ConsumerWidget {
                     children: [
                       StatusBadge(status: log.status),
                       const SizedBox(width: 8),
-                      Text(dateFmt.format(log.reportedDate),
-                          style:
-                              const TextStyle(color: AppColors.textSecondary)),
+                      Text(
+                        dateFmt.format(log.reportedDate),
+                        style: const TextStyle(color: AppColors.textSecondary),
+                      ),
                       if (log.repairCost != null) ...[
                         const Spacer(),
                         Text(
@@ -572,8 +594,9 @@ class _TransfersTab extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     // Re-use the transfers provider with no status filter
-    final transfersAsync =
-        ref.watch(transfersProvider(const TransferListParams()));
+    final transfersAsync = ref.watch(
+      transfersProvider(const TransferListParams()),
+    );
     final dateFmt = DateFormat('dd MMM yyyy');
 
     return transfersAsync.when(
@@ -585,8 +608,7 @@ class _TransfersTab extends ConsumerWidget {
       ),
       data: (transfers) {
         // Filter locally by assetId for this tab view
-        final filtered =
-            transfers.where((t) => t.assetId == assetId).toList();
+        final filtered = transfers.where((t) => t.assetId == assetId).toList();
         if (filtered.isEmpty) {
           return const EmptyStateWidget(
             icon: Icons.swap_horiz,
@@ -603,13 +625,17 @@ class _TransfersTab extends ConsumerWidget {
             return Card(
               margin: const EdgeInsets.only(bottom: 12),
               shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(10)),
+                borderRadius: BorderRadius.circular(10),
+              ),
               child: ListTile(
                 contentPadding: const EdgeInsets.all(16),
                 leading: CircleAvatar(
                   backgroundColor: AppColors.info.withOpacity(0.1),
-                  child: const Icon(Icons.swap_horiz,
-                      color: AppColors.info, size: 20),
+                  child: const Icon(
+                    Icons.swap_horiz,
+                    color: AppColors.info,
+                    size: 20,
+                  ),
                 ),
                 title: Text(
                   '${transfer.fromBranchName ?? 'Branch ${transfer.fromBranchId}'}'
@@ -623,9 +649,10 @@ class _TransfersTab extends ConsumerWidget {
                     children: [
                       StatusBadge(status: transfer.status),
                       const SizedBox(width: 8),
-                      Text(dateFmt.format(transfer.transferDate),
-                          style:
-                              const TextStyle(color: AppColors.textSecondary)),
+                      Text(
+                        dateFmt.format(transfer.transferDate),
+                        style: const TextStyle(color: AppColors.textSecondary),
+                      ),
                     ],
                   ),
                 ),
@@ -655,7 +682,10 @@ class _TabBarDelegate extends SliverPersistentHeaderDelegate {
 
   @override
   Widget build(
-      BuildContext context, double shrinkOffset, bool overlapsContent) {
+    BuildContext context,
+    double shrinkOffset,
+    bool overlapsContent,
+  ) {
     return Material(
       color: Theme.of(context).scaffoldBackgroundColor,
       elevation: overlapsContent ? 2 : 0,

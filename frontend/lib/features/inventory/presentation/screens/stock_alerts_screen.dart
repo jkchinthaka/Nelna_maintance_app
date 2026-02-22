@@ -29,9 +29,8 @@ class StockAlertsScreen extends ConsumerWidget {
             if (alerts.isEmpty) return _buildEmptyState();
 
             // Sort with most severe first
-            final sorted = [...alerts]..sort(
-                (a, b) => b.severity.compareTo(a.severity),
-              );
+            final sorted = [...alerts]
+              ..sort((a, b) => b.severity.compareTo(a.severity));
 
             return ListView.builder(
               padding: const EdgeInsets.fromLTRB(16, 12, 16, 24),

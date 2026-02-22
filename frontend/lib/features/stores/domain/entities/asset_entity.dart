@@ -73,8 +73,7 @@ class AssetEntity extends Equatable {
       warrantyExpiry!.isBefore(DateTime.now().add(const Duration(days: 30)));
 
   /// Total depreciation amount.
-  double get totalDepreciation =>
-      (purchasePrice ?? 0) - (currentValue ?? 0);
+  double get totalDepreciation => (purchasePrice ?? 0) - (currentValue ?? 0);
 
   /// Depreciation percentage.
   double get depreciationPercentage {
@@ -200,8 +199,7 @@ class AssetTransferEntity extends Equatable {
   bool get canApprove => status == 'Pending';
 
   /// Whether the transfer is still active (not completed or rejected).
-  bool get isActive =>
-      status != 'Completed' && status != 'Rejected';
+  bool get isActive => status != 'Completed' && status != 'Rejected';
 
   @override
   List<Object?> get props => [

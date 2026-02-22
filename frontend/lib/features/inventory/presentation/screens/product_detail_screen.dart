@@ -49,9 +49,7 @@ class ProductDetailScreen extends ConsumerWidget {
           onRefresh: () async {
             ref.invalidate(productDetailProvider(productId));
             ref.invalidate(
-              stockMovementsProvider(
-                StockMovementParams(productId: productId),
-              ),
+              stockMovementsProvider(StockMovementParams(productId: productId)),
             );
           },
           child: ListView(
@@ -94,8 +92,8 @@ class ProductDetailScreen extends ConsumerWidget {
                     color: AppColors.primary.withOpacity(0.1),
                     borderRadius: BorderRadius.circular(16),
                   ),
-                  child: product.imageUrl != null &&
-                          product.imageUrl!.isNotEmpty
+                  child:
+                      product.imageUrl != null && product.imageUrl!.isNotEmpty
                       ? ClipRRect(
                           borderRadius: BorderRadius.circular(16),
                           child: Image.network(
@@ -196,17 +194,17 @@ class ProductDetailScreen extends ConsumerWidget {
             width: 110,
             child: Text(
               label,
-              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                color: AppColors.textSecondary,
-              ),
+              style: Theme.of(
+                context,
+              ).textTheme.bodyMedium?.copyWith(color: AppColors.textSecondary),
             ),
           ),
           Expanded(
             child: Text(
               value,
-              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                fontWeight: FontWeight.w600,
-              ),
+              style: Theme.of(
+                context,
+              ).textTheme.bodyMedium?.copyWith(fontWeight: FontWeight.w600),
             ),
           ),
         ],
@@ -288,15 +286,15 @@ class ProductDetailScreen extends ConsumerWidget {
         children: [
           Text(
             label,
-            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-              color: AppColors.textSecondary,
-            ),
+            style: Theme.of(
+              context,
+            ).textTheme.bodyMedium?.copyWith(color: AppColors.textSecondary),
           ),
           Text(
             '$value $unit',
-            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-              fontWeight: FontWeight.w600,
-            ),
+            style: Theme.of(
+              context,
+            ).textTheme.bodyMedium?.copyWith(fontWeight: FontWeight.w600),
           ),
         ],
       ),
@@ -385,7 +383,9 @@ class ProductDetailScreen extends ConsumerWidget {
   ) {
     final isIn = movement.isStockIn;
     final color = isIn ? AppColors.success : AppColors.error;
-    final icon = isIn ? Icons.arrow_downward_rounded : Icons.arrow_upward_rounded;
+    final icon = isIn
+        ? Icons.arrow_downward_rounded
+        : Icons.arrow_upward_rounded;
     final sign = isIn ? '+' : '-';
     final dateFmt = DateFormat('dd MMM yyyy, HH:mm');
 
@@ -402,17 +402,10 @@ class ProductDetailScreen extends ConsumerWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           if (movement.notes != null && movement.notes!.isNotEmpty)
-            Text(
-              movement.notes!,
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
-            ),
+            Text(movement.notes!, maxLines: 1, overflow: TextOverflow.ellipsis),
           Text(
             dateFmt.format(movement.createdAt),
-            style: TextStyle(
-              fontSize: 12,
-              color: AppColors.textSecondary,
-            ),
+            style: TextStyle(fontSize: 12, color: AppColors.textSecondary),
           ),
         ],
       ),
@@ -514,12 +507,12 @@ class ProductDetailScreen extends ConsumerWidget {
                       onPressed: formState.isLoading
                           ? null
                           : () async {
-                              final qty =
-                                  int.tryParse(qtyController.text) ?? 0;
+                              final qty = int.tryParse(qtyController.text) ?? 0;
                               if (qty <= 0) return;
 
-                              final notifier =
-                                  innerRef.read(productFormProvider.notifier);
+                              final notifier = innerRef.read(
+                                productFormProvider.notifier,
+                              );
                               final success = await notifier.adjustStock({
                                 'productId': product.id,
                                 'type': adjustType,
@@ -536,17 +529,16 @@ class ProductDetailScreen extends ConsumerWidget {
                                 );
                                 innerRef.invalidate(
                                   stockMovementsProvider(
-                                    StockMovementParams(
-                                      productId: productId,
-                                    ),
+                                    StockMovementParams(productId: productId),
                                   ),
                                 );
 
                                 if (context.mounted) {
                                   ScaffoldMessenger.of(context).showSnackBar(
                                     const SnackBar(
-                                      content:
-                                          Text('Stock adjusted successfully'),
+                                      content: Text(
+                                        'Stock adjusted successfully',
+                                      ),
                                       backgroundColor: AppColors.success,
                                     ),
                                   );

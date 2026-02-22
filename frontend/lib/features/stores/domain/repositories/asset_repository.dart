@@ -19,19 +19,14 @@ abstract class AssetRepository {
 
   Future<Either<Failure, AssetEntity>> getAssetById(int id);
 
-  Future<Either<Failure, AssetEntity>> createAsset(
-    Map<String, dynamic> data,
-  );
+  Future<Either<Failure, AssetEntity>> createAsset(Map<String, dynamic> data);
 
   Future<Either<Failure, AssetEntity>> updateAsset(
     int id,
     Map<String, dynamic> data,
   );
 
-  Future<Either<Failure, void>> disposeAsset(
-    int id, {
-    String? reason,
-  });
+  Future<Either<Failure, void>> disposeAsset(int id, {String? reason});
 
   // ── Repair Logs ─────────────────────────────────────────────────────────
 

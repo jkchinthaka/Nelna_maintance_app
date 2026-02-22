@@ -1,0 +1,182 @@
+# ===========================================================
+# Nelna Integrated Maintenance Management System
+# Docker Compose - Full Stack Development Environment
+# ===========================================================
+
+version: '3.8'
+
+services:
+  # ==================== MySQL Database ====================
+  mysql:
+    image: mysql:8.0
+    container_name: nelna_mysql
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD:-NelnaRoot@2024}
+      MYSQL_DATABASE: ${MYSQL_DATABASE:-nelna_maintenance}
+      MYSQL_USER: ${MYSQL_USER:-nelna_user}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD:-NelnaPass@2024}
+      MYSQL_CHARSET: utf8mb4
+      MYSQL_COLLATION: utf8mb4_unicode_ci
+    ports:
+      - "${MYSQL_PORT:-3306}:3306"
+    volumes:
+      - mysql_data:/var/lib/mysql
+      - ./backend/prisma/init:/docker-entrypoint-initdb.d
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-p${MYSQL_ROOT_PASSWORD:-NelnaRoot@2024}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+    networks:
+      - nelna_network
+    command: >
+      --default-authentication-plugin=mysql_native_password
+      --character-set-server=utf8mb4
+      --collation-server=utf8mb4_unicode_ci
+      --max-connections=200
+      --innodb-buffer-pool-size=256M
+
+  # ==================== Redis Cache ====================
+  redis:
+    image: redis:7-alpine
+    container_name: nelna_redis
+    restart: unless-stopped
+    ports:
+      - "${REDIS_PORT:-6379}:6379"
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - nelna_network
+    command: redis-server --appendonly yes --maxmemory 128mb --maxmemory-policy allkeys-lru
+
+  # ==================== Backend API ====================
+  api:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: nelna_api
+    restart: unless-stopped
+    depends_on:
+      mysql:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    environment:
+      NODE_ENV: ${NODE_ENV:-development}
+      PORT: 3000
+      DATABASE_URL: mysql://${MYSQL_USER:-nelna_user}:${MYSQL_PASSWORD:-NelnaPass@2024}@mysql:3306/${MYSQL_DATABASE:-nelna_maintenance}
+      REDIS_URL: redis://redis:6379
+      JWT_SECRET: ${JWT_SECRET:-nelna-jwt-secret-change-in-production-2024}
+      JWT_REFRESH_SECRET: ${JWT_REFRESH_SECRET:-nelna-refresh-secret-change-in-production-2024}
+      JWT_EXPIRE: ${JWT_EXPIRE:-24h}
+      JWT_REFRESH_EXPIRE: ${JWT_REFRESH_EXPIRE:-7d}
+      CORS_ORIGIN: ${CORS_ORIGIN:-http://localhost:8080}
+      LOG_LEVEL: ${LOG_LEVEL:-info}
+      UPLOAD_DIR: /app/uploads
+      MAX_FILE_SIZE: ${MAX_FILE_SIZE:-10485760}
+    ports:
+      - "${API_PORT:-3000}:3000"
+    volumes:
+      - api_uploads:/app/uploads
+      - api_logs:/app/logs
+    networks:
+      - nelna_network
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:3000/api/v1/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+  # ==================== Database Migration Runner ====================
+  migrate:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: nelna_migrate
+    depends_on:
+      mysql:
+        condition: service_healthy
+    environment:
+      DATABASE_URL: mysql://${MYSQL_USER:-nelna_user}:${MYSQL_PASSWORD:-NelnaPass@2024}@mysql:3306/${MYSQL_DATABASE:-nelna_maintenance}
+    command: >
+      sh -c "npx prisma migrate deploy && npx prisma db seed"
+    networks:
+      - nelna_network
+    restart: "no"
+
+  # ==================== Nginx Reverse Proxy ====================
+  nginx:
+    image: nginx:alpine
+    container_name: nelna_nginx
+    restart: unless-stopped
+    depends_on:
+      api:
+        condition: service_healthy
+    ports:
+      - "${NGINX_PORT:-8080}:80"
+      - "${NGINX_SSL_PORT:-8443}:443"
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+      - ./nginx/conf.d:/etc/nginx/conf.d:ro
+      - ./nginx/ssl:/etc/nginx/ssl:ro
+      - nginx_logs:/var/log/nginx
+    networks:
+      - nelna_network
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost/health"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+
+  # ==================== phpMyAdmin (Development Only) ====================
+  phpmyadmin:
+    image: phpmyadmin/phpmyadmin:latest
+    container_name: nelna_phpmyadmin
+    restart: unless-stopped
+    depends_on:
+      mysql:
+        condition: service_healthy
+    environment:
+      PMA_HOST: mysql
+      PMA_PORT: 3306
+      PMA_USER: root
+      PMA_PASSWORD: ${MYSQL_ROOT_PASSWORD:-NelnaRoot@2024}
+      UPLOAD_LIMIT: 50M
+    ports:
+      - "${PMA_PORT:-8081}:80"
+    networks:
+      - nelna_network
+    profiles:
+      - dev
+
+# ==================== Volumes ====================
+volumes:
+  mysql_data:
+    driver: local
+    name: nelna_mysql_data
+  redis_data:
+    driver: local
+    name: nelna_redis_data
+  api_uploads:
+    driver: local
+    name: nelna_api_uploads
+  api_logs:
+    driver: local
+    name: nelna_api_logs
+  nginx_logs:
+    driver: local
+    name: nelna_nginx_logs
+
+# ==================== Networks ====================
+networks:
+  nelna_network:
+    driver: bridge
+    name: nelna_network

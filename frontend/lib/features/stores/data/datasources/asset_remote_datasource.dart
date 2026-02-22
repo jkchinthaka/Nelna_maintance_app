@@ -80,10 +80,7 @@ class AssetRemoteDatasource {
   Future<Map<String, dynamic>> createRepairLog(
     Map<String, dynamic> data,
   ) async {
-    final response = await _client.post(
-      ApiConstants.assetRepairs,
-      data: data,
-    );
+    final response = await _client.post(ApiConstants.assetRepairs, data: data);
     return response.data as Map<String, dynamic>;
   }
 
@@ -118,9 +115,7 @@ class AssetRemoteDatasource {
     return response.data as Map<String, dynamic>;
   }
 
-  Future<Map<String, dynamic>> createTransfer(
-    Map<String, dynamic> data,
-  ) async {
+  Future<Map<String, dynamic>> createTransfer(Map<String, dynamic> data) async {
     final response = await _client.post(
       ApiConstants.assetTransfers,
       data: data,
@@ -135,19 +130,14 @@ class AssetRemoteDatasource {
   }) async {
     final response = await _client.patch(
       '${ApiConstants.assetTransfers}/$id/approve',
-      data: {
-        'approved': approved,
-        if (notes != null) 'notes': notes,
-      },
+      data: {'approved': approved, if (notes != null) 'notes': notes},
     );
     return response.data as Map<String, dynamic>;
   }
 
   // ── Depreciation Summary ────────────────────────────────────────────────
 
-  Future<Map<String, dynamic>> getDepreciationSummary({
-    int? branchId,
-  }) async {
+  Future<Map<String, dynamic>> getDepreciationSummary({int? branchId}) async {
     final queryParameters = <String, dynamic>{
       if (branchId != null) 'branchId': branchId,
     };

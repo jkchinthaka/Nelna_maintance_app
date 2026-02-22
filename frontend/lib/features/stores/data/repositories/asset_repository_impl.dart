@@ -36,8 +36,7 @@ class AssetRepositoryImpl implements AssetRepository {
         branchId: branchId,
       );
 
-      final dataList =
-          response['data'] is List ? response['data'] as List : [];
+      final dataList = response['data'] is List ? response['data'] as List : [];
       final assets = dataList
           .map((e) => AssetModel.fromJson(e as Map<String, dynamic>))
           .toList();
@@ -131,11 +130,9 @@ class AssetRepositoryImpl implements AssetRepository {
         limit: limit,
       );
 
-      final dataList =
-          response['data'] is List ? response['data'] as List : [];
+      final dataList = response['data'] is List ? response['data'] as List : [];
       final logs = dataList
-          .map(
-              (e) => AssetRepairLogModel.fromJson(e as Map<String, dynamic>))
+          .map((e) => AssetRepairLogModel.fromJson(e as Map<String, dynamic>))
           .toList();
 
       return Right(logs);
@@ -198,11 +195,9 @@ class AssetRepositoryImpl implements AssetRepository {
         status: status,
       );
 
-      final dataList =
-          response['data'] is List ? response['data'] as List : [];
+      final dataList = response['data'] is List ? response['data'] as List : [];
       final transfers = dataList
-          .map(
-              (e) => AssetTransferModel.fromJson(e as Map<String, dynamic>))
+          .map((e) => AssetTransferModel.fromJson(e as Map<String, dynamic>))
           .toList();
 
       return Right(transfers);
@@ -262,8 +257,9 @@ class AssetRepositoryImpl implements AssetRepository {
     int? branchId,
   }) async {
     try {
-      final response =
-          await _remoteDatasource.getDepreciationSummary(branchId: branchId);
+      final response = await _remoteDatasource.getDepreciationSummary(
+        branchId: branchId,
+      );
       final data = response['data'] as Map<String, dynamic>? ?? response;
       return Right(AssetDepreciationSummaryModel.fromJson(data));
     } on ServerException catch (e) {

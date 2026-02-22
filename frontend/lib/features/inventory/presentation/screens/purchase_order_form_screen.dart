@@ -147,9 +147,8 @@ class _PurchaseOrderFormScreenState
                         final picked = await showDatePicker(
                           context: context,
                           initialDate:
-                              _expectedDate ?? DateTime.now().add(
-                                const Duration(days: 7),
-                              ),
+                              _expectedDate ??
+                              DateTime.now().add(const Duration(days: 7)),
                           firstDate: DateTime.now(),
                           lastDate: DateTime.now().add(
                             const Duration(days: 365),
@@ -170,8 +169,7 @@ class _PurchaseOrderFormScreenState
                         ),
                         child: Text(
                           _expectedDate != null
-                              ? DateFormat('dd MMM yyyy')
-                                    .format(_expectedDate!)
+                              ? DateFormat('dd MMM yyyy').format(_expectedDate!)
                               : 'Tap to select',
                           style: TextStyle(
                             color: _expectedDate != null
@@ -218,9 +216,7 @@ class _PurchaseOrderFormScreenState
                       children: [
                         Text(
                           'Line Items',
-                          style: Theme.of(context)
-                              .textTheme
-                              .titleSmall
+                          style: Theme.of(context).textTheme.titleSmall
                               ?.copyWith(fontWeight: FontWeight.bold),
                         ),
                         TextButton.icon(
@@ -340,9 +336,7 @@ class _PurchaseOrderFormScreenState
                             if (formState.lineItems.isEmpty) {
                               ScaffoldMessenger.of(context).showSnackBar(
                                 const SnackBar(
-                                  content: Text(
-                                    'Add at least one line item',
-                                  ),
+                                  content: Text('Add at least one line item'),
                                   backgroundColor: AppColors.warning,
                                 ),
                               );
@@ -351,13 +345,11 @@ class _PurchaseOrderFormScreenState
                             final notifier = ref.read(
                               purchaseOrderFormProvider.notifier,
                             );
-                            final success =
-                                await notifier.submitForApproval();
+                            final success = await notifier.submitForApproval();
                             if (success && context.mounted) {
                               ScaffoldMessenger.of(context).showSnackBar(
                                 const SnackBar(
-                                  content:
-                                      Text('Submitted for approval'),
+                                  content: Text('Submitted for approval'),
                                   backgroundColor: AppColors.success,
                                 ),
                               );
@@ -455,9 +447,7 @@ class _LineItemRow extends StatelessWidget {
                         .toList(),
                     onChanged: (val) {
                       if (val != null) {
-                        final product = products.firstWhere(
-                          (p) => p.id == val,
-                        );
+                        final product = products.firstWhere((p) => p.id == val);
                         onChanged(
                           item.copyWith(
                             productId: val,
@@ -527,8 +517,9 @@ class _LineItemRow extends StatelessWidget {
                     initialValue: item.unitPrice > 0
                         ? item.unitPrice.toStringAsFixed(2)
                         : '',
-                    keyboardType:
-                        const TextInputType.numberWithOptions(decimal: true),
+                    keyboardType: const TextInputType.numberWithOptions(
+                      decimal: true,
+                    ),
                     decoration: InputDecoration(
                       isDense: true,
                       contentPadding: const EdgeInsets.symmetric(

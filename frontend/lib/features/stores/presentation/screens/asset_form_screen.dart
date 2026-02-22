@@ -152,10 +152,7 @@ class _AssetFormScreenState extends ConsumerState<AssetFormScreen> {
 
     if (success && mounted) {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content:
-              Text(_isEditing ? 'Asset updated' : 'Asset created'),
-        ),
+        SnackBar(content: Text(_isEditing ? 'Asset updated' : 'Asset created')),
       );
       context.pop(true);
     }
@@ -167,19 +164,19 @@ class _AssetFormScreenState extends ConsumerState<AssetFormScreen> {
     final dateFmt = DateFormat('dd MMM yyyy');
 
     return Scaffold(
-      appBar: AppBar(
-        title: Text(_isEditing ? 'Edit Asset' : 'New Asset'),
-      ),
+      appBar: AppBar(title: Text(_isEditing ? 'Edit Asset' : 'New Asset')),
       body: _isEditing
-          ? ref.watch(assetDetailProvider(widget.assetId!)).when(
-                loading: () =>
-                    const Center(child: CircularProgressIndicator()),
-                error: (e, _) => Center(child: Text(e.toString())),
-                data: (asset) {
-                  _populateFields(asset);
-                  return _buildForm(formState, dateFmt);
-                },
-              )
+          ? ref
+                .watch(assetDetailProvider(widget.assetId!))
+                .when(
+                  loading: () =>
+                      const Center(child: CircularProgressIndicator()),
+                  error: (e, _) => Center(child: Text(e.toString())),
+                  data: (asset) {
+                    _populateFields(asset);
+                    return _buildForm(formState, dateFmt);
+                  },
+                )
           : _buildForm(formState, dateFmt),
     );
   }
@@ -282,8 +279,9 @@ class _AssetFormScreenState extends ConsumerState<AssetFormScreen> {
                         border: OutlineInputBorder(),
                       ),
                       items: _conditions
-                          .map((c) =>
-                              DropdownMenuItem(value: c, child: Text(c)))
+                          .map(
+                            (c) => DropdownMenuItem(value: c, child: Text(c)),
+                          )
                           .toList(),
                       onChanged: (v) {
                         if (v != null) setState(() => _condition = v);
@@ -299,8 +297,9 @@ class _AssetFormScreenState extends ConsumerState<AssetFormScreen> {
                         border: OutlineInputBorder(),
                       ),
                       items: _statuses
-                          .map((s) =>
-                              DropdownMenuItem(value: s, child: Text(s)))
+                          .map(
+                            (s) => DropdownMenuItem(value: s, child: Text(s)),
+                          )
                           .toList(),
                       onChanged: (v) {
                         if (v != null) setState(() => _status = v);

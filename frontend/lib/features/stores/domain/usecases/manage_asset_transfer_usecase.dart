@@ -32,10 +32,6 @@ class ManageAssetTransferUseCase {
     int limit = 20,
     String? status,
   }) {
-    return _repository.getTransfers(
-      page: page,
-      limit: limit,
-      status: status,
-    );
+    return _repository.getTransfers(page: page, limit: limit, status: status);
   }
 }

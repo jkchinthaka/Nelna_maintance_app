@@ -1,0 +1,31 @@
+# ===========================================================
+# Nelna Maintenance Management System - Root .gitignore
+# ===========================================================
+
+# Environment files
+.env
+.env.local
+.env.*.local
+
+# IDE
+.vscode/settings.json
+.idea/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Docker volumes (local dev)
+mysql_data/
+redis_data/
+
+# SSL certificates
+nginx/ssl/*.crt
+nginx/ssl/*.key
+nginx/ssl/*.pem
+
+# Logs
+*.log
+logs/

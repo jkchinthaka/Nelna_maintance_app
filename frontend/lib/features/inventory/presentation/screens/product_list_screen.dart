@@ -70,14 +70,11 @@ class _ProductListScreenState extends ConsumerState<ProductListScreen> {
                 loading: () => _buildLoadingSkeleton(isWide),
                 error: (error, _) => ErrorView(
                   message: error.toString(),
-                  onRetry: () =>
-                      ref.invalidate(productListProvider(_params)),
+                  onRetry: () => ref.invalidate(productListProvider(_params)),
                 ),
                 data: (products) {
                   if (products.isEmpty) return _buildEmptyState();
-                  return isWide
-                      ? _buildGrid(products)
-                      : _buildList(products);
+                  return isWide ? _buildGrid(products) : _buildList(products);
                 },
               ),
             ),
@@ -137,8 +134,7 @@ class _ProductListScreenState extends ConsumerState<ProductListScreen> {
 
   Widget _buildFilterChips(AsyncValue<List<CategoryEntity>> categoriesAsync) {
     final categories = categoriesAsync.valueOrNull ?? [];
-    final hasActiveFilter =
-        _selectedCategoryId != null || _lowStockOnly;
+    final hasActiveFilter = _selectedCategoryId != null || _lowStockOnly;
 
     return SizedBox(
       height: 48,
@@ -208,9 +204,8 @@ class _ProductListScreenState extends ConsumerState<ProductListScreen> {
           padding: const EdgeInsets.only(bottom: 12),
           child: ProductCard(
             product: products[index],
-            onTap: () => context.push(
-              '/inventory/products/${products[index].id}',
-            ),
+            onTap: () =>
+                context.push('/inventory/products/${products[index].id}'),
           ),
         );
       },
@@ -232,9 +227,8 @@ class _ProductListScreenState extends ConsumerState<ProductListScreen> {
       itemBuilder: (context, index) {
         return ProductCard(
           product: products[index],
-          onTap: () => context.push(
-            '/inventory/products/${products[index].id}',
-          ),
+          onTap: () =>
+              context.push('/inventory/products/${products[index].id}'),
         );
       },
     );

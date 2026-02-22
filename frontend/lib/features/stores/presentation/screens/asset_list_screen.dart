@@ -31,20 +31,13 @@ class _AssetListScreenState extends ConsumerState<AssetListScreen> {
     'Lost',
   ];
 
-  static const _conditionOptions = [
-    'New',
-    'Good',
-    'Fair',
-    'Poor',
-    'Damaged',
-  ];
+  static const _conditionOptions = ['New', 'Good', 'Fair', 'Poor', 'Damaged'];
 
   AssetListParams get _params => AssetListParams(
-        search:
-            _searchController.text.isNotEmpty ? _searchController.text : null,
-        status: _selectedStatus,
-        condition: _selectedCondition,
-      );
+    search: _searchController.text.isNotEmpty ? _searchController.text : null,
+    status: _selectedStatus,
+    condition: _selectedCondition,
+  );
 
   @override
   void dispose() {
@@ -153,20 +146,22 @@ class _AssetListScreenState extends ConsumerState<AssetListScreen> {
         padding: const EdgeInsets.symmetric(horizontal: 16),
         children: [
           // Status chips
-          ..._statusOptions.map((status) => Padding(
-                padding: const EdgeInsets.only(right: 8),
-                child: FilterChip(
-                  label: Text(status),
-                  selected: _selectedStatus == status,
-                  onSelected: (selected) {
-                    setState(() {
-                      _selectedStatus = selected ? status : null;
-                    });
-                  },
-                  selectedColor: AppColors.primary.withOpacity(0.15),
-                  checkmarkColor: AppColors.primary,
-                ),
-              )),
+          ..._statusOptions.map(
+            (status) => Padding(
+              padding: const EdgeInsets.only(right: 8),
+              child: FilterChip(
+                label: Text(status),
+                selected: _selectedStatus == status,
+                onSelected: (selected) {
+                  setState(() {
+                    _selectedStatus = selected ? status : null;
+                  });
+                },
+                selectedColor: AppColors.primary.withOpacity(0.15),
+                checkmarkColor: AppColors.primary,
+              ),
+            ),
+          ),
 
           // Divider
           const Padding(
@@ -175,20 +170,22 @@ class _AssetListScreenState extends ConsumerState<AssetListScreen> {
           ),
 
           // Condition chips
-          ..._conditionOptions.map((condition) => Padding(
-                padding: const EdgeInsets.only(right: 8),
-                child: FilterChip(
-                  label: Text(condition),
-                  selected: _selectedCondition == condition,
-                  onSelected: (selected) {
-                    setState(() {
-                      _selectedCondition = selected ? condition : null;
-                    });
-                  },
-                  selectedColor: AppColors.secondary.withOpacity(0.15),
-                  checkmarkColor: AppColors.secondary,
-                ),
-              )),
+          ..._conditionOptions.map(
+            (condition) => Padding(
+              padding: const EdgeInsets.only(right: 8),
+              child: FilterChip(
+                label: Text(condition),
+                selected: _selectedCondition == condition,
+                onSelected: (selected) {
+                  setState(() {
+                    _selectedCondition = selected ? condition : null;
+                  });
+                },
+                selectedColor: AppColors.secondary.withOpacity(0.15),
+                checkmarkColor: AppColors.secondary,
+              ),
+            ),
+          ),
 
           // Clear button
           if (hasFilters)
@@ -302,23 +299,25 @@ class _AssetListScreenState extends ConsumerState<AssetListScreen> {
                 color: AppColors.primary.withOpacity(0.08),
                 shape: BoxShape.circle,
               ),
-              child: const Icon(Icons.inventory_2_outlined,
-                  size: 48, color: AppColors.primary),
+              child: const Icon(
+                Icons.inventory_2_outlined,
+                size: 48,
+                color: AppColors.primary,
+              ),
             ),
             const SizedBox(height: 16),
             Text(
               'No Assets Found',
-              style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                    fontWeight: FontWeight.w600,
-                  ),
+              style: Theme.of(
+                context,
+              ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w600),
             ),
             const SizedBox(height: 8),
             Text(
               'Try adjusting your search or filters, or add a new asset.',
-              style: Theme.of(context)
-                  .textTheme
-                  .bodyMedium
-                  ?.copyWith(color: AppColors.textSecondary),
+              style: Theme.of(
+                context,
+              ).textTheme.bodyMedium?.copyWith(color: AppColors.textSecondary),
               textAlign: TextAlign.center,
             ),
             const SizedBox(height: 24),

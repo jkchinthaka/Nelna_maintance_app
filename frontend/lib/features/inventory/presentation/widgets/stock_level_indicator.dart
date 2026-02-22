@@ -190,8 +190,9 @@ class StockLevelGauge extends StatelessWidget {
         LayoutBuilder(
           builder: (context, constraints) {
             final totalWidth = constraints.maxWidth;
-            final reorderFraction =
-                max > 0 ? (reorderPoint / max).clamp(0.0, 1.0) : 0.0;
+            final reorderFraction = max > 0
+                ? (reorderPoint / max).clamp(0.0, 1.0)
+                : 0.0;
             final markerX = totalWidth * reorderFraction;
 
             return ClipRRect(
@@ -316,8 +317,8 @@ class StockChip extends StatelessWidget {
         current <= 0
             ? 'OUT'
             : current.truncateToDouble() == current
-                ? current.toInt().toString()
-                : current.toStringAsFixed(1),
+            ? current.toInt().toString()
+            : current.toStringAsFixed(1),
         style: TextStyle(
           color: color,
           fontSize: 12,

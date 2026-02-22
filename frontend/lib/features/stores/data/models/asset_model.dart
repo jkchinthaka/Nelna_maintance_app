@@ -49,10 +49,12 @@ class AssetModel extends AssetEntity {
       warrantyExpiry: _tryParseDate(json['warrantyExpiry']),
       imageUrl: json['imageUrl'] as String?,
       notes: json['notes'] as String?,
-      createdAt: DateTime.tryParse(json['createdAt']?.toString() ?? '') ??
+      createdAt:
+          DateTime.tryParse(json['createdAt']?.toString() ?? '') ??
           DateTime.now(),
-      branchName:
-          json['branch'] is Map ? json['branch']['name'] as String? : null,
+      branchName: json['branch'] is Map
+          ? json['branch']['name'] as String?
+          : null,
       assignedToName: json['assignedTo'] is Map
           ? json['assignedTo']['name'] as String?
           : json['assignedToName'] as String?,
@@ -67,8 +69,7 @@ class AssetModel extends AssetEntity {
       'category': category,
       if (description != null) 'description': description,
       if (serialNumber != null) 'serialNumber': serialNumber,
-      if (purchaseDate != null)
-        'purchaseDate': purchaseDate!.toIso8601String(),
+      if (purchaseDate != null) 'purchaseDate': purchaseDate!.toIso8601String(),
       if (purchasePrice != null) 'purchasePrice': purchasePrice,
       if (currentValue != null) 'currentValue': currentValue,
       if (depreciationRate != null) 'depreciationRate': depreciationRate,
@@ -123,7 +124,7 @@ class AssetRepairLogModel extends AssetRepairLogEntity {
       assetId: json['assetId'] as int? ?? 0,
       reportedDate:
           DateTime.tryParse(json['reportedDate']?.toString() ?? '') ??
-              DateTime.now(),
+          DateTime.now(),
       description: json['description'] as String? ?? '',
       severity: json['severity'] as String? ?? 'Medium',
       status: json['status'] as String? ?? 'Reported',
@@ -131,8 +132,7 @@ class AssetRepairLogModel extends AssetRepairLogEntity {
       repairedById: json['repairedById'] as int?,
       completedDate: AssetModel._tryParseDate(json['completedDate']),
       notes: json['notes'] as String?,
-      assetName:
-          json['asset'] is Map ? json['asset']['name'] as String? : null,
+      assetName: json['asset'] is Map ? json['asset']['name'] as String? : null,
       repairedByName: json['repairedBy'] is Map
           ? json['repairedBy']['name'] as String?
           : null,
@@ -184,7 +184,7 @@ class AssetTransferModel extends AssetTransferEntity {
       toBranchId: json['toBranchId'] as int? ?? 0,
       transferDate:
           DateTime.tryParse(json['transferDate']?.toString() ?? '') ??
-              DateTime.now(),
+          DateTime.now(),
       reason: json['reason'] as String?,
       status: json['status'] as String? ?? 'Pending',
       approvedById: json['approvedById'] as int?,
@@ -195,8 +195,7 @@ class AssetTransferModel extends AssetTransferEntity {
       toBranchName: json['toBranch'] is Map
           ? json['toBranch']['name'] as String?
           : json['toBranchName'] as String?,
-      assetName:
-          json['asset'] is Map ? json['asset']['name'] as String? : null,
+      assetName: json['asset'] is Map ? json['asset']['name'] as String? : null,
       approvedByName: json['approvedBy'] is Map
           ? json['approvedBy']['name'] as String?
           : null,
@@ -232,19 +231,17 @@ class AssetDepreciationSummaryModel extends AssetDepreciationSummary {
     final conditionMap = <String, int>{};
     if (json['assetsByCondition'] is Map) {
       (json['assetsByCondition'] as Map).forEach((key, value) {
-        conditionMap[key.toString()] =
-            value is int ? value : int.tryParse(value.toString()) ?? 0;
+        conditionMap[key.toString()] = value is int
+            ? value
+            : int.tryParse(value.toString()) ?? 0;
       });
     }
 
     return AssetDepreciationSummaryModel(
       totalAssets: json['totalAssets'] as int? ?? 0,
-      totalPurchaseValue:
-          _toDouble(json['totalPurchaseValue']),
-      totalCurrentValue:
-          _toDouble(json['totalCurrentValue']),
-      totalDepreciation:
-          _toDouble(json['totalDepreciation']),
+      totalPurchaseValue: _toDouble(json['totalPurchaseValue']),
+      totalCurrentValue: _toDouble(json['totalCurrentValue']),
+      totalDepreciation: _toDouble(json['totalDepreciation']),
       assetsByCondition: conditionMap,
     );
   }

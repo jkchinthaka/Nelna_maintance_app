@@ -19,10 +19,10 @@ class DepreciationChart extends StatelessWidget {
     final purchasePrice = asset.purchasePrice ?? 0;
     final currentValue = asset.currentValue ?? 0;
     final depreciation = purchasePrice - currentValue;
-    final depPercent =
-        purchasePrice > 0 ? (depreciation / purchasePrice) : 0.0;
-    final valueFraction =
-        purchasePrice > 0 ? (currentValue / purchasePrice) : 1.0;
+    final depPercent = purchasePrice > 0 ? (depreciation / purchasePrice) : 0.0;
+    final valueFraction = purchasePrice > 0
+        ? (currentValue / purchasePrice)
+        : 1.0;
     final years = asset.yearsInService;
 
     return Card(
@@ -42,8 +42,11 @@ class DepreciationChart extends StatelessWidget {
                     color: AppColors.warning.withOpacity(0.1),
                     borderRadius: BorderRadius.circular(10),
                   ),
-                  child: const Icon(Icons.trending_down,
-                      color: AppColors.warning, size: 22),
+                  child: const Icon(
+                    Icons.trending_down,
+                    color: AppColors.warning,
+                    size: 22,
+                  ),
                 ),
                 const SizedBox(width: 12),
                 Text(

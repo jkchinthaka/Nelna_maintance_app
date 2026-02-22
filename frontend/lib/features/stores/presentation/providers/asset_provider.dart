@@ -64,14 +64,14 @@ class AssetListParams extends Equatable {
 
   @override
   List<Object?> get props => [
-        page,
-        limit,
-        search,
-        status,
-        condition,
-        category,
-        branchId,
-      ];
+    page,
+    limit,
+    search,
+    status,
+    condition,
+    category,
+    branchId,
+  ];
 }
 
 class TransferListParams extends Equatable {
@@ -79,17 +79,9 @@ class TransferListParams extends Equatable {
   final int limit;
   final String? status;
 
-  const TransferListParams({
-    this.page = 1,
-    this.limit = 20,
-    this.status,
-  });
+  const TransferListParams({this.page = 1, this.limit = 20, this.status});
 
-  TransferListParams copyWith({
-    int? page,
-    int? limit,
-    String? status,
-  }) {
+  TransferListParams copyWith({int? page, int? limit, String? status}) {
     return TransferListParams(
       page: page ?? this.page,
       limit: limit ?? this.limit,
@@ -108,24 +100,24 @@ class TransferListParams extends Equatable {
 /// Paginated + filtered asset list.
 final assetListProvider =
     FutureProvider.family<List<AssetEntity>, AssetListParams>((
-  ref,
-  params,
-) async {
-  final repo = ref.read(assetRepositoryProvider);
-  final result = await repo.getAssets(
-    page: params.page,
-    limit: params.limit,
-    search: params.search,
-    status: params.status,
-    condition: params.condition,
-    category: params.category,
-    branchId: params.branchId,
-  );
-  return result.fold(
-    (failure) => throw Exception(failure.message),
-    (assets) => assets,
-  );
-});
+      ref,
+      params,
+    ) async {
+      final repo = ref.read(assetRepositoryProvider);
+      final result = await repo.getAssets(
+        page: params.page,
+        limit: params.limit,
+        search: params.search,
+        status: params.status,
+        condition: params.condition,
+        category: params.category,
+        branchId: params.branchId,
+      );
+      return result.fold(
+        (failure) => throw Exception(failure.message),
+        (assets) => assets,
+      );
+    });
 
 /// Single asset detail.
 final assetDetailProvider = FutureProvider.family<AssetEntity, int>((
@@ -143,48 +135,48 @@ final assetDetailProvider = FutureProvider.family<AssetEntity, int>((
 /// Repair logs for a specific asset.
 final repairLogsProvider =
     FutureProvider.family<List<AssetRepairLogEntity>, int>((
-  ref,
-  assetId,
-) async {
-  final repo = ref.read(assetRepositoryProvider);
-  final result = await repo.getRepairLogs(assetId);
-  return result.fold(
-    (failure) => throw Exception(failure.message),
-    (logs) => logs,
-  );
-});
+      ref,
+      assetId,
+    ) async {
+      final repo = ref.read(assetRepositoryProvider);
+      final result = await repo.getRepairLogs(assetId);
+      return result.fold(
+        (failure) => throw Exception(failure.message),
+        (logs) => logs,
+      );
+    });
 
 /// Transfers list with optional status filter.
 final transfersProvider =
     FutureProvider.family<List<AssetTransferEntity>, TransferListParams>((
-  ref,
-  params,
-) async {
-  final repo = ref.read(assetRepositoryProvider);
-  final result = await repo.getTransfers(
-    page: params.page,
-    limit: params.limit,
-    status: params.status,
-  );
-  return result.fold(
-    (failure) => throw Exception(failure.message),
-    (transfers) => transfers,
-  );
-});
+      ref,
+      params,
+    ) async {
+      final repo = ref.read(assetRepositoryProvider);
+      final result = await repo.getTransfers(
+        page: params.page,
+        limit: params.limit,
+        status: params.status,
+      );
+      return result.fold(
+        (failure) => throw Exception(failure.message),
+        (transfers) => transfers,
+      );
+    });
 
 /// Depreciation summary optionally by branch.
 final depreciationSummaryProvider =
     FutureProvider.family<AssetDepreciationSummary, int?>((
-  ref,
-  branchId,
-) async {
-  final repo = ref.read(assetRepositoryProvider);
-  final result = await repo.getDepreciationSummary(branchId: branchId);
-  return result.fold(
-    (failure) => throw Exception(failure.message),
-    (summary) => summary,
-  );
-});
+      ref,
+      branchId,
+    ) async {
+      final repo = ref.read(assetRepositoryProvider);
+      final result = await repo.getDepreciationSummary(branchId: branchId);
+      return result.fold(
+        (failure) => throw Exception(failure.message),
+        (summary) => summary,
+      );
+    });
 
 // ═══════════════════════════════════════════════════════════════════════════
 //  Form State Provider (Create / Edit Asset)
@@ -294,11 +286,17 @@ class AssetFormNotifier extends StateNotifier<AssetFormState> {
     );
   }
 
-  Future<bool> approveTransfer(int id,
-      {required bool approved, String? notes}) async {
+  Future<bool> approveTransfer(
+    int id, {
+    required bool approved,
+    String? notes,
+  }) async {
     state = state.copyWith(isLoading: true, errorMessage: null);
-    final result = await _repository.approveTransfer(id,
-        approved: approved, notes: notes);
+    final result = await _repository.approveTransfer(
+      id,
+      approved: approved,
+      notes: notes,
+    );
     return result.fold(
       (failure) {
         state = state.copyWith(isLoading: false, errorMessage: failure.message);
@@ -316,5 +314,5 @@ class AssetFormNotifier extends StateNotifier<AssetFormState> {
 
 final assetFormProvider =
     StateNotifierProvider.autoDispose<AssetFormNotifier, AssetFormState>((ref) {
-  return AssetFormNotifier(ref.read(assetRepositoryProvider));
-});
+      return AssetFormNotifier(ref.read(assetRepositoryProvider));
+    });
