@@ -5,11 +5,7 @@ import 'core/theme/app_theme.dart';
 
 void main() {
   WidgetsFlutterBinding.ensureInitialized();
-  runApp(
-    const ProviderScope(
-      child: NelnaMaintenanceApp(),
-    ),
-  );
+  runApp(const ProviderScope(child: NelnaMaintenanceApp()));
 }
 
 class NelnaMaintenanceApp extends ConsumerWidget {
