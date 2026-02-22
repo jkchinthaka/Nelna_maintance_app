@@ -47,10 +47,8 @@ class _ServiceDetailScreenState extends ConsumerState<ServiceDetailScreen>
 
     return Scaffold(
       body: requestAsync.when(
-        loading: () => const LoadingOverlay(
-          isLoading: true,
-          child: SizedBox.expand(),
-        ),
+        loading: () =>
+            const LoadingOverlay(isLoading: true, child: SizedBox.expand()),
         error: (error, _) => ErrorView(
           message: error.toString(),
           onRetry: () =>
@@ -71,17 +69,13 @@ class _ServiceDetailScreenState extends ConsumerState<ServiceDetailScreen>
             pinned: true,
             backgroundColor: _priorityColor(request.priority),
             foregroundColor: Colors.white,
-            flexibleSpace: FlexibleSpaceBar(
-              background: _buildHero(request),
-            ),
+            flexibleSpace: FlexibleSpaceBar(background: _buildHero(request)),
             actions: [
               IconButton(
                 icon: const Icon(Icons.edit_outlined),
                 tooltip: 'Edit Request',
-                onPressed: () => context.push(
-                  '/services/create',
-                  extra: request,
-                ),
+                onPressed: () =>
+                    context.push('/services/create', extra: request),
               ),
               PopupMenuButton<String>(
                 onSelected: (value) => _handleAction(value, request),
@@ -90,8 +84,10 @@ class _ServiceDetailScreenState extends ConsumerState<ServiceDetailScreen>
                     const PopupMenuItem(
                       value: 'approve',
                       child: ListTile(
-                        leading: Icon(Icons.check_circle_outline,
-                            color: AppColors.success),
+                        leading: Icon(
+                          Icons.check_circle_outline,
+                          color: AppColors.success,
+                        ),
                         title: Text('Approve'),
                         contentPadding: EdgeInsets.zero,
                       ),
@@ -100,8 +96,10 @@ class _ServiceDetailScreenState extends ConsumerState<ServiceDetailScreen>
                     const PopupMenuItem(
                       value: 'reject',
                       child: ListTile(
-                        leading:
-                            Icon(Icons.cancel_outlined, color: AppColors.error),
+                        leading: Icon(
+                          Icons.cancel_outlined,
+                          color: AppColors.error,
+                        ),
                         title: Text('Reject'),
                         contentPadding: EdgeInsets.zero,
                       ),
@@ -111,8 +109,10 @@ class _ServiceDetailScreenState extends ConsumerState<ServiceDetailScreen>
                     const PopupMenuItem(
                       value: 'complete',
                       child: ListTile(
-                        leading: Icon(Icons.task_alt_outlined,
-                            color: AppColors.success),
+                        leading: Icon(
+                          Icons.task_alt_outlined,
+                          color: AppColors.success,
+                        ),
                         title: Text('Complete'),
                         contentPadding: EdgeInsets.zero,
                       ),
@@ -213,8 +213,7 @@ class _ServiceDetailScreenState extends ConsumerState<ServiceDetailScreen>
         children: [
           Icon(_typeIcon(type), size: 14, color: Colors.white),
           const SizedBox(width: 4),
-          Text(type,
-              style: const TextStyle(color: Colors.white, fontSize: 12)),
+          Text(type, style: const TextStyle(color: Colors.white, fontSize: 12)),
         ],
       ),
     );
@@ -300,14 +299,8 @@ class _ServiceDetailScreenState extends ConsumerState<ServiceDetailScreen>
               _detailRow('Priority', request.priority),
               _detailRow('Type', request.type),
               _detailRow('Branch ID', request.branchId.toString()),
-              _detailRow(
-                'Created',
-                dateFmt.format(request.createdAt),
-              ),
-              _detailRow(
-                'Updated',
-                dateFmt.format(request.updatedAt),
-              ),
+              _detailRow('Created', dateFmt.format(request.createdAt)),
+              _detailRow('Updated', dateFmt.format(request.updatedAt)),
             ],
           ),
         ),
@@ -472,10 +465,7 @@ class _ServiceDetailScreenState extends ConsumerState<ServiceDetailScreen>
           Expanded(
             child: Text(
               value,
-              style: const TextStyle(
-                fontSize: 13,
-                fontWeight: FontWeight.w500,
-              ),
+              style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w500),
             ),
           ),
         ],
@@ -561,10 +551,7 @@ class _ServiceDetailScreenState extends ConsumerState<ServiceDetailScreen>
                     ),
                     if (!isLast)
                       Expanded(
-                        child: Container(
-                          width: 2,
-                          color: AppColors.border,
-                        ),
+                        child: Container(width: 2, color: AppColors.border),
                       ),
                   ],
                 ),
@@ -632,8 +619,7 @@ class _ServiceDetailScreenState extends ConsumerState<ServiceDetailScreen>
       context: context,
       builder: (ctx) => AlertDialog(
         title: const Text('Approve Request'),
-        content:
-            Text('Approve service request ${request.requestNo}?'),
+        content: Text('Approve service request ${request.requestNo}?'),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(ctx, false),
@@ -649,8 +635,7 @@ class _ServiceDetailScreenState extends ConsumerState<ServiceDetailScreen>
 
     if (confirmed == true && mounted) {
       final notifier = ref.read(serviceFormProvider.notifier);
-      final success =
-          await notifier.approveServiceRequest(request.id, {});
+      final success = await notifier.approveServiceRequest(request.id, {});
       if (success && mounted) {
         ref.invalidate(serviceDetailProvider(widget.serviceId));
         ScaffoldMessenger.of(context).showSnackBar(
@@ -700,8 +685,7 @@ class _ServiceDetailScreenState extends ConsumerState<ServiceDetailScreen>
         return;
       }
       final notifier = ref.read(serviceFormProvider.notifier);
-      final success =
-          await notifier.rejectServiceRequest(request.id, reason);
+      final success = await notifier.rejectServiceRequest(request.id, reason);
       if (success && mounted) {
         ref.invalidate(serviceDetailProvider(widget.serviceId));
         ScaffoldMessenger.of(context).showSnackBar(
@@ -768,8 +752,7 @@ class _ServiceDetailScreenState extends ConsumerState<ServiceDetailScreen>
           'actualCost': double.tryParse(costController.text),
       };
       final notifier = ref.read(serviceFormProvider.notifier);
-      final success =
-          await notifier.completeServiceRequest(request.id, data);
+      final success = await notifier.completeServiceRequest(request.id, data);
       if (success && mounted) {
         ref.invalidate(serviceDetailProvider(widget.serviceId));
         ScaffoldMessenger.of(context).showSnackBar(

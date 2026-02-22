@@ -47,10 +47,9 @@ class _ServiceListScreenState extends ConsumerState<ServiceListScreen>
   }
 
   ServiceListParams get _params => ServiceListParams(
-        search:
-            _searchController.text.isNotEmpty ? _searchController.text : null,
-        status: _tabStatusMap[_tabs[_tabController.index]],
-      );
+    search: _searchController.text.isNotEmpty ? _searchController.text : null,
+    status: _tabStatusMap[_tabs[_tabController.index]],
+  );
 
   void _onSearchChanged(String _) => setState(() {});
 
@@ -78,16 +77,13 @@ class _ServiceListScreenState extends ConsumerState<ServiceListScreen>
                 loading: () => _buildLoadingSkeleton(isWide),
                 error: (error, _) => ErrorView(
                   message: error.toString(),
-                  onRetry: () =>
-                      ref.invalidate(serviceListProvider(_params)),
+                  onRetry: () => ref.invalidate(serviceListProvider(_params)),
                 ),
                 data: (requests) {
                   if (requests.isEmpty) {
                     return _buildEmptyState();
                   }
-                  return isWide
-                      ? _buildGrid(requests)
-                      : _buildList(requests);
+                  return isWide ? _buildGrid(requests) : _buildList(requests);
                 },
               ),
             ),
@@ -134,8 +130,10 @@ class _ServiceListScreenState extends ConsumerState<ServiceListScreen>
             borderRadius: BorderRadius.circular(12),
             borderSide: BorderSide(color: AppColors.border),
           ),
-          contentPadding:
-              const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+          contentPadding: const EdgeInsets.symmetric(
+            horizontal: 16,
+            vertical: 14,
+          ),
         ),
       ),
     );
@@ -160,8 +158,10 @@ class _ServiceListScreenState extends ConsumerState<ServiceListScreen>
         labelColor: Colors.white,
         unselectedLabelColor: AppColors.textSecondary,
         labelStyle: const TextStyle(fontWeight: FontWeight.w600, fontSize: 13),
-        unselectedLabelStyle:
-            const TextStyle(fontWeight: FontWeight.w500, fontSize: 13),
+        unselectedLabelStyle: const TextStyle(
+          fontWeight: FontWeight.w500,
+          fontSize: 13,
+        ),
         dividerColor: Colors.transparent,
         tabs: _tabs.map((t) => Tab(text: t)).toList(),
       ),

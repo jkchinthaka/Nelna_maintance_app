@@ -53,8 +53,10 @@ class ServiceRemoteDatasource {
     int id,
     Map<String, dynamic> data,
   ) async {
-    final response =
-        await _client.put('${ApiConstants.services}/$id', data: data);
+    final response = await _client.put(
+      '${ApiConstants.services}/$id',
+      data: data,
+    );
     return response.data as Map<String, dynamic>;
   }
 
@@ -103,8 +105,7 @@ class ServiceRemoteDatasource {
   Future<Map<String, dynamic>> createServiceTask(
     Map<String, dynamic> data,
   ) async {
-    final response =
-        await _client.post(ApiConstants.serviceTasks, data: data);
+    final response = await _client.post(ApiConstants.serviceTasks, data: data);
     return response.data as Map<String, dynamic>;
   }
 
@@ -112,8 +113,10 @@ class ServiceRemoteDatasource {
     int id,
     Map<String, dynamic> data,
   ) async {
-    final response =
-        await _client.put('${ApiConstants.serviceTasks}/$id', data: data);
+    final response = await _client.put(
+      '${ApiConstants.serviceTasks}/$id',
+      data: data,
+    );
     return response.data as Map<String, dynamic>;
   }
 
@@ -126,11 +129,11 @@ class ServiceRemoteDatasource {
     return response.data as Map<String, dynamic>;
   }
 
-  Future<Map<String, dynamic>> addSparePart(
-    Map<String, dynamic> data,
-  ) async {
-    final response =
-        await _client.post(ApiConstants.serviceSpareParts, data: data);
+  Future<Map<String, dynamic>> addSparePart(Map<String, dynamic> data) async {
+    final response = await _client.post(
+      ApiConstants.serviceSpareParts,
+      data: data,
+    );
     return response.data as Map<String, dynamic>;
   }
 

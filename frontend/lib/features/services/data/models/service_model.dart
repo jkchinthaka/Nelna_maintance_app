@@ -60,30 +60,35 @@ class ServiceRequestModel extends ServiceRequestEntity {
       approvedDate: _tryParseDate(json['approvedDate']),
       rejectionReason: json['rejectionReason'] as String?,
       completionNotes: json['completionNotes'] as String?,
-      createdAt: DateTime.tryParse(json['createdAt']?.toString() ?? '') ??
+      createdAt:
+          DateTime.tryParse(json['createdAt']?.toString() ?? '') ??
           DateTime.now(),
-      updatedAt: DateTime.tryParse(json['updatedAt']?.toString() ?? '') ??
+      updatedAt:
+          DateTime.tryParse(json['updatedAt']?.toString() ?? '') ??
           DateTime.now(),
       requestedByName: _extractUserName(json['requestedBy']),
       assignedToName: _extractUserName(json['assignedTo']),
       vehicleName: json['vehicle'] is Map
           ? '${json['vehicle']['make'] ?? ''} ${json['vehicle']['model'] ?? ''} (${json['vehicle']['registrationNo'] ?? ''})'
-              .trim()
+                .trim()
           : null,
       machineName: json['machine'] is Map
           ? json['machine']['name'] as String?
           : null,
       tasks: json['tasks'] is List
           ? (json['tasks'] as List)
-              .map((e) =>
-                  ServiceTaskModel.fromJson(e as Map<String, dynamic>))
-              .toList()
+                .map(
+                  (e) => ServiceTaskModel.fromJson(e as Map<String, dynamic>),
+                )
+                .toList()
           : null,
       spareParts: json['spareParts'] is List
           ? (json['spareParts'] as List)
-              .map((e) =>
-                  ServiceSparePartModel.fromJson(e as Map<String, dynamic>))
-              .toList()
+                .map(
+                  (e) =>
+                      ServiceSparePartModel.fromJson(e as Map<String, dynamic>),
+                )
+                .toList()
           : null,
     );
   }
@@ -102,8 +107,7 @@ class ServiceRequestModel extends ServiceRequestEntity {
       if (estimatedCost != null) 'estimatedCost': estimatedCost,
       if (actualCost != null) 'actualCost': actualCost,
       if (estimatedCompletionDate != null)
-        'estimatedCompletionDate':
-            estimatedCompletionDate!.toIso8601String(),
+        'estimatedCompletionDate': estimatedCompletionDate!.toIso8601String(),
       if (actualCompletionDate != null)
         'actualCompletionDate': actualCompletionDate!.toIso8601String(),
       if (slaDeadline != null) 'slaDeadline': slaDeadline!.toIso8601String(),
@@ -169,7 +173,7 @@ class ServiceTaskModel extends ServiceTaskEntity {
       notes: json['notes'] as String?,
       assignedToName: json['assignedTo'] is Map
           ? '${json['assignedTo']['firstName'] ?? ''} ${json['assignedTo']['lastName'] ?? ''}'
-              .trim()
+                .trim()
           : json['assignedToName'] as String?,
     );
   }

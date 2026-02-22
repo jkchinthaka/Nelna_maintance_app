@@ -38,11 +38,9 @@ class ServiceRepositoryImpl implements ServiceRepository {
         assignedToId: assignedToId,
       );
 
-      final dataList =
-          response['data'] is List ? response['data'] as List : [];
+      final dataList = response['data'] is List ? response['data'] as List : [];
       final requests = dataList
-          .map((e) =>
-              ServiceRequestModel.fromJson(e as Map<String, dynamic>))
+          .map((e) => ServiceRequestModel.fromJson(e as Map<String, dynamic>))
           .toList();
 
       return Right(requests);
@@ -131,8 +129,7 @@ class ServiceRepositoryImpl implements ServiceRepository {
     String reason,
   ) async {
     try {
-      final response =
-          await _remoteDatasource.rejectServiceRequest(id, reason);
+      final response = await _remoteDatasource.rejectServiceRequest(id, reason);
       final resData = response['data'] as Map<String, dynamic>? ?? response;
       return Right(ServiceRequestModel.fromJson(resData));
     } on ServerException catch (e) {
@@ -150,8 +147,7 @@ class ServiceRepositoryImpl implements ServiceRepository {
     Map<String, dynamic> data,
   ) async {
     try {
-      final response =
-          await _remoteDatasource.completeServiceRequest(id, data);
+      final response = await _remoteDatasource.completeServiceRequest(id, data);
       final resData = response['data'] as Map<String, dynamic>? ?? response;
       return Right(ServiceRequestModel.fromJson(resData));
     } on ServerException catch (e) {
@@ -170,10 +166,10 @@ class ServiceRepositoryImpl implements ServiceRepository {
     int serviceRequestId,
   ) async {
     try {
-      final response =
-          await _remoteDatasource.getServiceTasks(serviceRequestId);
-      final dataList =
-          response['data'] is List ? response['data'] as List : [];
+      final response = await _remoteDatasource.getServiceTasks(
+        serviceRequestId,
+      );
+      final dataList = response['data'] is List ? response['data'] as List : [];
       final tasks = dataList
           .map((e) => ServiceTaskModel.fromJson(e as Map<String, dynamic>))
           .toList();
@@ -229,13 +225,10 @@ class ServiceRepositoryImpl implements ServiceRepository {
     int serviceRequestId,
   ) async {
     try {
-      final response =
-          await _remoteDatasource.getSpareParts(serviceRequestId);
-      final dataList =
-          response['data'] is List ? response['data'] as List : [];
+      final response = await _remoteDatasource.getSpareParts(serviceRequestId);
+      final dataList = response['data'] is List ? response['data'] as List : [];
       final parts = dataList
-          .map((e) =>
-              ServiceSparePartModel.fromJson(e as Map<String, dynamic>))
+          .map((e) => ServiceSparePartModel.fromJson(e as Map<String, dynamic>))
           .toList();
       return Right(parts);
     } on ServerException catch (e) {
@@ -320,11 +313,9 @@ class ServiceRepositoryImpl implements ServiceRepository {
         limit: limit,
       );
 
-      final dataList =
-          response['data'] is List ? response['data'] as List : [];
+      final dataList = response['data'] is List ? response['data'] as List : [];
       final requests = dataList
-          .map((e) =>
-              ServiceRequestModel.fromJson(e as Map<String, dynamic>))
+          .map((e) => ServiceRequestModel.fromJson(e as Map<String, dynamic>))
           .toList();
 
       return Right(requests);
