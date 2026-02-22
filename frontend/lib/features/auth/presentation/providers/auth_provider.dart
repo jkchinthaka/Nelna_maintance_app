@@ -88,11 +88,11 @@ class AuthNotifier extends StateNotifier<AuthState> {
     required LogoutUseCase logoutUseCase,
     required GetProfileUseCase getProfileUseCase,
     required AuthRepository authRepository,
-  })  : _loginUseCase = loginUseCase,
-        _logoutUseCase = logoutUseCase,
-        _getProfileUseCase = getProfileUseCase,
-        _authRepository = authRepository,
-        super(const AuthInitial());
+  }) : _loginUseCase = loginUseCase,
+       _logoutUseCase = logoutUseCase,
+       _getProfileUseCase = getProfileUseCase,
+       _authRepository = authRepository,
+       super(const AuthInitial());
 
   /// Check stored credentials and load the cached user (called on app start).
   Future<void> checkAuthStatus() async {
@@ -145,8 +145,7 @@ class AuthNotifier extends StateNotifier<AuthState> {
 
 // ── Riverpod Providers ────────────────────────────────────────────────
 
-final authStateProvider =
-    StateNotifierProvider<AuthNotifier, AuthState>((ref) {
+final authStateProvider = StateNotifierProvider<AuthNotifier, AuthState>((ref) {
   return AuthNotifier(
     loginUseCase: ref.read(loginUseCaseProvider),
     logoutUseCase: ref.read(logoutUseCaseProvider),

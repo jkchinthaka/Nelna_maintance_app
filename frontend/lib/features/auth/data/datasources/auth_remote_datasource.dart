@@ -86,10 +86,7 @@ class AuthRemoteDataSource {
     try {
       final response = await _apiClient.dio.put(
         ApiConstants.changePassword,
-        data: {
-          'currentPassword': currentPassword,
-          'newPassword': newPassword,
-        },
+        data: {'currentPassword': currentPassword, 'newPassword': newPassword},
       );
       final body = response.data as Map<String, dynamic>;
       if (body['success'] != true) {
@@ -142,7 +139,8 @@ class AuthRemoteDataSource {
 
     if (e.type == DioExceptionType.connectionError) {
       return ServerException(
-        message: 'Unable to connect to the server. Check your internet connection.',
+        message:
+            'Unable to connect to the server. Check your internet connection.',
         statusCode: statusCode,
       );
     }
@@ -150,7 +148,8 @@ class AuthRemoteDataSource {
     final responseData = e.response?.data;
     if (responseData is Map<String, dynamic>) {
       return ServerException(
-        message: responseData['message'] as String? ??
+        message:
+            responseData['message'] as String? ??
             'An unexpected error occurred',
         statusCode: statusCode,
         errorCode: responseData['errorCode'] as String?,

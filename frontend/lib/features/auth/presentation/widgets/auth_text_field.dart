@@ -98,10 +98,7 @@ class _AuthTextFieldState extends State<AuthTextField> {
         ),
         focusedBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
-          borderSide: BorderSide(
-            color: theme.colorScheme.primary,
-            width: 2,
-          ),
+          borderSide: BorderSide(color: theme.colorScheme.primary, width: 2),
         ),
         errorBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
@@ -109,10 +106,7 @@ class _AuthTextFieldState extends State<AuthTextField> {
         ),
         focusedErrorBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
-          borderSide: BorderSide(
-            color: theme.colorScheme.error,
-            width: 2,
-          ),
+          borderSide: BorderSide(color: theme.colorScheme.error, width: 2),
         ),
         disabledBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),

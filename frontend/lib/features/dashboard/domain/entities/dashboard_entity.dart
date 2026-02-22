@@ -28,15 +28,15 @@ class DashboardKPIs extends Equatable {
 
   @override
   List<Object?> get props => [
-        activeVehicles,
-        operationalMachines,
-        openServiceRequests,
-        lowStockItems,
-        pendingPOs,
-        expensesThisMonth,
-        totalAssets,
-        assetsUnderRepair,
-      ];
+    activeVehicles,
+    operationalMachines,
+    openServiceRequests,
+    lowStockItems,
+    pendingPOs,
+    expensesThisMonth,
+    totalAssets,
+    assetsUnderRepair,
+  ];
 }
 
 // ═══════════════════════════════════════════════════════════════════════════
@@ -68,14 +68,14 @@ class MonthlyTrend extends Equatable {
 
   @override
   List<Object?> get props => [
-        month,
-        monthLabel,
-        expenseAmount,
-        expenseCount,
-        serviceRequestCount,
-        serviceCost,
-        completedRequests,
-      ];
+    month,
+    monthLabel,
+    expenseAmount,
+    expenseCount,
+    serviceRequestCount,
+    serviceCost,
+    completedRequests,
+  ];
 }
 
 // ═══════════════════════════════════════════════════════════════════════════
@@ -112,11 +112,11 @@ class YearlyTotals extends Equatable {
 
   @override
   List<Object?> get props => [
-        totalExpenses,
-        totalServiceCost,
-        totalServiceRequests,
-        totalCompleted,
-      ];
+    totalExpenses,
+    totalServiceCost,
+    totalServiceRequests,
+    totalCompleted,
+  ];
 }
 
 // ═══════════════════════════════════════════════════════════════════════════
@@ -198,11 +198,11 @@ class ServiceStatsSummary extends Equatable {
 
   @override
   List<Object?> get props => [
-        totalRequests,
-        totalActualCost,
-        totalEstimatedCost,
-        averageCost,
-        avgResolutionHours,
-        completedCount,
-      ];
+    totalRequests,
+    totalActualCost,
+    totalEstimatedCost,
+    averageCost,
+    avgResolutionHours,
+    completedCount,
+  ];
 }

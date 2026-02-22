@@ -135,14 +135,14 @@ class RegisterParams {
   });
 
   Map<String, dynamic> toJson() => {
-        'firstName': firstName,
-        'lastName': lastName,
-        'email': email,
-        'password': password,
-        'companyId': companyId,
-        'roleId': roleId,
-        if (branchId != null) 'branchId': branchId,
-        if (employeeId != null) 'employeeId': employeeId,
-        if (phone != null) 'phone': phone,
-      };
+    'firstName': firstName,
+    'lastName': lastName,
+    'email': email,
+    'password': password,
+    'companyId': companyId,
+    'roleId': roleId,
+    if (branchId != null) 'branchId': branchId,
+    if (employeeId != null) 'employeeId': employeeId,
+    if (phone != null) 'phone': phone,
+  };
 }

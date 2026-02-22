@@ -33,10 +33,9 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
   Future<void> _onLogin() async {
     if (!(_formKey.currentState?.validate() ?? false)) return;
 
-    await ref.read(authStateProvider.notifier).login(
-          _emailController.text.trim(),
-          _passwordController.text,
-        );
+    await ref
+        .read(authStateProvider.notifier)
+        .login(_emailController.text.trim(), _passwordController.text);
   }
 
   @override
@@ -86,7 +85,9 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(20),
                       side: BorderSide(
-                        color: theme.colorScheme.outlineVariant.withOpacity(0.5),
+                        color: theme.colorScheme.outlineVariant.withOpacity(
+                          0.5,
+                        ),
                       ),
                     ),
                     child: Padding(
@@ -193,8 +194,9 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                             FilledButton(
                               onPressed: isLoading ? null : _onLogin,
                               style: FilledButton.styleFrom(
-                                padding:
-                                    const EdgeInsets.symmetric(vertical: 16),
+                                padding: const EdgeInsets.symmetric(
+                                  vertical: 16,
+                                ),
                                 shape: RoundedRectangleBorder(
                                   borderRadius: BorderRadius.circular(12),
                                 ),
@@ -228,7 +230,9 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                   Text(
                     '© ${DateTime.now().year} ${AppConstants.appName}',
                     style: theme.textTheme.bodySmall?.copyWith(
-                      color: theme.colorScheme.onSurfaceVariant.withOpacity(0.6),
+                      color: theme.colorScheme.onSurfaceVariant.withOpacity(
+                        0.6,
+                      ),
                     ),
                   ),
                   const SizedBox(height: 16),

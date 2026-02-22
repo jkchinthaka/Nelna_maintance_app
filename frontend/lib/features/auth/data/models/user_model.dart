@@ -12,15 +12,16 @@ class RoleModel extends RoleEntity {
     return RoleModel(
       id: json['id'] as int,
       name: json['name'] as String? ?? '',
-      displayName: json['displayName'] as String? ?? json['name'] as String? ?? '',
+      displayName:
+          json['displayName'] as String? ?? json['name'] as String? ?? '',
     );
   }
 
   Map<String, dynamic> toJson() => {
-        'id': id,
-        'name': name,
-        'displayName': displayName,
-      };
+    'id': id,
+    'name': name,
+    'displayName': displayName,
+  };
 }
 
 /// Data-layer model for [CompanyEntity].
@@ -39,11 +40,7 @@ class CompanyModel extends CompanyEntity {
     );
   }
 
-  Map<String, dynamic> toJson() => {
-        'id': id,
-        'name': name,
-        'code': code,
-      };
+  Map<String, dynamic> toJson() => {'id': id, 'name': name, 'code': code};
 }
 
 /// Data-layer model for [BranchEntity].
@@ -62,11 +59,7 @@ class BranchModel extends BranchEntity {
     );
   }
 
-  Map<String, dynamic> toJson() => {
-        'id': id,
-        'name': name,
-        'code': code,
-      };
+  Map<String, dynamic> toJson() => {'id': id, 'name': name, 'code': code};
 }
 
 /// Data-layer model for [UserEntity].
@@ -118,22 +111,22 @@ class UserModel extends UserEntity {
   }
 
   Map<String, dynamic> toJson() => {
-        'id': id,
-        'companyId': companyId,
-        'branchId': branchId,
-        'roleId': roleId,
-        'employeeId': employeeId,
-        'firstName': firstName,
-        'lastName': lastName,
-        'email': email,
-        'phone': phone,
-        'avatar': avatar,
-        'isActive': isActive,
-        'lastLoginAt': lastLoginAt?.toIso8601String(),
-        'role': (role as RoleModel).toJson(),
-        if (company != null) 'company': (company! as CompanyModel).toJson(),
-        if (branch != null) 'branch': (branch! as BranchModel).toJson(),
-      };
+    'id': id,
+    'companyId': companyId,
+    'branchId': branchId,
+    'roleId': roleId,
+    'employeeId': employeeId,
+    'firstName': firstName,
+    'lastName': lastName,
+    'email': email,
+    'phone': phone,
+    'avatar': avatar,
+    'isActive': isActive,
+    'lastLoginAt': lastLoginAt?.toIso8601String(),
+    'role': (role as RoleModel).toJson(),
+    if (company != null) 'company': (company! as CompanyModel).toJson(),
+    if (branch != null) 'branch': (branch! as BranchModel).toJson(),
+  };
 
   /// Create a copy with overrides.
   UserModel copyWith({
