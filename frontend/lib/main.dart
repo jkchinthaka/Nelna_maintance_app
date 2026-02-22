@@ -18,8 +18,8 @@ class NelnaMaintenanceApp extends ConsumerWidget {
     return MaterialApp.router(
       title: 'Nelna Maintenance System',
       debugShowCheckedModeBanner: false,
-      theme: AppTheme.lightTheme,
-      darkTheme: AppTheme.darkTheme,
+      theme: AppTheme.light,
+      darkTheme: AppTheme.dark,
       themeMode: ThemeMode.light,
       routerConfig: router,
     );
