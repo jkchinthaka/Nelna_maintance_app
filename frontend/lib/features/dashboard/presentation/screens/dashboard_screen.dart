@@ -38,7 +38,8 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
         ? authState.user.firstName
         : 'User';
 
-    final isAdmin = authState is AuthAuthenticated &&
+    final isAdmin =
+        authState is AuthAuthenticated &&
         (authState.user.roleName == 'super_admin' ||
             authState.user.roleName == 'admin');
 
@@ -62,16 +63,16 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
                   Text(
                     'Welcome back, $userName',
                     style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                          fontWeight: FontWeight.w700,
-                          color: AppColors.textPrimary,
-                        ),
+                      fontWeight: FontWeight.w700,
+                      color: AppColors.textPrimary,
+                    ),
                   ),
                   const SizedBox(height: 2),
                   Text(
                     DateFormat('EEEE, d MMMM yyyy').format(DateTime.now()),
                     style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                          color: AppColors.textSecondary,
-                        ),
+                      color: AppColors.textSecondary,
+                    ),
                   ),
                 ],
               ),
@@ -80,8 +81,10 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
                 // Branch filter for admins
                 if (isAdmin) _buildBranchSelector(context),
                 IconButton(
-                  icon: const Icon(Icons.notifications_outlined,
-                      color: AppColors.textPrimary),
+                  icon: const Icon(
+                    Icons.notifications_outlined,
+                    color: AppColors.textPrimary,
+                  ),
                   onPressed: () {
                     // Navigate to notifications
                   },
@@ -129,15 +132,21 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
     ref.invalidate(serviceRequestStatsProvider);
     // Wait for the providers to re-fetch
     await Future.wait([
-      ref.read(dashboardKPIsProvider.future).catchError((_) => const DashboardKPIs()),
-      ref.read(monthlyTrendsProvider.future).catchError((_) =>
-          const MonthlyTrendsResponse(
-            year: 0,
-            months: [],
-            yearlyTotals: YearlyTotals(),
-          )),
-      ref.read(serviceRequestStatsProvider.future).catchError(
-          (_) => const ServiceRequestStats()),
+      ref
+          .read(dashboardKPIsProvider.future)
+          .catchError((_) => const DashboardKPIs()),
+      ref
+          .read(monthlyTrendsProvider.future)
+          .catchError(
+            (_) => const MonthlyTrendsResponse(
+              year: 0,
+              months: [],
+              yearlyTotals: YearlyTotals(),
+            ),
+          ),
+      ref
+          .read(serviceRequestStatsProvider.future)
+          .catchError((_) => const ServiceRequestStats()),
     ]);
   }
 
@@ -166,10 +175,7 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
         ref.read(selectedBranchIdProvider.notifier).state = value;
       },
       itemBuilder: (context) => [
-        const PopupMenuItem<int?>(
-          value: null,
-          child: Text('All Branches'),
-        ),
+        const PopupMenuItem<int?>(value: null, child: Text('All Branches')),
         // In a real app, populate from a branches provider
         ...List.generate(5, (i) {
           final branchId = i + 1;
@@ -214,9 +220,7 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
         value: '${kpis.openServiceRequests}',
         icon: Icons.assignment_outlined,
         color: AppColors.warning,
-        trend: kpis.openServiceRequests > 10
-            ? KpiTrend.up
-            : KpiTrend.neutral,
+        trend: kpis.openServiceRequests > 10 ? KpiTrend.up : KpiTrend.neutral,
         trendLabel: kpis.openServiceRequests > 10 ? 'High' : null,
       ),
       _KpiItem(
@@ -260,8 +264,8 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
         final crossAxisCount = constraints.maxWidth > 900
             ? 4
             : constraints.maxWidth > 600
-                ? 3
-                : 2;
+            ? 3
+            : 2;
 
         return GridView.builder(
           shrinkWrap: true,
@@ -298,8 +302,8 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
         final crossAxisCount = constraints.maxWidth > 900
             ? 4
             : constraints.maxWidth > 600
-                ? 3
-                : 2;
+            ? 3
+            : 2;
 
         return GridView.builder(
           shrinkWrap: true,
@@ -352,60 +356,68 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
 
     kpisAsync.whenData((kpis) {
       if (kpis.openServiceRequests > 0) {
-        activities.add(ActivityItem(
-          title: 'Open Service Requests',
-          subtitle:
-              '${kpis.openServiceRequests} requests awaiting action',
-          icon: Icons.assignment_late_outlined,
-          color: AppColors.warning,
-          timestamp: DateTime.now().subtract(const Duration(minutes: 15)),
-          tag: 'PENDING',
-        ));
+        activities.add(
+          ActivityItem(
+            title: 'Open Service Requests',
+            subtitle: '${kpis.openServiceRequests} requests awaiting action',
+            icon: Icons.assignment_late_outlined,
+            color: AppColors.warning,
+            timestamp: DateTime.now().subtract(const Duration(minutes: 15)),
+            tag: 'PENDING',
+          ),
+        );
       }
 
       if (kpis.lowStockItems > 0) {
-        activities.add(ActivityItem(
-          title: 'Low Stock Alert',
-          subtitle:
-              '${kpis.lowStockItems} items below reorder level',
-          icon: Icons.warning_amber_outlined,
-          color: AppColors.error,
-          timestamp: DateTime.now().subtract(const Duration(hours: 1)),
-          tag: 'ALERT',
-        ));
+        activities.add(
+          ActivityItem(
+            title: 'Low Stock Alert',
+            subtitle: '${kpis.lowStockItems} items below reorder level',
+            icon: Icons.warning_amber_outlined,
+            color: AppColors.error,
+            timestamp: DateTime.now().subtract(const Duration(hours: 1)),
+            tag: 'ALERT',
+          ),
+        );
       }
 
       if (kpis.assetsUnderRepair > 0) {
-        activities.add(ActivityItem(
-          title: 'Assets Under Repair',
-          subtitle:
-              '${kpis.assetsUnderRepair} assets currently being repaired',
-          icon: Icons.build_circle_outlined,
-          color: AppColors.info,
-          timestamp: DateTime.now().subtract(const Duration(hours: 2)),
-          tag: 'REPAIR',
-        ));
+        activities.add(
+          ActivityItem(
+            title: 'Assets Under Repair',
+            subtitle:
+                '${kpis.assetsUnderRepair} assets currently being repaired',
+            icon: Icons.build_circle_outlined,
+            color: AppColors.info,
+            timestamp: DateTime.now().subtract(const Duration(hours: 2)),
+            tag: 'REPAIR',
+          ),
+        );
       }
 
       if (kpis.pendingPOs > 0) {
-        activities.add(ActivityItem(
-          title: 'Pending Purchase Orders',
-          subtitle: '${kpis.pendingPOs} POs require attention',
-          icon: Icons.receipt_long_outlined,
-          color: AppColors.primaryLight,
-          timestamp: DateTime.now().subtract(const Duration(hours: 3)),
-        ));
+        activities.add(
+          ActivityItem(
+            title: 'Pending Purchase Orders',
+            subtitle: '${kpis.pendingPOs} POs require attention',
+            icon: Icons.receipt_long_outlined,
+            color: AppColors.primaryLight,
+            timestamp: DateTime.now().subtract(const Duration(hours: 3)),
+          ),
+        );
       }
 
-      activities.add(ActivityItem(
-        title: 'System Status',
-        subtitle:
-            '${kpis.activeVehicles} vehicles and ${kpis.operationalMachines} machines operational',
-        icon: Icons.check_circle_outline,
-        color: AppColors.success,
-        timestamp: DateTime.now().subtract(const Duration(hours: 6)),
-        tag: 'OK',
-      ));
+      activities.add(
+        ActivityItem(
+          title: 'System Status',
+          subtitle:
+              '${kpis.activeVehicles} vehicles and ${kpis.operationalMachines} machines operational',
+          icon: Icons.check_circle_outline,
+          color: AppColors.success,
+          timestamp: DateTime.now().subtract(const Duration(hours: 6)),
+          tag: 'OK',
+        ),
+      );
     });
 
     // Show a placeholder if we're still loading
