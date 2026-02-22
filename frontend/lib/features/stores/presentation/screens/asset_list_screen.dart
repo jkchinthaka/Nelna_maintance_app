@@ -34,10 +34,11 @@ class _AssetListScreenState extends ConsumerState<AssetListScreen> {
   static const _conditionOptions = ['New', 'Good', 'Fair', 'Poor', 'Damaged'];
 
   AssetListParams get _params => AssetListParams(
-    search: _searchController.text.isNotEmpty ? _searchController.text : null,
-    status: _selectedStatus,
-    condition: _selectedCondition,
-  );
+        search:
+            _searchController.text.isNotEmpty ? _searchController.text : null,
+        status: _selectedStatus,
+        condition: _selectedCondition,
+      );
 
   @override
   void dispose() {
@@ -89,7 +90,7 @@ class _AssetListScreenState extends ConsumerState<AssetListScreen> {
         ],
       ),
       floatingActionButton: FloatingActionButton.extended(
-        onPressed: () => context.push('/stores/assets/create'),
+        onPressed: () => context.push('/assets/create'),
         icon: const Icon(Icons.add),
         label: const Text('Add Asset'),
         backgroundColor: AppColors.primary,
@@ -218,7 +219,7 @@ class _AssetListScreenState extends ConsumerState<AssetListScreen> {
         final asset = assets[index];
         return AssetCard(
           asset: asset,
-          onTap: () => context.push('/stores/assets/${asset.id}'),
+          onTap: () => context.push('/assets/${asset.id}'),
         );
       },
     );
@@ -236,7 +237,7 @@ class _AssetListScreenState extends ConsumerState<AssetListScreen> {
           padding: const EdgeInsets.only(bottom: 12),
           child: AssetCard(
             asset: asset,
-            onTap: () => context.push('/stores/assets/${asset.id}'),
+            onTap: () => context.push('/assets/${asset.id}'),
           ),
         );
       },

@@ -1,21 +1,23 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../features/auth/presentation/providers/auth_provider.dart';
 import '../theme/app_colors.dart';
 
 /// Responsive enterprise scaffold with collapsible sidebar, app bar, and
 /// user menu.
-class AppScaffold extends StatefulWidget {
+class AppScaffold extends ConsumerStatefulWidget {
   final Widget child;
   final String title;
 
   const AppScaffold({super.key, required this.child, required this.title});
 
   @override
-  State<AppScaffold> createState() => _AppScaffoldState();
+  ConsumerState<AppScaffold> createState() => _AppScaffoldState();
 }
 
-class _AppScaffoldState extends State<AppScaffold> {
+class _AppScaffoldState extends ConsumerState<AppScaffold> {
   bool _sidebarExpanded = true;
 
   // Menu items with role-based visibility tags
@@ -144,7 +146,7 @@ class _AppScaffoldState extends State<AppScaffold> {
           ],
           onSelected: (value) {
             if (value == 'logout') {
-              // TODO: handle logout
+              ref.read(authStateProvider.notifier).logout();
             }
           },
         ),
@@ -193,7 +195,10 @@ class _AppScaffoldState extends State<AppScaffold> {
                   child: Icon(Icons.person, color: Colors.white, size: 18),
                 ),
                 const SizedBox(width: 8),
-                Text('Admin', style: Theme.of(context).textTheme.bodyMedium),
+                Text(
+                  ref.watch(currentUserProvider)?.fullName ?? 'User',
+                  style: Theme.of(context).textTheme.bodyMedium,
+                ),
                 const Icon(Icons.arrow_drop_down),
               ],
             ),
@@ -205,7 +210,7 @@ class _AppScaffoldState extends State<AppScaffold> {
             ],
             onSelected: (value) {
               if (value == 'logout') {
-                // TODO: handle logout
+                ref.read(authStateProvider.notifier).logout();
               }
             },
           ),
@@ -424,9 +429,8 @@ class _SidebarTile extends StatelessWidget {
             height: 44,
             padding: EdgeInsets.symmetric(horizontal: expanded ? 12 : 0),
             child: Row(
-              mainAxisAlignment: expanded
-                  ? MainAxisAlignment.start
-                  : MainAxisAlignment.center,
+              mainAxisAlignment:
+                  expanded ? MainAxisAlignment.start : MainAxisAlignment.center,
               children: [
                 Icon(
                   isActive ? item.activeIcon : item.icon,
@@ -441,9 +445,8 @@ class _SidebarTile extends StatelessWidget {
                       style: TextStyle(
                         color: isActive ? Colors.white : Colors.white70,
                         fontSize: 14,
-                        fontWeight: isActive
-                            ? FontWeight.w600
-                            : FontWeight.w400,
+                        fontWeight:
+                            isActive ? FontWeight.w600 : FontWeight.w400,
                       ),
                       overflow: TextOverflow.ellipsis,
                     ),

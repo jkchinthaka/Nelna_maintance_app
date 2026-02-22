@@ -75,13 +75,13 @@ class AssetDetailScreen extends ConsumerWidget {
   ) {
     switch (action) {
       case 'edit':
-        context.push('/stores/assets/${asset.id}/edit');
+        context.push('/assets/${asset.id}/edit');
         break;
       case 'repair':
         _showRepairDialog(context, ref, asset);
         break;
       case 'transfer':
-        context.push('/stores/transfers/create?assetId=${asset.id}');
+        context.push('/assets/transfer?assetId=${asset.id}');
         break;
       case 'dispose':
         _showDisposeDialog(context, ref, asset);
