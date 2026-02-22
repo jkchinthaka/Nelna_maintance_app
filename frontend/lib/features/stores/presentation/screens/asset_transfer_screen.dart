@@ -5,7 +5,6 @@ import 'package:shimmer/shimmer.dart';
 
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/widgets/error_widget.dart';
-import '../../../../core/widgets/loading_widget.dart';
 import '../../../../core/widgets/status_badge.dart';
 import '../../domain/entities/asset_entity.dart';
 import '../providers/asset_provider.dart';
@@ -127,8 +126,8 @@ class _AssetTransferScreenState extends ConsumerState<AssetTransferScreen>
                   Text(
                     'Create Transfer',
                     style: Theme.of(ctx).textTheme.titleLarge?.copyWith(
-                      fontWeight: FontWeight.bold,
-                    ),
+                          fontWeight: FontWeight.bold,
+                        ),
                   ),
                 ],
               ),

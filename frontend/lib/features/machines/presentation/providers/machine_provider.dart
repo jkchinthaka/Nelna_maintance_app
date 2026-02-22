@@ -99,23 +99,23 @@ class ServiceHistoryParams extends Equatable {
 /// Paginated + filtered machine list.
 final machineListProvider =
     FutureProvider.family<List<MachineEntity>, MachineListParams>((
-      ref,
-      params,
-    ) async {
-      final repo = ref.read(machineRepositoryProvider);
-      final result = await repo.getMachines(
-        page: params.page,
-        limit: params.limit,
-        search: params.search,
-        status: params.status,
-        type: params.type,
-        branchId: params.branchId,
-      );
-      return result.fold(
-        (failure) => throw Exception(failure.message),
-        (machines) => machines,
-      );
-    });
+  ref,
+  params,
+) async {
+  final repo = ref.read(machineRepositoryProvider);
+  final result = await repo.getMachines(
+    page: params.page,
+    limit: params.limit,
+    search: params.search,
+    status: params.status,
+    type: params.type,
+    branchId: params.branchId,
+  );
+  return result.fold(
+    (failure) => throw Exception(failure.message),
+    (machines) => machines,
+  );
+});
 
 /// Single machine detail.
 final machineDetailProvider = FutureProvider.family<MachineEntity, int>((
@@ -133,74 +133,72 @@ final machineDetailProvider = FutureProvider.family<MachineEntity, int>((
 /// Maintenance schedules for a machine.
 final maintenanceSchedulesProvider =
     FutureProvider.family<List<MaintenanceScheduleEntity>, int>((
-      ref,
-      machineId,
-    ) async {
-      final repo = ref.read(machineRepositoryProvider);
-      final result = await repo.getMaintenanceSchedules(machineId);
-      return result.fold(
-        (failure) => throw Exception(failure.message),
-        (schedules) => schedules,
-      );
-    });
+  ref,
+  machineId,
+) async {
+  final repo = ref.read(machineRepositoryProvider);
+  final result = await repo.getMaintenanceSchedules(machineId);
+  return result.fold(
+    (failure) => throw Exception(failure.message),
+    (schedules) => schedules,
+  );
+});
 
 /// Breakdown logs for a machine.
 final breakdownLogsProvider =
     FutureProvider.family<List<BreakdownLogEntity>, BreakdownLogParams>((
-      ref,
-      params,
-    ) async {
-      final repo = ref.read(machineRepositoryProvider);
-      final result = await repo.getBreakdownLogs(
-        params.machineId,
-        page: params.page,
-        limit: params.limit,
-      );
-      return result.fold(
-        (failure) => throw Exception(failure.message),
-        (logs) => logs,
-      );
-    });
+  ref,
+  params,
+) async {
+  final repo = ref.read(machineRepositoryProvider);
+  final result = await repo.getBreakdownLogs(
+    params.machineId,
+    page: params.page,
+    limit: params.limit,
+  );
+  return result.fold(
+    (failure) => throw Exception(failure.message),
+    (logs) => logs,
+  );
+});
 
 /// AMC contracts for a machine.
 final amcContractsProvider =
     FutureProvider.family<List<AMCContractEntity>, int>((ref, machineId) async {
-      final repo = ref.read(machineRepositoryProvider);
-      final result = await repo.getAMCContracts(machineId);
-      return result.fold(
-        (failure) => throw Exception(failure.message),
-        (contracts) => contracts,
-      );
-    });
+  final repo = ref.read(machineRepositoryProvider);
+  final result = await repo.getAMCContracts(machineId);
+  return result.fold(
+    (failure) => throw Exception(failure.message),
+    (contracts) => contracts,
+  );
+});
 
 /// Service history for a machine.
-final serviceHistoryProvider =
-    FutureProvider.family<
-      List<MachineServiceHistoryEntity>,
-      ServiceHistoryParams
-    >((ref, params) async {
-      final repo = ref.read(machineRepositoryProvider);
-      final result = await repo.getServiceHistory(
-        params.machineId,
-        page: params.page,
-        limit: params.limit,
-      );
-      return result.fold(
-        (failure) => throw Exception(failure.message),
-        (history) => history,
-      );
-    });
+final serviceHistoryProvider = FutureProvider.family<
+    List<MachineServiceHistoryEntity>,
+    ServiceHistoryParams>((ref, params) async {
+  final repo = ref.read(machineRepositoryProvider);
+  final result = await repo.getServiceHistory(
+    params.machineId,
+    page: params.page,
+    limit: params.limit,
+  );
+  return result.fold(
+    (failure) => throw Exception(failure.message),
+    (history) => history,
+  );
+});
 
 /// Upcoming maintenance across all machines.
 final upcomingMaintenanceProvider =
     FutureProvider<List<MaintenanceScheduleEntity>>((ref) async {
-      final repo = ref.read(machineRepositoryProvider);
-      final result = await repo.getUpcomingMaintenance();
-      return result.fold(
-        (failure) => throw Exception(failure.message),
-        (schedules) => schedules,
-      );
-    });
+  final repo = ref.read(machineRepositoryProvider);
+  final result = await repo.getUpcomingMaintenance();
+  return result.fold(
+    (failure) => throw Exception(failure.message),
+    (schedules) => schedules,
+  );
+});
 
 // ═══════════════════════════════════════════════════════════════════════════
 //  Form State Provider (Create / Edit)
@@ -230,10 +228,14 @@ class MachineFormState {
   }
 }
 
-class MachineFormNotifier extends StateNotifier<MachineFormState> {
-  final MachineRepository _repository;
+class MachineFormNotifier extends Notifier<MachineFormState> {
+  late final MachineRepository _repository;
 
-  MachineFormNotifier(this._repository) : super(const MachineFormState());
+  @override
+  MachineFormState build() {
+    _repository = ref.read(machineRepositoryProvider);
+    return const MachineFormState();
+  }
 
   Future<bool> createMachine(Map<String, dynamic> data) async {
     state = state.copyWith(isLoading: true, errorMessage: null);
@@ -314,6 +316,6 @@ class MachineFormNotifier extends StateNotifier<MachineFormState> {
 }
 
 final machineFormProvider =
-    StateNotifierProvider<MachineFormNotifier, MachineFormState>(
-      (ref) => MachineFormNotifier(ref.read(machineRepositoryProvider)),
-    );
+    NotifierProvider<MachineFormNotifier, MachineFormState>(
+  MachineFormNotifier.new,
+);

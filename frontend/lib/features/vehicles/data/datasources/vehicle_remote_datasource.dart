@@ -1,6 +1,5 @@
 import '../../../../core/constants/api_constants.dart';
 import '../../../../core/network/api_client.dart';
-import '../models/vehicle_model.dart';
 
 /// Remote data source for vehicle‑related API calls.
 class VehicleRemoteDatasource {

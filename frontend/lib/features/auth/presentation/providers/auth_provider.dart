@@ -77,22 +77,20 @@ class AuthError extends AuthState {
 
 // ── Auth State Notifier ───────────────────────────────────────────────
 
-class AuthNotifier extends StateNotifier<AuthState> {
-  final LoginUseCase _loginUseCase;
-  final LogoutUseCase _logoutUseCase;
-  final GetProfileUseCase _getProfileUseCase;
-  final AuthRepository _authRepository;
+class AuthNotifier extends Notifier<AuthState> {
+  late final LoginUseCase _loginUseCase;
+  late final LogoutUseCase _logoutUseCase;
+  late final GetProfileUseCase _getProfileUseCase;
+  late final AuthRepository _authRepository;
 
-  AuthNotifier({
-    required LoginUseCase loginUseCase,
-    required LogoutUseCase logoutUseCase,
-    required GetProfileUseCase getProfileUseCase,
-    required AuthRepository authRepository,
-  }) : _loginUseCase = loginUseCase,
-       _logoutUseCase = logoutUseCase,
-       _getProfileUseCase = getProfileUseCase,
-       _authRepository = authRepository,
-       super(const AuthInitial());
+  @override
+  AuthState build() {
+    _loginUseCase = ref.read(loginUseCaseProvider);
+    _logoutUseCase = ref.read(logoutUseCaseProvider);
+    _getProfileUseCase = ref.read(getProfileUseCaseProvider);
+    _authRepository = ref.read(authRepositoryProvider);
+    return const AuthInitial();
+  }
 
   /// Check stored credentials and load the cached user (called on app start).
   Future<void> checkAuthStatus() async {
@@ -145,14 +143,9 @@ class AuthNotifier extends StateNotifier<AuthState> {
 
 // ── Riverpod Providers ────────────────────────────────────────────────
 
-final authStateProvider = StateNotifierProvider<AuthNotifier, AuthState>((ref) {
-  return AuthNotifier(
-    loginUseCase: ref.read(loginUseCaseProvider),
-    logoutUseCase: ref.read(logoutUseCaseProvider),
-    getProfileUseCase: ref.read(getProfileUseCaseProvider),
-    authRepository: ref.read(authRepositoryProvider),
-  );
-});
+final authStateProvider = NotifierProvider<AuthNotifier, AuthState>(
+  AuthNotifier.new,
+);
 
 /// The currently authenticated user, or `null`.
 final currentUserProvider = Provider<UserEntity?>((ref) {

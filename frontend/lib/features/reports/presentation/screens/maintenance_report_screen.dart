@@ -97,8 +97,7 @@ class _Body extends StatelessWidget {
         // ── Date Range ────────────────────────────────────────────────
         DateRangeSelector(
           initialRange: range,
-          onChanged: (r) =>
-              ref.read(reportDateRangeProvider.notifier).state = r,
+          onChanged: (r) => ref.read(reportDateRangeProvider.notifier).set(r),
         ),
         const SizedBox(height: 20),
 
@@ -254,9 +253,8 @@ class _Body extends StatelessWidget {
   // ── Priority Bar Chart ──────────────────────────────────────────────
   Widget _buildPriorityBarChart(BuildContext context) {
     final entries = report.byPriority.entries.toList();
-    final maxVal = entries
-        .fold<int>(0, (m, e) => e.value > m ? e.value : m)
-        .toDouble();
+    final maxVal =
+        entries.fold<int>(0, (m, e) => e.value > m ? e.value : m).toDouble();
     final colors = {
       'critical': AppColors.error,
       'high': const Color(0xFFE67E22),

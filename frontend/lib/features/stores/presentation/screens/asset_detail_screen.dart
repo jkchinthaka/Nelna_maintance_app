@@ -5,7 +5,6 @@ import 'package:intl/intl.dart';
 
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/widgets/error_widget.dart';
-import '../../../../core/widgets/loading_widget.dart';
 import '../../../../core/widgets/status_badge.dart';
 import '../../domain/entities/asset_entity.dart';
 import '../providers/asset_provider.dart';
@@ -400,7 +399,6 @@ class _DetailsTab extends StatelessWidget {
         _detailRow('Serial Number', asset.serialNumber ?? '—'),
         _detailRow('Location', asset.location ?? '—'),
         _detailRow('Description', asset.description ?? '—'),
-
         const SizedBox(height: 20),
         _sectionTitle(context, 'Financial Information'),
         if (asset.purchaseDate != null)
@@ -414,14 +412,12 @@ class _DetailsTab extends StatelessWidget {
             'Depreciation Rate',
             '${asset.depreciationRate}% per annum',
           ),
-
         const SizedBox(height: 20),
         _sectionTitle(context, 'Warranty & Assignment'),
         if (asset.warrantyExpiry != null)
           _detailRow('Warranty Expiry', dateFmt.format(asset.warrantyExpiry!)),
         _detailRow('Assigned To', asset.assignedToName ?? '—'),
         _detailRow('Branch', asset.branchName ?? '—'),
-
         if (asset.notes != null && asset.notes!.isNotEmpty) ...[
           const SizedBox(height: 20),
           _sectionTitle(context, 'Notes'),
@@ -442,9 +438,9 @@ class _DetailsTab extends StatelessWidget {
       child: Text(
         title,
         style: Theme.of(context).textTheme.titleSmall?.copyWith(
-          fontWeight: FontWeight.w600,
-          color: AppColors.primary,
-        ),
+              fontWeight: FontWeight.w600,
+              color: AppColors.primary,
+            ),
       ),
     );
   }

@@ -33,7 +33,7 @@ class ReportsHomeScreen extends ConsumerWidget {
             DateRangeSelector(
               initialRange: range,
               onChanged: (newRange) {
-                ref.read(reportDateRangeProvider.notifier).state = newRange;
+                ref.read(reportDateRangeProvider.notifier).set(newRange);
               },
             ),
             const SizedBox(height: 8),
@@ -185,7 +185,7 @@ class _BranchSelector extends ConsumerWidget {
       items: branches.entries
           .map((e) => DropdownMenuItem(value: e.key, child: Text(e.value)))
           .toList(),
-      onChanged: (v) => ref.read(reportBranchProvider.notifier).state = v,
+      onChanged: (v) => ref.read(reportBranchProvider.notifier).set(v),
     );
   }
 }
@@ -245,13 +245,17 @@ class _ReportTypeCard extends StatelessWidget {
                       children: [
                         Text(
                           title,
-                          style: Theme.of(context).textTheme.titleMedium
+                          style: Theme.of(context)
+                              .textTheme
+                              .titleMedium
                               ?.copyWith(fontWeight: FontWeight.w600),
                         ),
                         const SizedBox(height: 2),
                         Text(
                           subtitle,
-                          style: Theme.of(context).textTheme.bodySmall
+                          style: Theme.of(context)
+                              .textTheme
+                              .bodySmall
                               ?.copyWith(color: AppColors.textSecondary),
                         ),
                       ],
@@ -293,9 +297,9 @@ class _MiniKpi extends StatelessWidget {
           Text(
             value,
             style: Theme.of(context).textTheme.titleSmall?.copyWith(
-              fontWeight: FontWeight.w700,
-              color: AppColors.textPrimary,
-            ),
+                  fontWeight: FontWeight.w700,
+                  color: AppColors.textPrimary,
+                ),
             maxLines: 1,
             overflow: TextOverflow.ellipsis,
           ),
@@ -303,9 +307,9 @@ class _MiniKpi extends StatelessWidget {
           Text(
             label,
             style: Theme.of(context).textTheme.bodySmall?.copyWith(
-              color: AppColors.textSecondary,
-              fontSize: 11,
-            ),
+                  color: AppColors.textSecondary,
+                  fontSize: 11,
+                ),
           ),
         ],
       ),

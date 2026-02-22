@@ -24,10 +24,11 @@ class _ProductListScreenState extends ConsumerState<ProductListScreen> {
   bool _lowStockOnly = false;
 
   ProductListParams get _params => ProductListParams(
-    search: _searchController.text.isNotEmpty ? _searchController.text : null,
-    categoryId: _selectedCategoryId,
-    lowStock: _lowStockOnly ? true : null,
-  );
+        search:
+            _searchController.text.isNotEmpty ? _searchController.text : null,
+        categoryId: _selectedCategoryId,
+        lowStock: _lowStockOnly ? true : null,
+      );
 
   @override
   void dispose() {
@@ -133,7 +134,7 @@ class _ProductListScreenState extends ConsumerState<ProductListScreen> {
   // ── Filter Chips ────────────────────────────────────────────────────────
 
   Widget _buildFilterChips(AsyncValue<List<CategoryEntity>> categoriesAsync) {
-    final categories = categoriesAsync.valueOrNull ?? [];
+    final categories = categoriesAsync.value ?? [];
     final hasActiveFilter = _selectedCategoryId != null || _lowStockOnly;
 
     return SizedBox(

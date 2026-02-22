@@ -34,12 +34,10 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
     final statsAsync = ref.watch(serviceRequestStatsProvider);
     final authState = ref.watch(authStateProvider);
 
-    final userName = authState is AuthAuthenticated
-        ? authState.user.firstName
-        : 'User';
+    final userName =
+        authState is AuthAuthenticated ? authState.user.firstName : 'User';
 
-    final isAdmin =
-        authState is AuthAuthenticated &&
+    final isAdmin = authState is AuthAuthenticated &&
         (authState.user.roleName == 'super_admin' ||
             authState.user.roleName == 'admin');
 
@@ -63,16 +61,16 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
                   Text(
                     'Welcome back, $userName',
                     style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                      fontWeight: FontWeight.w700,
-                      color: AppColors.textPrimary,
-                    ),
+                          fontWeight: FontWeight.w700,
+                          color: AppColors.textPrimary,
+                        ),
                   ),
                   const SizedBox(height: 2),
                   Text(
                     DateFormat('EEEE, d MMMM yyyy').format(DateTime.now()),
                     style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                      color: AppColors.textSecondary,
-                    ),
+                          color: AppColors.textSecondary,
+                        ),
                   ),
                 ],
               ),
@@ -135,9 +133,7 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
       ref
           .read(dashboardKPIsProvider.future)
           .catchError((_) => const DashboardKPIs()),
-      ref
-          .read(monthlyTrendsProvider.future)
-          .catchError(
+      ref.read(monthlyTrendsProvider.future).catchError(
             (_) => const MonthlyTrendsResponse(
               year: 0,
               months: [],
@@ -172,7 +168,7 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
         ],
       ),
       onSelected: (value) {
-        ref.read(selectedBranchIdProvider.notifier).state = value;
+        ref.read(selectedBranchIdProvider.notifier).set(value);
       },
       itemBuilder: (context) => [
         const PopupMenuItem<int?>(value: null, child: Text('All Branches')),
@@ -253,9 +249,8 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
         title: 'Under Repair',
         value: '${kpis.assetsUnderRepair}',
         icon: Icons.build_outlined,
-        color: kpis.assetsUnderRepair > 0
-            ? AppColors.warning
-            : AppColors.success,
+        color:
+            kpis.assetsUnderRepair > 0 ? AppColors.warning : AppColors.success,
       ),
     ];
 
@@ -264,8 +259,8 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
         final crossAxisCount = constraints.maxWidth > 900
             ? 4
             : constraints.maxWidth > 600
-            ? 3
-            : 2;
+                ? 3
+                : 2;
 
         return GridView.builder(
           shrinkWrap: true,
@@ -302,8 +297,8 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
         final crossAxisCount = constraints.maxWidth > 900
             ? 4
             : constraints.maxWidth > 600
-            ? 3
-            : 2;
+                ? 3
+                : 2;
 
         return GridView.builder(
           shrinkWrap: true,

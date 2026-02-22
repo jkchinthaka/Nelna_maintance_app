@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:intl/intl.dart';
 
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/widgets/status_badge.dart';
@@ -164,8 +163,8 @@ class ServiceRequestCard extends StatelessWidget {
     final color = breached
         ? AppColors.error
         : (remaining != null && remaining.inHours < 4)
-        ? AppColors.warning
-        : AppColors.textSecondary;
+            ? AppColors.warning
+            : AppColors.textSecondary;
 
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),

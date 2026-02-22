@@ -100,8 +100,7 @@ class _Body extends StatelessWidget {
         // ── Date Range ────────────────────────────────────────────────
         DateRangeSelector(
           initialRange: range,
-          onChanged: (r) =>
-              ref.read(reportDateRangeProvider.notifier).state = r,
+          onChanged: (r) => ref.read(reportDateRangeProvider.notifier).set(r),
         ),
         const SizedBox(height: 20),
 

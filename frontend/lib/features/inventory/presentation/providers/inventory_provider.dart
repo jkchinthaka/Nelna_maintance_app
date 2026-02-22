@@ -60,13 +60,13 @@ class ProductListParams extends Equatable {
 
   @override
   List<Object?> get props => [
-    page,
-    limit,
-    search,
-    categoryId,
-    branchId,
-    lowStock,
-  ];
+        page,
+        limit,
+        search,
+        categoryId,
+        branchId,
+        lowStock,
+      ];
 }
 
 class SupplierListParams extends Equatable {
@@ -141,23 +141,23 @@ class StockMovementParams extends Equatable {
 /// Paginated + filtered product list.
 final productListProvider =
     FutureProvider.family<List<ProductEntity>, ProductListParams>((
-      ref,
-      params,
-    ) async {
-      final repo = ref.read(inventoryRepositoryProvider);
-      final result = await repo.getProducts(
-        page: params.page,
-        limit: params.limit,
-        search: params.search,
-        categoryId: params.categoryId,
-        branchId: params.branchId,
-        lowStock: params.lowStock,
-      );
-      return result.fold(
-        (failure) => throw Exception(failure.message),
-        (products) => products,
-      );
-    });
+  ref,
+  params,
+) async {
+  final repo = ref.read(inventoryRepositoryProvider);
+  final result = await repo.getProducts(
+    page: params.page,
+    limit: params.limit,
+    search: params.search,
+    categoryId: params.categoryId,
+    branchId: params.branchId,
+    lowStock: params.lowStock,
+  );
+  return result.fold(
+    (failure) => throw Exception(failure.message),
+    (products) => products,
+  );
+});
 
 /// Single product detail.
 final productDetailProvider = FutureProvider.family<ProductEntity, int>((
@@ -185,68 +185,68 @@ final categoriesProvider = FutureProvider<List<CategoryEntity>>((ref) async {
 /// Paginated + filtered supplier list.
 final suppliersProvider =
     FutureProvider.family<List<SupplierEntity>, SupplierListParams>((
-      ref,
-      params,
-    ) async {
-      final repo = ref.read(inventoryRepositoryProvider);
-      final result = await repo.getSuppliers(
-        page: params.page,
-        limit: params.limit,
-        search: params.search,
-      );
-      return result.fold(
-        (failure) => throw Exception(failure.message),
-        (suppliers) => suppliers,
-      );
-    });
+  ref,
+  params,
+) async {
+  final repo = ref.read(inventoryRepositoryProvider);
+  final result = await repo.getSuppliers(
+    page: params.page,
+    limit: params.limit,
+    search: params.search,
+  );
+  return result.fold(
+    (failure) => throw Exception(failure.message),
+    (suppliers) => suppliers,
+  );
+});
 
 /// Paginated + filtered purchase order list.
 final purchaseOrderListProvider =
     FutureProvider.family<List<PurchaseOrderEntity>, PurchaseOrderListParams>((
-      ref,
-      params,
-    ) async {
-      final repo = ref.read(inventoryRepositoryProvider);
-      final result = await repo.getPurchaseOrders(
-        page: params.page,
-        limit: params.limit,
-        status: params.status,
-        supplierId: params.supplierId,
-      );
-      return result.fold(
-        (failure) => throw Exception(failure.message),
-        (orders) => orders,
-      );
-    });
+  ref,
+  params,
+) async {
+  final repo = ref.read(inventoryRepositoryProvider);
+  final result = await repo.getPurchaseOrders(
+    page: params.page,
+    limit: params.limit,
+    status: params.status,
+    supplierId: params.supplierId,
+  );
+  return result.fold(
+    (failure) => throw Exception(failure.message),
+    (orders) => orders,
+  );
+});
 
 /// Single purchase order detail.
 final purchaseOrderDetailProvider =
     FutureProvider.family<PurchaseOrderEntity, int>((ref, id) async {
-      final repo = ref.read(inventoryRepositoryProvider);
-      final result = await repo.getPurchaseOrderById(id);
-      return result.fold(
-        (failure) => throw Exception(failure.message),
-        (order) => order,
-      );
-    });
+  final repo = ref.read(inventoryRepositoryProvider);
+  final result = await repo.getPurchaseOrderById(id);
+  return result.fold(
+    (failure) => throw Exception(failure.message),
+    (order) => order,
+  );
+});
 
 /// Stock movements for a product.
 final stockMovementsProvider =
     FutureProvider.family<List<StockMovementEntity>, StockMovementParams>((
-      ref,
-      params,
-    ) async {
-      final repo = ref.read(inventoryRepositoryProvider);
-      final result = await repo.getStockMovements(
-        params.productId,
-        page: params.page,
-        limit: params.limit,
-      );
-      return result.fold(
-        (failure) => throw Exception(failure.message),
-        (movements) => movements,
-      );
-    });
+  ref,
+  params,
+) async {
+  final repo = ref.read(inventoryRepositoryProvider);
+  final result = await repo.getStockMovements(
+    params.productId,
+    page: params.page,
+    limit: params.limit,
+  );
+  return result.fold(
+    (failure) => throw Exception(failure.message),
+    (movements) => movements,
+  );
+});
 
 /// Stock alerts (optionally filtered by branch).
 final stockAlertsProvider = FutureProvider.family<List<StockAlert>, int?>((
@@ -289,10 +289,14 @@ class ProductFormState {
   }
 }
 
-class ProductFormNotifier extends StateNotifier<ProductFormState> {
-  final InventoryRepository _repository;
+class ProductFormNotifier extends Notifier<ProductFormState> {
+  late final InventoryRepository _repository;
 
-  ProductFormNotifier(this._repository) : super(const ProductFormState());
+  @override
+  ProductFormState build() {
+    _repository = ref.read(inventoryRepositoryProvider);
+    return const ProductFormState();
+  }
 
   Future<bool> createProduct(Map<String, dynamic> data) async {
     state = state.copyWith(isLoading: true, errorMessage: null);
@@ -343,9 +347,9 @@ class ProductFormNotifier extends StateNotifier<ProductFormState> {
 }
 
 final productFormProvider =
-    StateNotifierProvider<ProductFormNotifier, ProductFormState>(
-      (ref) => ProductFormNotifier(ref.read(inventoryRepositoryProvider)),
-    );
+    NotifierProvider<ProductFormNotifier, ProductFormState>(
+  ProductFormNotifier.new,
+);
 
 // ═══════════════════════════════════════════════════════════════════════════
 //  Purchase Order Form State Provider
@@ -432,11 +436,14 @@ class PurchaseOrderFormState {
   }
 }
 
-class PurchaseOrderFormNotifier extends StateNotifier<PurchaseOrderFormState> {
-  final InventoryRepository _repository;
+class PurchaseOrderFormNotifier extends Notifier<PurchaseOrderFormState> {
+  late final InventoryRepository _repository;
 
-  PurchaseOrderFormNotifier(this._repository)
-    : super(const PurchaseOrderFormState());
+  @override
+  PurchaseOrderFormState build() {
+    _repository = ref.read(inventoryRepositoryProvider);
+    return const PurchaseOrderFormState();
+  }
 
   void setSupplier(int id, String name) {
     state = state.copyWith(supplierId: id, supplierName: name);
@@ -579,6 +586,6 @@ class PurchaseOrderFormNotifier extends StateNotifier<PurchaseOrderFormState> {
 }
 
 final purchaseOrderFormProvider =
-    StateNotifierProvider<PurchaseOrderFormNotifier, PurchaseOrderFormState>(
-      (ref) => PurchaseOrderFormNotifier(ref.read(inventoryRepositoryProvider)),
-    );
+    NotifierProvider<PurchaseOrderFormNotifier, PurchaseOrderFormState>(
+  PurchaseOrderFormNotifier.new,
+);

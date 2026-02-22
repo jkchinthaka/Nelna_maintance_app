@@ -80,22 +80,22 @@ class CostAnalyticsParams extends Equatable {
 /// Paginated + filtered vehicle list.
 final vehicleListProvider =
     FutureProvider.family<List<VehicleEntity>, VehicleListParams>((
-      ref,
-      params,
-    ) async {
-      final repo = ref.read(vehicleRepositoryProvider);
-      final result = await repo.getVehicles(
-        page: params.page,
-        limit: params.limit,
-        search: params.search,
-        status: params.status,
-        branchId: params.branchId,
-      );
-      return result.fold(
-        (failure) => throw Exception(failure.message),
-        (v) => v,
-      );
-    });
+  ref,
+  params,
+) async {
+  final repo = ref.read(vehicleRepositoryProvider);
+  final result = await repo.getVehicles(
+    page: params.page,
+    limit: params.limit,
+    search: params.search,
+    status: params.status,
+    branchId: params.branchId,
+  );
+  return result.fold(
+    (failure) => throw Exception(failure.message),
+    (v) => v,
+  );
+});
 
 /// Single vehicle detail.
 final vehicleDetailProvider = FutureProvider.family<VehicleEntity, int>((
@@ -119,20 +119,20 @@ final serviceRemindersProvider = FutureProvider<List<ServiceReminder>>((
 /// Cost analytics.
 final vehicleCostAnalyticsProvider =
     FutureProvider.family<VehicleCostAnalytics, CostAnalyticsParams>((
-      ref,
-      params,
-    ) async {
-      final repo = ref.read(vehicleRepositoryProvider);
-      final result = await repo.getCostAnalytics(
-        params.vehicleId,
-        startDate: params.startDate,
-        endDate: params.endDate,
-      );
-      return result.fold(
-        (failure) => throw Exception(failure.message),
-        (v) => v,
-      );
-    });
+  ref,
+  params,
+) async {
+  final repo = ref.read(vehicleRepositoryProvider);
+  final result = await repo.getCostAnalytics(
+    params.vehicleId,
+    startDate: params.startDate,
+    endDate: params.endDate,
+  );
+  return result.fold(
+    (failure) => throw Exception(failure.message),
+    (v) => v,
+  );
+});
 
 /// Fuel logs for a vehicle.
 final vehicleFuelLogsProvider = FutureProvider.family<List<FuelLogEntity>, int>(
@@ -171,10 +171,14 @@ class VehicleFormState {
   }
 }
 
-class VehicleFormNotifier extends StateNotifier<VehicleFormState> {
-  final VehicleRepository _repository;
+class VehicleFormNotifier extends Notifier<VehicleFormState> {
+  late final VehicleRepository _repository;
 
-  VehicleFormNotifier(this._repository) : super(const VehicleFormState());
+  @override
+  VehicleFormState build() {
+    _repository = ref.read(vehicleRepositoryProvider);
+    return const VehicleFormState();
+  }
 
   Future<bool> createVehicle(Map<String, dynamic> data) async {
     state = state.copyWith(isLoading: true, errorMessage: null);
@@ -255,6 +259,6 @@ class VehicleFormNotifier extends StateNotifier<VehicleFormState> {
 }
 
 final vehicleFormProvider =
-    StateNotifierProvider<VehicleFormNotifier, VehicleFormState>(
-      (ref) => VehicleFormNotifier(ref.read(vehicleRepositoryProvider)),
-    );
+    NotifierProvider<VehicleFormNotifier, VehicleFormState>(
+  VehicleFormNotifier.new,
+);

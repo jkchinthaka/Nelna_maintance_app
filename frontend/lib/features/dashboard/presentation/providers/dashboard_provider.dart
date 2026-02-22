@@ -33,15 +33,23 @@ final getMonthlyTrendsUseCaseProvider = Provider<GetMonthlyTrendsUseCase>(
 
 final getServiceRequestStatsUseCaseProvider =
     Provider<GetServiceRequestStatsUseCase>(
-      (ref) =>
-          GetServiceRequestStatsUseCase(ref.read(dashboardRepositoryProvider)),
-    );
+  (ref) => GetServiceRequestStatsUseCase(ref.read(dashboardRepositoryProvider)),
+);
 
 // ── Selected Branch (for admin filtering) ─────────────────────────────
 
 /// The currently selected branch ID for dashboard filtering.
 /// `null` means all branches (admin view).
-final selectedBranchIdProvider = StateProvider<int?>((ref) => null);
+final selectedBranchIdProvider =
+    NotifierProvider<_SelectedBranchIdNotifier, int?>(
+  _SelectedBranchIdNotifier.new,
+);
+
+class _SelectedBranchIdNotifier extends Notifier<int?> {
+  @override
+  int? build() => null;
+  void set(int? value) => state = value;
+}
 
 // ── Data Providers ────────────────────────────────────────────────────
 
@@ -77,12 +85,12 @@ final monthlyTrendsProvider = FutureProvider.autoDispose<MonthlyTrendsResponse>(
 /// Fetches service request statistics for the selected branch.
 final serviceRequestStatsProvider =
     FutureProvider.autoDispose<ServiceRequestStats>((ref) async {
-      final branchId = ref.watch(selectedBranchIdProvider);
-      final useCase = ref.read(getServiceRequestStatsUseCaseProvider);
+  final branchId = ref.watch(selectedBranchIdProvider);
+  final useCase = ref.read(getServiceRequestStatsUseCaseProvider);
 
-      final result = await useCase(branchId: branchId);
-      return result.fold(
-        (failure) => throw Exception(failure.message),
-        (stats) => stats,
-      );
-    });
+  final result = await useCase(branchId: branchId);
+  return result.fold(
+    (failure) => throw Exception(failure.message),
+    (stats) => stats,
+  );
+});

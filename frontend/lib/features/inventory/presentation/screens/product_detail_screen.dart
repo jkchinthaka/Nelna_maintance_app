@@ -4,7 +4,6 @@ import 'package:intl/intl.dart';
 
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/widgets/error_widget.dart';
-import '../../../../core/widgets/loading_widget.dart';
 import '../../domain/entities/inventory_entity.dart';
 import '../providers/inventory_provider.dart';
 import '../widgets/stock_level_indicator.dart';
@@ -31,7 +30,7 @@ class ProductDetailScreen extends ConsumerWidget {
             icon: const Icon(Icons.tune_rounded),
             tooltip: 'Adjust Stock',
             onPressed: () {
-              final product = productAsync.valueOrNull;
+              final product = productAsync.value;
               if (product != null) {
                 _showAdjustStockDialog(context, ref, product);
               }
@@ -40,7 +39,7 @@ class ProductDetailScreen extends ConsumerWidget {
         ],
       ),
       body: productAsync.when(
-        loading: () => const LoadingWidget(),
+        loading: () => const Center(child: CircularProgressIndicator()),
         error: (error, _) => ErrorView(
           message: error.toString(),
           onRetry: () => ref.invalidate(productDetailProvider(productId)),
@@ -94,23 +93,23 @@ class ProductDetailScreen extends ConsumerWidget {
                   ),
                   child:
                       product.imageUrl != null && product.imageUrl!.isNotEmpty
-                      ? ClipRRect(
-                          borderRadius: BorderRadius.circular(16),
-                          child: Image.network(
-                            product.imageUrl!,
-                            fit: BoxFit.cover,
-                            errorBuilder: (_, __, ___) => const Icon(
+                          ? ClipRRect(
+                              borderRadius: BorderRadius.circular(16),
+                              child: Image.network(
+                                product.imageUrl!,
+                                fit: BoxFit.cover,
+                                errorBuilder: (_, __, ___) => const Icon(
+                                  Icons.inventory_2_outlined,
+                                  color: AppColors.primary,
+                                  size: 28,
+                                ),
+                              ),
+                            )
+                          : const Icon(
                               Icons.inventory_2_outlined,
                               color: AppColors.primary,
                               size: 28,
                             ),
-                          ),
-                        )
-                      : const Icon(
-                          Icons.inventory_2_outlined,
-                          color: AppColors.primary,
-                          size: 28,
-                        ),
                 ),
                 const SizedBox(width: 16),
                 Expanded(
@@ -383,9 +382,8 @@ class ProductDetailScreen extends ConsumerWidget {
   ) {
     final isIn = movement.isStockIn;
     final color = isIn ? AppColors.success : AppColors.error;
-    final icon = isIn
-        ? Icons.arrow_downward_rounded
-        : Icons.arrow_upward_rounded;
+    final icon =
+        isIn ? Icons.arrow_downward_rounded : Icons.arrow_upward_rounded;
     final sign = isIn ? '+' : '-';
     final dateFmt = DateFormat('dd MMM yyyy, HH:mm');
 

@@ -68,15 +68,15 @@ class ServiceListParams extends Equatable {
 
   @override
   List<Object?> get props => [
-    page,
-    limit,
-    search,
-    status,
-    priority,
-    type,
-    branchId,
-    assignedToId,
-  ];
+        page,
+        limit,
+        search,
+        status,
+        priority,
+        type,
+        branchId,
+        assignedToId,
+      ];
 }
 
 class SLAMetricsParams extends Equatable {
@@ -97,25 +97,25 @@ class SLAMetricsParams extends Equatable {
 /// Paginated + filtered service request list.
 final serviceListProvider =
     FutureProvider.family<List<ServiceRequestEntity>, ServiceListParams>((
-      ref,
-      params,
-    ) async {
-      final repo = ref.read(serviceRepositoryProvider);
-      final result = await repo.getServiceRequests(
-        page: params.page,
-        limit: params.limit,
-        search: params.search,
-        status: params.status,
-        priority: params.priority,
-        type: params.type,
-        branchId: params.branchId,
-        assignedToId: params.assignedToId,
-      );
-      return result.fold(
-        (failure) => throw Exception(failure.message),
-        (v) => v,
-      );
-    });
+  ref,
+  params,
+) async {
+  final repo = ref.read(serviceRepositoryProvider);
+  final result = await repo.getServiceRequests(
+    page: params.page,
+    limit: params.limit,
+    search: params.search,
+    status: params.status,
+    priority: params.priority,
+    type: params.type,
+    branchId: params.branchId,
+    assignedToId: params.assignedToId,
+  );
+  return result.fold(
+    (failure) => throw Exception(failure.message),
+    (v) => v,
+  );
+});
 
 /// Single service request detail.
 final serviceDetailProvider = FutureProvider.family<ServiceRequestEntity, int>((
@@ -130,48 +130,48 @@ final serviceDetailProvider = FutureProvider.family<ServiceRequestEntity, int>((
 /// Tasks for a service request.
 final serviceTasksProvider =
     FutureProvider.family<List<ServiceTaskEntity>, int>((
-      ref,
-      serviceRequestId,
-    ) async {
-      final repo = ref.read(serviceRepositoryProvider);
-      final result = await repo.getServiceTasks(serviceRequestId);
-      return result.fold(
-        (failure) => throw Exception(failure.message),
-        (v) => v,
-      );
-    });
+  ref,
+  serviceRequestId,
+) async {
+  final repo = ref.read(serviceRepositoryProvider);
+  final result = await repo.getServiceTasks(serviceRequestId);
+  return result.fold(
+    (failure) => throw Exception(failure.message),
+    (v) => v,
+  );
+});
 
 /// Spare parts for a service request.
 final serviceSparePartsProvider =
     FutureProvider.family<List<ServiceSparePartEntity>, int>((
-      ref,
-      serviceRequestId,
-    ) async {
-      final repo = ref.read(serviceRepositoryProvider);
-      final result = await repo.getSpareParts(serviceRequestId);
-      return result.fold(
-        (failure) => throw Exception(failure.message),
-        (v) => v,
-      );
-    });
+  ref,
+  serviceRequestId,
+) async {
+  final repo = ref.read(serviceRepositoryProvider);
+  final result = await repo.getSpareParts(serviceRequestId);
+  return result.fold(
+    (failure) => throw Exception(failure.message),
+    (v) => v,
+  );
+});
 
 /// SLA Metrics.
 final slaMetricsProvider =
     FutureProvider.family<ServiceSLAMetrics, SLAMetricsParams>((
-      ref,
-      params,
-    ) async {
-      final repo = ref.read(serviceRepositoryProvider);
-      final result = await repo.getSLAMetrics(
-        branchId: params.branchId,
-        startDate: params.startDate,
-        endDate: params.endDate,
-      );
-      return result.fold(
-        (failure) => throw Exception(failure.message),
-        (v) => v,
-      );
-    });
+  ref,
+  params,
+) async {
+  final repo = ref.read(serviceRepositoryProvider);
+  final result = await repo.getSLAMetrics(
+    branchId: params.branchId,
+    startDate: params.startDate,
+    endDate: params.endDate,
+  );
+  return result.fold(
+    (failure) => throw Exception(failure.message),
+    (v) => v,
+  );
+});
 
 /// My service requests.
 final myServiceRequestsProvider = FutureProvider<List<ServiceRequestEntity>>((
@@ -210,10 +210,14 @@ class ServiceFormState {
   }
 }
 
-class ServiceFormNotifier extends StateNotifier<ServiceFormState> {
-  final ServiceRepository _repository;
+class ServiceFormNotifier extends Notifier<ServiceFormState> {
+  late final ServiceRepository _repository;
 
-  ServiceFormNotifier(this._repository) : super(const ServiceFormState());
+  @override
+  ServiceFormState build() {
+    _repository = ref.read(serviceRepositoryProvider);
+    return const ServiceFormState();
+  }
 
   Future<bool> createServiceRequest(Map<String, dynamic> data) async {
     state = state.copyWith(isLoading: true, errorMessage: null);
@@ -354,6 +358,6 @@ class ServiceFormNotifier extends StateNotifier<ServiceFormState> {
 }
 
 final serviceFormProvider =
-    StateNotifierProvider<ServiceFormNotifier, ServiceFormState>(
-      (ref) => ServiceFormNotifier(ref.read(serviceRepositoryProvider)),
-    );
+    NotifierProvider<ServiceFormNotifier, ServiceFormState>(
+  ServiceFormNotifier.new,
+);

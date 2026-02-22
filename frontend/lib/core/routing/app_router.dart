@@ -5,7 +5,16 @@ import 'package:go_router/go_router.dart';
 import '../widgets/app_scaffold.dart';
 
 // ── Auth State Provider (stub – replace with real auth provider) ───────
-final isAuthenticatedProvider = StateProvider<bool>((ref) => false);
+final isAuthenticatedProvider =
+    NotifierProvider<_IsAuthenticatedNotifier, bool>(
+  _IsAuthenticatedNotifier.new,
+);
+
+class _IsAuthenticatedNotifier extends Notifier<bool> {
+  @override
+  bool build() => false;
+  void set(bool value) => state = value;
+}
 
 // ── Router Provider ───────────────────────────────────────────────────
 final appRouterProvider = Provider<GoRouter>((ref) {

@@ -46,7 +46,7 @@ class AppTheme {
       ),
 
       // ── Card ────────────────────────────────────────────────────────
-      cardTheme: CardTheme(
+      cardTheme: CardThemeData(
         elevation: 0,
         color: AppColors.surface,
         shape: RoundedRectangleBorder(
@@ -156,7 +156,7 @@ class AppTheme {
       ),
 
       // ── Dialog ──────────────────────────────────────────────────────
-      dialogTheme: DialogTheme(
+      dialogTheme: DialogThemeData(
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
         elevation: 4,
         titleTextStyle: GoogleFonts.inter(
@@ -176,7 +176,7 @@ class AppTheme {
       ),
 
       // ── Tab Bar ─────────────────────────────────────────────────────
-      tabBarTheme: TabBarTheme(
+      tabBarTheme: TabBarThemeData(
         labelColor: AppColors.primary,
         unselectedLabelColor: AppColors.textSecondary,
         indicatorColor: AppColors.primary,
@@ -263,7 +263,7 @@ class AppTheme {
       ),
 
       // ── Card ────────────────────────────────────────────────────────
-      cardTheme: CardTheme(
+      cardTheme: CardThemeData(
         elevation: 0,
         color: AppColors.darkCard,
         shape: RoundedRectangleBorder(

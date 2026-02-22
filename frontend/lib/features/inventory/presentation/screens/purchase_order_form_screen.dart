@@ -62,8 +62,8 @@ class _PurchaseOrderFormScreenState
       });
     }
 
-    final suppliers = suppliersAsync.valueOrNull ?? [];
-    final products = productsAsync.valueOrNull ?? [];
+    final suppliers = suppliersAsync.value ?? [];
+    final products = productsAsync.value ?? [];
     final currFmt = NumberFormat.currency(symbol: 'Rs ', decimalDigits: 2);
 
     return Scaffold(
@@ -107,8 +107,8 @@ class _PurchaseOrderFormScreenState
                     Text(
                       'Supplier',
                       style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                        fontWeight: FontWeight.bold,
-                      ),
+                            fontWeight: FontWeight.bold,
+                          ),
                     ),
                     const SizedBox(height: 12),
                     DropdownButtonFormField<int>(
@@ -146,8 +146,7 @@ class _PurchaseOrderFormScreenState
                       onTap: () async {
                         final picked = await showDatePicker(
                           context: context,
-                          initialDate:
-                              _expectedDate ??
+                          initialDate: _expectedDate ??
                               DateTime.now().add(const Duration(days: 7)),
                           firstDate: DateTime.now(),
                           lastDate: DateTime.now().add(
@@ -216,7 +215,9 @@ class _PurchaseOrderFormScreenState
                       children: [
                         Text(
                           'Line Items',
-                          style: Theme.of(context).textTheme.titleSmall
+                          style: Theme.of(context)
+                              .textTheme
+                              .titleSmall
                               ?.copyWith(fontWeight: FontWeight.bold),
                         ),
                         TextButton.icon(
@@ -241,19 +242,19 @@ class _PurchaseOrderFormScreenState
                       )
                     else
                       ...formState.lineItems.asMap().entries.map(
-                        (entry) => _LineItemRow(
-                          key: ValueKey('line_${entry.key}'),
-                          index: entry.key,
-                          item: entry.value,
-                          products: products,
-                          onChanged: (updated) => ref
-                              .read(purchaseOrderFormProvider.notifier)
-                              .updateLineItem(entry.key, updated),
-                          onRemove: () => ref
-                              .read(purchaseOrderFormProvider.notifier)
-                              .removeLineItem(entry.key),
-                        ),
-                      ),
+                            (entry) => _LineItemRow(
+                              key: ValueKey('line_${entry.key}'),
+                              index: entry.key,
+                              item: entry.value,
+                              products: products,
+                              onChanged: (updated) => ref
+                                  .read(purchaseOrderFormProvider.notifier)
+                                  .updateLineItem(entry.key, updated),
+                              onRemove: () => ref
+                                  .read(purchaseOrderFormProvider.notifier)
+                                  .removeLineItem(entry.key),
+                            ),
+                          ),
                   ],
                 ),
               ),
@@ -278,15 +279,15 @@ class _PurchaseOrderFormScreenState
                     Text(
                       'Grand Total',
                       style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                        fontWeight: FontWeight.bold,
-                      ),
+                            fontWeight: FontWeight.bold,
+                          ),
                     ),
                     Text(
                       currFmt.format(formState.grandTotal),
                       style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                        fontWeight: FontWeight.bold,
-                        color: AppColors.primary,
-                      ),
+                            fontWeight: FontWeight.bold,
+                            color: AppColors.primary,
+                          ),
                     ),
                   ],
                 ),
@@ -482,9 +483,8 @@ class _LineItemRow extends StatelessWidget {
                 Expanded(
                   flex: 2,
                   child: TextFormField(
-                    initialValue: item.quantity > 0
-                        ? item.quantity.toString()
-                        : '',
+                    initialValue:
+                        item.quantity > 0 ? item.quantity.toString() : '',
                     keyboardType: TextInputType.number,
                     decoration: InputDecoration(
                       isDense: true,

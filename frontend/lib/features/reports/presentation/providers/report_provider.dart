@@ -32,19 +32,46 @@ final exportReportUseCaseProvider = Provider<ExportReportUseCase>(
 // ═══════════════════════════════════════════════════════════════════════════
 
 /// Selected date range for reports. Defaults to the current month.
-final reportDateRangeProvider = StateProvider<DateTimeRange>((ref) {
-  final now = DateTime.now();
-  return DateTimeRange(
-    start: DateTime(now.year, now.month, 1),
-    end: DateTime(now.year, now.month + 1, 0),
-  );
-});
+final reportDateRangeProvider =
+    NotifierProvider<_ReportDateRangeNotifier, DateTimeRange>(
+  _ReportDateRangeNotifier.new,
+);
+
+class _ReportDateRangeNotifier extends Notifier<DateTimeRange> {
+  @override
+  DateTimeRange build() {
+    final now = DateTime.now();
+    return DateTimeRange(
+      start: DateTime(now.year, now.month, 1),
+      end: DateTime(now.year, now.month + 1, 0),
+    );
+  }
+
+  void set(DateTimeRange value) => state = value;
+}
 
 /// Selected branch id (null = all branches).
-final reportBranchProvider = StateProvider<int?>((ref) => null);
+final reportBranchProvider = NotifierProvider<_ReportBranchNotifier, int?>(
+  _ReportBranchNotifier.new,
+);
+
+class _ReportBranchNotifier extends Notifier<int?> {
+  @override
+  int? build() => null;
+  void set(int? value) => state = value;
+}
 
 /// Selected expense category filter (null = all categories).
-final reportExpenseCategoryProvider = StateProvider<String?>((ref) => null);
+final reportExpenseCategoryProvider =
+    NotifierProvider<_ReportExpenseCategoryNotifier, String?>(
+  _ReportExpenseCategoryNotifier.new,
+);
+
+class _ReportExpenseCategoryNotifier extends Notifier<String?> {
+  @override
+  String? build() => null;
+  void set(String? value) => state = value;
+}
 
 // ═══════════════════════════════════════════════════════════════════════════
 //  Param Classes
@@ -108,68 +135,68 @@ class ExportParams extends Equatable {
 /// Maintenance report – keyed by date range + branch.
 final maintenanceReportProvider =
     FutureProvider.family<MaintenanceReportEntity, ReportParams>((
-      ref,
-      params,
-    ) async {
-      final repo = ref.read(reportRepositoryProvider);
-      final result = await repo.getMaintenanceReport(
-        startDate: params.startDate,
-        endDate: params.endDate,
-        branchId: params.branchId,
-      );
-      return result.fold(
-        (failure) => throw Exception(failure.message),
-        (report) => report,
-      );
-    });
+  ref,
+  params,
+) async {
+  final repo = ref.read(reportRepositoryProvider);
+  final result = await repo.getMaintenanceReport(
+    startDate: params.startDate,
+    endDate: params.endDate,
+    branchId: params.branchId,
+  );
+  return result.fold(
+    (failure) => throw Exception(failure.message),
+    (report) => report,
+  );
+});
 
 /// Vehicle report – keyed by date range + branch.
 final vehicleReportProvider =
     FutureProvider.family<VehicleReportEntity, ReportParams>((
-      ref,
-      params,
-    ) async {
-      final repo = ref.read(reportRepositoryProvider);
-      final result = await repo.getVehicleReport(
-        startDate: params.startDate,
-        endDate: params.endDate,
-        branchId: params.branchId,
-      );
-      return result.fold(
-        (failure) => throw Exception(failure.message),
-        (report) => report,
-      );
-    });
+  ref,
+  params,
+) async {
+  final repo = ref.read(reportRepositoryProvider);
+  final result = await repo.getVehicleReport(
+    startDate: params.startDate,
+    endDate: params.endDate,
+    branchId: params.branchId,
+  );
+  return result.fold(
+    (failure) => throw Exception(failure.message),
+    (report) => report,
+  );
+});
 
 /// Inventory report – keyed by optional branch.
 final inventoryReportProvider =
     FutureProvider.family<InventoryReportEntity, int?>((ref, branchId) async {
-      final repo = ref.read(reportRepositoryProvider);
-      final result = await repo.getInventoryReport(branchId: branchId);
-      return result.fold(
-        (failure) => throw Exception(failure.message),
-        (report) => report,
-      );
-    });
+  final repo = ref.read(reportRepositoryProvider);
+  final result = await repo.getInventoryReport(branchId: branchId);
+  return result.fold(
+    (failure) => throw Exception(failure.message),
+    (report) => report,
+  );
+});
 
 /// Expense report – keyed by date range + branch + category.
 final expenseReportProvider =
     FutureProvider.family<ExpenseReportEntity, ExpenseReportProviderParams>((
-      ref,
-      params,
-    ) async {
-      final repo = ref.read(reportRepositoryProvider);
-      final result = await repo.getExpenseReport(
-        startDate: params.startDate,
-        endDate: params.endDate,
-        branchId: params.branchId,
-        category: params.category,
-      );
-      return result.fold(
-        (failure) => throw Exception(failure.message),
-        (report) => report,
-      );
-    });
+  ref,
+  params,
+) async {
+  final repo = ref.read(reportRepositoryProvider);
+  final result = await repo.getExpenseReport(
+    startDate: params.startDate,
+    endDate: params.endDate,
+    branchId: params.branchId,
+    category: params.category,
+  );
+  return result.fold(
+    (failure) => throw Exception(failure.message),
+    (report) => report,
+  );
+});
 
 /// Export report – keyed by export params. Returns raw bytes (PDF / Excel).
 final exportReportProvider = FutureProvider.family<Uint8List, ExportParams>((

@@ -97,8 +97,7 @@ class ServiceRequestEntity extends Equatable {
       slaDeadline!.isBefore(DateTime.now());
 
   /// Remaining SLA duration (negative if breached).
-  Duration? get slaRemaining =>
-      slaDeadline != null ? slaDeadline!.difference(DateTime.now()) : null;
+  Duration? get slaRemaining => slaDeadline?.difference(DateTime.now());
 
   /// Task completion ratio (0.0 – 1.0).
   double get taskProgress {
@@ -115,30 +114,30 @@ class ServiceRequestEntity extends Equatable {
 
   @override
   List<Object?> get props => [
-    id,
-    requestNo,
-    branchId,
-    requestedById,
-    assignedToId,
-    vehicleId,
-    machineId,
-    type,
-    priority,
-    status,
-    title,
-    description,
-    estimatedCost,
-    actualCost,
-    estimatedCompletionDate,
-    actualCompletionDate,
-    slaDeadline,
-    approvedById,
-    approvedDate,
-    rejectionReason,
-    completionNotes,
-    createdAt,
-    updatedAt,
-  ];
+        id,
+        requestNo,
+        branchId,
+        requestedById,
+        assignedToId,
+        vehicleId,
+        machineId,
+        type,
+        priority,
+        status,
+        title,
+        description,
+        estimatedCost,
+        actualCost,
+        estimatedCompletionDate,
+        actualCompletionDate,
+        slaDeadline,
+        approvedById,
+        approvedDate,
+        rejectionReason,
+        completionNotes,
+        createdAt,
+        updatedAt,
+      ];
 }
 
 // ═══════════════════════════════════════════════════════════════════════════
@@ -179,19 +178,19 @@ class ServiceTaskEntity extends Equatable {
 
   @override
   List<Object?> get props => [
-    id,
-    serviceRequestId,
-    title,
-    description,
-    assignedToId,
-    status,
-    startedAt,
-    completedAt,
-    estimatedHours,
-    actualHours,
-    notes,
-    assignedToName,
-  ];
+        id,
+        serviceRequestId,
+        title,
+        description,
+        assignedToId,
+        status,
+        startedAt,
+        completedAt,
+        estimatedHours,
+        actualHours,
+        notes,
+        assignedToName,
+      ];
 }
 
 // ═══════════════════════════════════════════════════════════════════════════
@@ -223,16 +222,16 @@ class ServiceSparePartEntity extends Equatable {
 
   @override
   List<Object?> get props => [
-    id,
-    serviceRequestId,
-    productId,
-    quantity,
-    unitPrice,
-    totalPrice,
-    status,
-    productName,
-    productCode,
-  ];
+        id,
+        serviceRequestId,
+        productId,
+        quantity,
+        unitPrice,
+        totalPrice,
+        status,
+        productName,
+        productCode,
+      ];
 }
 
 // ═══════════════════════════════════════════════════════════════════════════
@@ -261,11 +260,11 @@ class ServiceSLAMetrics extends Equatable {
 
   @override
   List<Object?> get props => [
-    totalRequests,
-    withinSLA,
-    breachedSLA,
-    avgResolutionHours,
-    pendingCount,
-    criticalCount,
-  ];
+        totalRequests,
+        withinSLA,
+        breachedSLA,
+        avgResolutionHours,
+        pendingCount,
+        criticalCount,
+      ];
 }

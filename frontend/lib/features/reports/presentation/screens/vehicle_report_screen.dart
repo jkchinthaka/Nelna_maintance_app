@@ -97,8 +97,7 @@ class _Body extends StatelessWidget {
         // ── Date Range ────────────────────────────────────────────────
         DateRangeSelector(
           initialRange: range,
-          onChanged: (r) =>
-              ref.read(reportDateRangeProvider.notifier).state = r,
+          onChanged: (r) => ref.read(reportDateRangeProvider.notifier).set(r),
         ),
         const SizedBox(height: 20),
 
@@ -389,7 +388,9 @@ class _Body extends StatelessWidget {
                   children: [
                     Text(
                       '${report.avgFuelEfficiency.toStringAsFixed(1)} km/l',
-                      style: Theme.of(context).textTheme.headlineSmall
+                      style: Theme.of(context)
+                          .textTheme
+                          .headlineSmall
                           ?.copyWith(fontWeight: FontWeight.w700),
                     ),
                     const Text(
