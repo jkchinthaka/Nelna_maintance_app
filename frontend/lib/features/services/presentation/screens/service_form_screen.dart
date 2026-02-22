@@ -41,7 +41,12 @@ class _ServiceFormScreenState extends ConsumerState<ServiceFormScreen> {
   // Dates
   DateTime? _estimatedCompletionDate;
 
-  static const _typeOptions = ['Repair', 'Maintenance', 'Inspection', 'Emergency'];
+  static const _typeOptions = [
+    'Repair',
+    'Maintenance',
+    'Inspection',
+    'Emergency',
+  ];
   static const _priorityOptions = ['Critical', 'High', 'Medium', 'Low'];
 
   @override
@@ -55,16 +60,19 @@ class _ServiceFormScreenState extends ConsumerState<ServiceFormScreen> {
     _estimatedCostCtrl = TextEditingController(
       text: s?.estimatedCost?.toStringAsFixed(2) ?? '',
     );
-    _branchIdCtrl =
-        TextEditingController(text: s?.branchId.toString() ?? '1');
-    _requestedByIdCtrl =
-        TextEditingController(text: s?.requestedById.toString() ?? '');
-    _assignedToIdCtrl =
-        TextEditingController(text: s?.assignedToId?.toString() ?? '');
-    _vehicleIdCtrl =
-        TextEditingController(text: s?.vehicleId?.toString() ?? '');
-    _machineIdCtrl =
-        TextEditingController(text: s?.machineId?.toString() ?? '');
+    _branchIdCtrl = TextEditingController(text: s?.branchId.toString() ?? '1');
+    _requestedByIdCtrl = TextEditingController(
+      text: s?.requestedById.toString() ?? '',
+    );
+    _assignedToIdCtrl = TextEditingController(
+      text: s?.assignedToId?.toString() ?? '',
+    );
+    _vehicleIdCtrl = TextEditingController(
+      text: s?.vehicleId?.toString() ?? '',
+    );
+    _machineIdCtrl = TextEditingController(
+      text: s?.machineId?.toString() ?? '',
+    );
 
     _type = s?.type ?? 'Repair';
     _priority = s?.priority ?? 'Medium';
@@ -116,8 +124,7 @@ class _ServiceFormScreenState extends ConsumerState<ServiceFormScreen> {
       if (_estimatedCostCtrl.text.isNotEmpty)
         'estimatedCost': double.tryParse(_estimatedCostCtrl.text),
       if (_estimatedCompletionDate != null)
-        'estimatedCompletionDate':
-            _estimatedCompletionDate!.toIso8601String(),
+        'estimatedCompletionDate': _estimatedCompletionDate!.toIso8601String(),
     };
 
     final notifier = ref.read(serviceFormProvider.notifier);
@@ -161,7 +168,9 @@ class _ServiceFormScreenState extends ConsumerState<ServiceFormScreen> {
 
     return Scaffold(
       appBar: AppBar(
-        title: Text(_isEditMode ? 'Edit Service Request' : 'New Service Request'),
+        title: Text(
+          _isEditMode ? 'Edit Service Request' : 'New Service Request',
+        ),
         backgroundColor: AppColors.primary,
         foregroundColor: Colors.white,
       ),
@@ -220,8 +229,9 @@ class _ServiceFormScreenState extends ConsumerState<ServiceFormScreen> {
                 border: OutlineInputBorder(),
                 alignLabelWithHint: true,
               ),
-              validator: (v) =>
-                  v == null || v.trim().isEmpty ? 'Description is required' : null,
+              validator: (v) => v == null || v.trim().isEmpty
+                  ? 'Description is required'
+                  : null,
             ),
             const SizedBox(height: 16),
 
@@ -254,8 +264,9 @@ class _ServiceFormScreenState extends ConsumerState<ServiceFormScreen> {
             // ── Estimated Cost ──────────────────────────────────────────
             TextFormField(
               controller: _estimatedCostCtrl,
-              keyboardType:
-                  const TextInputType.numberWithOptions(decimal: true),
+              keyboardType: const TextInputType.numberWithOptions(
+                decimal: true,
+              ),
               decoration: const InputDecoration(
                 labelText: 'Estimated Cost',
                 hintText: '0.00',
@@ -277,8 +288,9 @@ class _ServiceFormScreenState extends ConsumerState<ServiceFormScreen> {
                 ),
                 child: Text(
                   _estimatedCompletionDate != null
-                      ? DateFormat('dd MMM yyyy')
-                          .format(_estimatedCompletionDate!)
+                      ? DateFormat(
+                          'dd MMM yyyy',
+                        ).format(_estimatedCompletionDate!)
                       : 'Select date',
                   style: TextStyle(
                     color: _estimatedCompletionDate != null
@@ -312,8 +324,9 @@ class _ServiceFormScreenState extends ConsumerState<ServiceFormScreen> {
                 border: OutlineInputBorder(),
                 prefixIcon: Icon(Icons.business_outlined),
               ),
-              validator: (v) =>
-                  v == null || v.trim().isEmpty ? 'Branch ID is required' : null,
+              validator: (v) => v == null || v.trim().isEmpty
+                  ? 'Branch ID is required'
+                  : null,
             ),
             const SizedBox(height: 32),
 
@@ -427,10 +440,7 @@ class _ServiceFormScreenState extends ConsumerState<ServiceFormScreen> {
               : CircleAvatar(
                   backgroundColor: colors[p]!.withOpacity(0.2),
                   radius: 6,
-                  child: CircleAvatar(
-                    backgroundColor: colors[p],
-                    radius: 4,
-                  ),
+                  child: CircleAvatar(backgroundColor: colors[p], radius: 4),
                 ),
           onSelected: (val) {
             if (val) setState(() => _priority = p);
