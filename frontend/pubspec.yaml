@@ -49,13 +49,6 @@ dependencies:
   path_provider: ^2.1.2
   open_file: ^3.3.2
   
-  # Barcode
-  flutter_barcode_scanner: ^2.0.0
-  
-  # Notifications
-  firebase_messaging: ^14.7.20
-  flutter_local_notifications: ^17.0.0
-  
   # Image
   image_picker: ^1.0.7
 
@@ -77,8 +70,3 @@ flutter:
     - assets/images/
     - assets/icons/
     - assets/fonts/
-  
-  fonts:
-    - family: NelnaIcons
-      fonts:
-        - asset: assets/fonts/NelnaIcons.ttf
