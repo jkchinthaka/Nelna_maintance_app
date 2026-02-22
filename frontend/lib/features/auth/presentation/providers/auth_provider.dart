@@ -109,53 +109,14 @@ class AuthNotifier extends Notifier<AuthState> {
     );
   }
 
-  /// Perform email + password login.
-  /// Falls back to demo mode if the backend is unreachable.
+  /// Perform email + password login against the real backend.
   Future<void> login(String email, String password) async {
     state = const AuthLoading();
 
     final result = await _loginUseCase(email: email, password: password);
     result.fold(
-      (failure) {
-        // If network / server error, offer demo login automatically
-        _loginAsDemo(email);
-      },
+      (failure) => state = AuthError(failure.message),
       (authResult) => state = AuthAuthenticated(authResult.user),
-    );
-  }
-
-  /// Demo login — creates a fake user so the UI is explorable
-  /// without a running backend.
-  void _loginAsDemo(String email) {
-    state = AuthAuthenticated(
-      UserEntity(
-        id: 1,
-        companyId: 1,
-        branchId: 1,
-        roleId: 1,
-        employeeId: 'EMP001',
-        firstName: 'Demo',
-        lastName: 'User',
-        email: email,
-        phone: '+94 77 123 4567',
-        isActive: true,
-        lastLoginAt: DateTime.now(),
-        role: const RoleEntity(
-          id: 1,
-          name: 'super_admin',
-          displayName: 'Super Admin',
-        ),
-        company: const CompanyEntity(
-          id: 1,
-          name: 'Nelna Company',
-          code: 'NELNA',
-        ),
-        branch: const BranchEntity(
-          id: 1,
-          name: 'Head Office',
-          code: 'HO',
-        ),
-      ),
     );
   }
 
