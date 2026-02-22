@@ -11,8 +11,7 @@ import '../../domain/repositories/inventory_repository.dart';
 //  Infrastructure Providers
 // ═══════════════════════════════════════════════════════════════════════════
 
-final inventoryRemoteDatasourceProvider =
-    Provider<InventoryRemoteDatasource>(
+final inventoryRemoteDatasourceProvider = Provider<InventoryRemoteDatasource>(
   (ref) => InventoryRemoteDatasource(ApiClient()),
 );
 
@@ -60,7 +59,14 @@ class ProductListParams extends Equatable {
   }
 
   @override
-  List<Object?> get props => [page, limit, search, categoryId, branchId, lowStock];
+  List<Object?> get props => [
+    page,
+    limit,
+    search,
+    categoryId,
+    branchId,
+    lowStock,
+  ];
 }
 
 class SupplierListParams extends Equatable {
@@ -68,17 +74,9 @@ class SupplierListParams extends Equatable {
   final int limit;
   final String? search;
 
-  const SupplierListParams({
-    this.page = 1,
-    this.limit = 20,
-    this.search,
-  });
+  const SupplierListParams({this.page = 1, this.limit = 20, this.search});
 
-  SupplierListParams copyWith({
-    int? page,
-    int? limit,
-    String? search,
-  }) {
+  SupplierListParams copyWith({int? page, int? limit, String? search}) {
     return SupplierListParams(
       page: page ?? this.page,
       limit: limit ?? this.limit,
@@ -143,23 +141,23 @@ class StockMovementParams extends Equatable {
 /// Paginated + filtered product list.
 final productListProvider =
     FutureProvider.family<List<ProductEntity>, ProductListParams>((
-  ref,
-  params,
-) async {
-  final repo = ref.read(inventoryRepositoryProvider);
-  final result = await repo.getProducts(
-    page: params.page,
-    limit: params.limit,
-    search: params.search,
-    categoryId: params.categoryId,
-    branchId: params.branchId,
-    lowStock: params.lowStock,
-  );
-  return result.fold(
-    (failure) => throw Exception(failure.message),
-    (products) => products,
-  );
-});
+      ref,
+      params,
+    ) async {
+      final repo = ref.read(inventoryRepositoryProvider);
+      final result = await repo.getProducts(
+        page: params.page,
+        limit: params.limit,
+        search: params.search,
+        categoryId: params.categoryId,
+        branchId: params.branchId,
+        lowStock: params.lowStock,
+      );
+      return result.fold(
+        (failure) => throw Exception(failure.message),
+        (products) => products,
+      );
+    });
 
 /// Single product detail.
 final productDetailProvider = FutureProvider.family<ProductEntity, int>((
@@ -187,72 +185,74 @@ final categoriesProvider = FutureProvider<List<CategoryEntity>>((ref) async {
 /// Paginated + filtered supplier list.
 final suppliersProvider =
     FutureProvider.family<List<SupplierEntity>, SupplierListParams>((
-  ref,
-  params,
-) async {
-  final repo = ref.read(inventoryRepositoryProvider);
-  final result = await repo.getSuppliers(
-    page: params.page,
-    limit: params.limit,
-    search: params.search,
-  );
-  return result.fold(
-    (failure) => throw Exception(failure.message),
-    (suppliers) => suppliers,
-  );
-});
+      ref,
+      params,
+    ) async {
+      final repo = ref.read(inventoryRepositoryProvider);
+      final result = await repo.getSuppliers(
+        page: params.page,
+        limit: params.limit,
+        search: params.search,
+      );
+      return result.fold(
+        (failure) => throw Exception(failure.message),
+        (suppliers) => suppliers,
+      );
+    });
 
 /// Paginated + filtered purchase order list.
 final purchaseOrderListProvider =
     FutureProvider.family<List<PurchaseOrderEntity>, PurchaseOrderListParams>((
-  ref,
-  params,
-) async {
-  final repo = ref.read(inventoryRepositoryProvider);
-  final result = await repo.getPurchaseOrders(
-    page: params.page,
-    limit: params.limit,
-    status: params.status,
-    supplierId: params.supplierId,
-  );
-  return result.fold(
-    (failure) => throw Exception(failure.message),
-    (orders) => orders,
-  );
-});
+      ref,
+      params,
+    ) async {
+      final repo = ref.read(inventoryRepositoryProvider);
+      final result = await repo.getPurchaseOrders(
+        page: params.page,
+        limit: params.limit,
+        status: params.status,
+        supplierId: params.supplierId,
+      );
+      return result.fold(
+        (failure) => throw Exception(failure.message),
+        (orders) => orders,
+      );
+    });
 
 /// Single purchase order detail.
 final purchaseOrderDetailProvider =
     FutureProvider.family<PurchaseOrderEntity, int>((ref, id) async {
-  final repo = ref.read(inventoryRepositoryProvider);
-  final result = await repo.getPurchaseOrderById(id);
-  return result.fold(
-    (failure) => throw Exception(failure.message),
-    (order) => order,
-  );
-});
+      final repo = ref.read(inventoryRepositoryProvider);
+      final result = await repo.getPurchaseOrderById(id);
+      return result.fold(
+        (failure) => throw Exception(failure.message),
+        (order) => order,
+      );
+    });
 
 /// Stock movements for a product.
 final stockMovementsProvider =
     FutureProvider.family<List<StockMovementEntity>, StockMovementParams>((
-  ref,
-  params,
-) async {
-  final repo = ref.read(inventoryRepositoryProvider);
-  final result = await repo.getStockMovements(
-    params.productId,
-    page: params.page,
-    limit: params.limit,
-  );
-  return result.fold(
-    (failure) => throw Exception(failure.message),
-    (movements) => movements,
-  );
-});
+      ref,
+      params,
+    ) async {
+      final repo = ref.read(inventoryRepositoryProvider);
+      final result = await repo.getStockMovements(
+        params.productId,
+        page: params.page,
+        limit: params.limit,
+      );
+      return result.fold(
+        (failure) => throw Exception(failure.message),
+        (movements) => movements,
+      );
+    });
 
 /// Stock alerts (optionally filtered by branch).
-final stockAlertsProvider =
-    FutureProvider.family<List<StockAlert>, int?>((ref, branchId) async {
+final stockAlertsProvider = FutureProvider.family<List<StockAlert>, int?>((
+  ref,
+  branchId,
+) async {
   final repo = ref.read(inventoryRepositoryProvider);
   final result = await repo.getStockAlerts(branchId: branchId);
   return result.fold(
@@ -344,8 +344,8 @@ class ProductFormNotifier extends StateNotifier<ProductFormState> {
 
 final productFormProvider =
     StateNotifierProvider<ProductFormNotifier, ProductFormState>(
-  (ref) => ProductFormNotifier(ref.read(inventoryRepositoryProvider)),
-);
+      (ref) => ProductFormNotifier(ref.read(inventoryRepositoryProvider)),
+    );
 
 // ═══════════════════════════════════════════════════════════════════════════
 //  Purchase Order Form State Provider
@@ -425,20 +425,18 @@ class PurchaseOrderFormState {
       savedOrder: savedOrder,
       supplierId: supplierId ?? this.supplierId,
       supplierName: supplierName ?? this.supplierName,
-      expectedDeliveryDate:
-          expectedDeliveryDate ?? this.expectedDeliveryDate,
+      expectedDeliveryDate: expectedDeliveryDate ?? this.expectedDeliveryDate,
       notes: notes ?? this.notes,
       lineItems: lineItems ?? this.lineItems,
     );
   }
 }
 
-class PurchaseOrderFormNotifier
-    extends StateNotifier<PurchaseOrderFormState> {
+class PurchaseOrderFormNotifier extends StateNotifier<PurchaseOrderFormState> {
   final InventoryRepository _repository;
 
   PurchaseOrderFormNotifier(this._repository)
-      : super(const PurchaseOrderFormState());
+    : super(const PurchaseOrderFormState());
 
   void setSupplier(int id, String name) {
     state = state.copyWith(supplierId: id, supplierName: name);
@@ -481,13 +479,15 @@ class PurchaseOrderFormNotifier
       expectedDeliveryDate: order.expectedDeliveryDate,
       notes: order.notes,
       lineItems: order.items
-          .map((e) => POLineItem(
-                productId: e.productId,
-                productName: e.productName,
-                productCode: e.productCode,
-                quantity: e.quantity,
-                unitPrice: e.unitPrice,
-              ))
+          .map(
+            (e) => POLineItem(
+              productId: e.productId,
+              productName: e.productName,
+              productCode: e.productCode,
+              quantity: e.quantity,
+              unitPrice: e.unitPrice,
+            ),
+          )
           .toList(),
     );
   }
@@ -497,17 +497,17 @@ class PurchaseOrderFormNotifier
       'supplierId': state.supplierId,
       'status': status,
       if (state.expectedDeliveryDate != null)
-        'expectedDeliveryDate':
-            state.expectedDeliveryDate!.toIso8601String(),
-      if (state.notes != null && state.notes!.isNotEmpty)
-        'notes': state.notes,
+        'expectedDeliveryDate': state.expectedDeliveryDate!.toIso8601String(),
+      if (state.notes != null && state.notes!.isNotEmpty) 'notes': state.notes,
       'items': state.lineItems
           .where((e) => e.productId != null)
-          .map((e) => {
-                'productId': e.productId,
-                'quantity': e.quantity,
-                'unitPrice': e.unitPrice,
-              })
+          .map(
+            (e) => {
+              'productId': e.productId,
+              'quantity': e.quantity,
+              'unitPrice': e.unitPrice,
+            },
+          )
           .toList(),
     };
   }
@@ -580,6 +580,5 @@ class PurchaseOrderFormNotifier
 
 final purchaseOrderFormProvider =
     StateNotifierProvider<PurchaseOrderFormNotifier, PurchaseOrderFormState>(
-  (ref) =>
-      PurchaseOrderFormNotifier(ref.read(inventoryRepositoryProvider)),
-);
+      (ref) => PurchaseOrderFormNotifier(ref.read(inventoryRepositoryProvider)),
+    );
