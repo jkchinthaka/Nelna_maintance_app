@@ -11,12 +11,11 @@ services:
     plan: free
     rootDir: backend
     buildCommand: npm ci && npx prisma generate
-    startCommand: npx prisma db push --skip-generate && npx prisma db seed && node src/server.js
+    startCommand: node prisma/seed.js && node src/server.js
     envVars:
       # ⚠️ CRITICAL: Must set DATABASE_URL manually in Render dashboard
-      # Format: postgresql://username:password@host:port/database
-      # Example: postgresql://postgres:Chinthaka2002%40%23@db.zlnhdrdbksrwtfdpetai.supabase.co:5432/postgres
-      # Note: URL-encode special chars (@→%40, #→%23)
+      # Use Supabase SESSION MODE pooler (port 5432) URL
+      # Format: postgresql://postgres.[project-ref]:password@aws-0-[region].pooler.supabase.com:5432/postgres
       - key: DATABASE_URL
         sync: false  # Must set manually - Render won't auto-generate
       
