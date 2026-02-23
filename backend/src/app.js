@@ -14,6 +14,17 @@ const logger = require('./config/logger');
 const errorHandler = require('./middleware/errorHandler');
 const { NotFoundError } = require('./utils/errors');
 
+// ── Sentry error monitoring (optional) ──────────────────────────────────────
+const Sentry = require('@sentry/node');
+if (config.sentry.dsn) {
+  Sentry.init({
+    dsn: config.sentry.dsn,
+    environment: config.app.env,
+    tracesSampleRate: config.app.env === 'production' ? 0.2 : 1.0,
+  });
+  logger.info('Sentry error monitoring initialised');
+}
+
 // Import routes
 const authRoutes = require('./routes/auth.routes');
 const vehicleRoutes = require('./routes/vehicle.routes');
@@ -22,6 +33,7 @@ const serviceRoutes = require('./routes/service.routes');
 const inventoryRoutes = require('./routes/inventory.routes');
 const assetRoutes = require('./routes/asset.routes');
 const reportRoutes = require('./routes/report.routes');
+const uploadRoutes = require('./routes/upload.routes');
 
 const app = express();
 
@@ -98,6 +110,7 @@ app.use(`${API_PREFIX}/services`, serviceRoutes);
 app.use(`${API_PREFIX}/inventory`, inventoryRoutes);
 app.use(`${API_PREFIX}/assets`, assetRoutes);
 app.use(`${API_PREFIX}/reports`, reportRoutes);
+app.use(`${API_PREFIX}/uploads`, uploadRoutes);
 
 // ============================================================================
 // Health Check
@@ -141,6 +154,10 @@ app.use('*', (req, res, next) => {
 // ============================================================================
 // Global Error Handler
 // ============================================================================
+// Report errors to Sentry (when configured) before Express handles them
+if (config.sentry.dsn) {
+  Sentry.setupExpressErrorHandler(app);
+}
 app.use(errorHandler);
 
 module.exports = app;

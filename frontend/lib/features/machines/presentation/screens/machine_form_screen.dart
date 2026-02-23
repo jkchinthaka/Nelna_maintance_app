@@ -36,6 +36,7 @@ class _MachineFormScreenState extends ConsumerState<MachineFormScreen> {
 
   String _selectedStatus = 'ACTIVE';
   String _selectedType = 'Production';
+  int _selectedBranchId = 1;
   DateTime? _purchaseDate;
   DateTime? _nextMaintenanceDate;
 
@@ -54,6 +55,11 @@ class _MachineFormScreenState extends ConsumerState<MachineFormScreen> {
     'Transport',
     'Quality Control',
   ];
+
+  static const _branchOptions = <int, String>{
+    1: 'Head Office',
+    2: 'Factory Branch',
+  };
 
   @override
   void initState() {
@@ -79,6 +85,7 @@ class _MachineFormScreenState extends ConsumerState<MachineFormScreen> {
     if (m != null) {
       _selectedStatus = m.status;
       _selectedType = m.type;
+      _selectedBranchId = m.branchId;
       _purchaseDate = m.purchaseDate;
       _nextMaintenanceDate = m.nextMaintenanceDate;
     }
@@ -118,7 +125,7 @@ class _MachineFormScreenState extends ConsumerState<MachineFormScreen> {
     if (!_formKey.currentState!.validate()) return;
 
     final data = <String, dynamic>{
-      'branchId': 1, // TODO: replace with real branch selector
+      'branchId': _selectedBranchId,
       'name': _nameCtrl.text.trim(),
       'code': _codeCtrl.text.trim(),
       'type': _selectedType,
@@ -257,6 +264,23 @@ class _MachineFormScreenState extends ConsumerState<MachineFormScreen> {
                   .toList(),
               onChanged: (v) {
                 if (v != null) setState(() => _selectedType = v);
+              },
+            ),
+            const SizedBox(height: 16),
+
+            // Branch dropdown
+            DropdownButtonFormField<int>(
+              value: _selectedBranchId,
+              decoration: _inputDecoration('Branch *'),
+              items: _branchOptions.entries
+                  .map((e) => DropdownMenuItem(
+                        value: e.key,
+                        child: Text(e.value),
+                      ))
+                  .toList(),
+              validator: (v) => v == null ? 'Branch is required' : null,
+              onChanged: (v) {
+                if (v != null) setState(() => _selectedBranchId = v);
               },
             ),
             const SizedBox(height: 24),

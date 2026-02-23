@@ -1,7 +1,9 @@
+import '../config/app_config.dart';
+
 class ApiConstants {
-  // Use 10.0.2.2 for Android emulator (maps to host machine's localhost).
-  // Replace with your machine's LAN IP (e.g. 192.168.x.x) for physical devices.
-  static const String baseUrl = 'http://10.0.2.2:3000/api/v1';
+  // Base URL is now driven by environment config (dev / staging / prod).
+  // Override at compile-time: flutter run --dart-define=ENV=dev
+  static String get baseUrl => AppConfig.baseUrl;
   static const String login = '/auth/login';
   static const String register = '/auth/register';
   static const String refreshToken = '/auth/refresh-token';

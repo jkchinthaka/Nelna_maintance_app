@@ -6,6 +6,7 @@ import '../widgets/app_scaffold.dart';
 
 // ── Screen imports ────────────────────────────────────────────────────
 import '../../features/auth/presentation/screens/login_screen.dart';
+import '../../features/auth/presentation/screens/register_screen.dart';
 import '../../features/auth/presentation/providers/auth_provider.dart';
 import '../../features/dashboard/presentation/screens/dashboard_screen.dart';
 import '../../features/vehicles/presentation/screens/vehicle_list_screen.dart';
@@ -34,6 +35,7 @@ import '../../features/reports/presentation/screens/reports_home_screen.dart';
 import '../../features/reports/presentation/screens/maintenance_report_screen.dart';
 import '../../features/reports/presentation/screens/vehicle_report_screen.dart';
 import '../../features/reports/presentation/screens/expense_report_screen.dart';
+import '../../features/reports/presentation/screens/inventory_report_screen.dart';
 
 // ── Router Provider ───────────────────────────────────────────────────
 final appRouterProvider = Provider<GoRouter>((ref) {
@@ -45,9 +47,10 @@ final appRouterProvider = Provider<GoRouter>((ref) {
     debugLogDiagnostics: true,
     redirect: (context, state) {
       final loggingIn = state.matchedLocation == '/login';
+      final registering = state.matchedLocation == '/register';
 
-      if (!isAuthenticated && !loggingIn) return '/login';
-      if (isAuthenticated && loggingIn) return '/dashboard';
+      if (!isAuthenticated && !loggingIn && !registering) return '/login';
+      if (isAuthenticated && (loggingIn || registering)) return '/dashboard';
       return null;
     },
     routes: [
@@ -56,6 +59,13 @@ final appRouterProvider = Provider<GoRouter>((ref) {
         path: '/login',
         name: 'login',
         builder: (context, state) => const LoginScreen(),
+      ),
+
+      // ── Register (no shell) ─────────────────────────────────────────
+      GoRoute(
+        path: '/register',
+        name: 'register',
+        builder: (context, state) => const RegisterScreen(),
       ),
 
       // ── Main Shell with sidebar + app bar ───────────────────────────
@@ -268,8 +278,7 @@ final appRouterProvider = Provider<GoRouter>((ref) {
               GoRoute(
                 path: 'inventory',
                 name: 'report-inventory',
-                builder: (context, state) =>
-                    const _PlaceholderScreen(title: 'Inventory Report'),
+                builder: (context, state) => const InventoryReportScreen(),
               ),
             ],
           ),

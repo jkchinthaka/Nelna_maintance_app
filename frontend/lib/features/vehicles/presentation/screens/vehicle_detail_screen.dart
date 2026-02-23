@@ -9,6 +9,8 @@ import '../../../../core/widgets/loading_widget.dart';
 import '../../../../core/widgets/status_badge.dart';
 import '../../domain/entities/vehicle_entity.dart';
 import '../providers/vehicle_provider.dart';
+import '../widgets/document_upload_form.dart';
+import '../widgets/driver_assign_form.dart';
 import '../widgets/fuel_log_form.dart';
 
 /// Detailed view for a single vehicle with tabbed sections:
@@ -301,15 +303,15 @@ class _VehicleDetailScreenState extends ConsumerState<VehicleDetailScreen>
               backgroundColor: doc.isExpired
                   ? AppColors.error.withOpacity(0.1)
                   : doc.isExpiringSoon
-                  ? AppColors.warning.withOpacity(0.1)
-                  : AppColors.success.withOpacity(0.1),
+                      ? AppColors.warning.withOpacity(0.1)
+                      : AppColors.success.withOpacity(0.1),
               child: Icon(
                 Icons.description,
                 color: doc.isExpired
                     ? AppColors.error
                     : doc.isExpiringSoon
-                    ? AppColors.warning
-                    : AppColors.success,
+                        ? AppColors.warning
+                        : AppColors.success,
               ),
             ),
             title: Text(doc.type.replaceAll('_', ' ')),
@@ -320,8 +322,8 @@ class _VehicleDetailScreenState extends ConsumerState<VehicleDetailScreen>
             trailing: doc.isExpired
                 ? const StatusBadge(status: 'EXPIRED')
                 : doc.isExpiringSoon
-                ? const StatusBadge(status: 'EXPIRING')
-                : const StatusBadge(status: 'ACTIVE'),
+                    ? const StatusBadge(status: 'EXPIRING')
+                    : const StatusBadge(status: 'ACTIVE'),
           ),
         );
       },
@@ -582,8 +584,8 @@ class _VehicleDetailScreenState extends ConsumerState<VehicleDetailScreen>
                     color: isExpired
                         ? AppColors.error
                         : warn
-                        ? AppColors.warning
-                        : null,
+                            ? AppColors.warning
+                            : null,
                   ),
                 ),
               ],
@@ -632,15 +634,35 @@ class _VehicleDetailScreenState extends ConsumerState<VehicleDetailScreen>
         );
         break;
       case 'document':
-        // TODO: implement document form bottom sheet
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Document form coming soon')),
+        showModalBottomSheet(
+          context: context,
+          isScrollControlled: true,
+          shape: const RoundedRectangleBorder(
+            borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+          ),
+          builder: (_) => DocumentUploadForm(
+            vehicleId: vehicle.id,
+            onSaved: () {
+              ref.invalidate(vehicleDetailProvider(widget.vehicleId));
+              Navigator.of(context).pop();
+            },
+          ),
         );
         break;
       case 'driver':
-        // TODO: implement driver assignment bottom sheet
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Driver assignment coming soon')),
+        showModalBottomSheet(
+          context: context,
+          isScrollControlled: true,
+          shape: const RoundedRectangleBorder(
+            borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+          ),
+          builder: (_) => DriverAssignForm(
+            vehicleId: vehicle.id,
+            onSaved: () {
+              ref.invalidate(vehicleDetailProvider(widget.vehicleId));
+              Navigator.of(context).pop();
+            },
+          ),
         );
         break;
     }

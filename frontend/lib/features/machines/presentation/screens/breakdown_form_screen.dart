@@ -1,9 +1,13 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:image_picker/image_picker.dart';
 import 'package:intl/intl.dart';
 
 import '../../../../core/theme/app_colors.dart';
+import '../../domain/entities/machine_entity.dart';
 import '../providers/machine_provider.dart';
 
 /// Form for reporting a machine breakdown.
@@ -35,6 +39,9 @@ class _BreakdownFormScreenState extends ConsumerState<BreakdownFormScreen> {
   // Placeholder for machine selection (use pre-selected if provided)
   int? _machineId;
   String? _machineName;
+
+  final List<XFile> _selectedImages = [];
+  final ImagePicker _imagePicker = ImagePicker();
 
   static const _severityOptions = ['Critical', 'High', 'Medium', 'Low'];
 
@@ -218,13 +225,7 @@ class _BreakdownFormScreenState extends ConsumerState<BreakdownFormScreen> {
             else
               // Machine selector (when not pre-selected)
               InkWell(
-                onTap: () async {
-                  // TODO: Navigate to machine picker / search screen
-                  // For now, show a message
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(content: Text('Machine picker coming soon')),
-                  );
-                },
+                onTap: () => _showMachinePickerDialog(),
                 child: InputDecorator(
                   decoration: _inputDecoration('Select Machine *'),
                   child: Text(
@@ -340,10 +341,60 @@ class _BreakdownFormScreenState extends ConsumerState<BreakdownFormScreen> {
             ),
             const SizedBox(height: 24),
 
-            // ── Photo Upload Placeholder ──────────────────────────────
+            // ── Photo Upload ──────────────────────────────────────────
             _sectionLabel('Attachments'),
             const SizedBox(height: 12),
 
+            // Selected images preview
+            if (_selectedImages.isNotEmpty) ...[
+              SizedBox(
+                height: 100,
+                child: ListView.separated(
+                  scrollDirection: Axis.horizontal,
+                  itemCount: _selectedImages.length,
+                  separatorBuilder: (_, __) => const SizedBox(width: 8),
+                  itemBuilder: (ctx, i) {
+                    return Stack(
+                      children: [
+                        ClipRRect(
+                          borderRadius: BorderRadius.circular(10),
+                          child: Image.file(
+                            File(_selectedImages[i].path),
+                            width: 100,
+                            height: 100,
+                            fit: BoxFit.cover,
+                          ),
+                        ),
+                        Positioned(
+                          top: 4,
+                          right: 4,
+                          child: GestureDetector(
+                            onTap: () {
+                              setState(() => _selectedImages.removeAt(i));
+                            },
+                            child: Container(
+                              padding: const EdgeInsets.all(2),
+                              decoration: const BoxDecoration(
+                                color: AppColors.error,
+                                shape: BoxShape.circle,
+                              ),
+                              child: const Icon(
+                                Icons.close,
+                                size: 16,
+                                color: Colors.white,
+                              ),
+                            ),
+                          ),
+                        ),
+                      ],
+                    );
+                  },
+                ),
+              ),
+              const SizedBox(height: 12),
+            ],
+
+            // Add photo button
             Container(
               height: 120,
               decoration: BoxDecoration(
@@ -355,12 +406,7 @@ class _BreakdownFormScreenState extends ConsumerState<BreakdownFormScreen> {
                 color: AppColors.surface,
               ),
               child: InkWell(
-                onTap: () {
-                  // TODO: Implement image picker via image_picker package
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(content: Text('Photo upload coming soon')),
-                  );
-                },
+                onTap: _pickImages,
                 borderRadius: BorderRadius.circular(12),
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
@@ -372,7 +418,9 @@ class _BreakdownFormScreenState extends ConsumerState<BreakdownFormScreen> {
                     ),
                     const SizedBox(height: 8),
                     Text(
-                      'Tap to attach photos',
+                      _selectedImages.isEmpty
+                          ? 'Tap to attach photos'
+                          : 'Tap to add more photos (${_selectedImages.length} selected)',
                       style: TextStyle(
                         color: AppColors.textSecondary,
                         fontSize: 14,
@@ -423,6 +471,64 @@ class _BreakdownFormScreenState extends ConsumerState<BreakdownFormScreen> {
 
   // ── Helpers ─────────────────────────────────────────────────────────────
 
+  Future<void> _pickImages() async {
+    final source = await showModalBottomSheet<ImageSource>(
+      context: context,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
+      ),
+      builder: (ctx) => SafeArea(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            ListTile(
+              leading: const Icon(Icons.camera_alt, color: AppColors.primary),
+              title: const Text('Take Photo'),
+              onTap: () => Navigator.pop(ctx, ImageSource.camera),
+            ),
+            ListTile(
+              leading:
+                  const Icon(Icons.photo_library, color: AppColors.primary),
+              title: const Text('Choose from Gallery'),
+              onTap: () => Navigator.pop(ctx, ImageSource.gallery),
+            ),
+          ],
+        ),
+      ),
+    );
+
+    if (source == null) return;
+
+    if (source == ImageSource.gallery) {
+      final images = await _imagePicker.pickMultiImage(imageQuality: 80);
+      if (images.isNotEmpty) {
+        setState(() => _selectedImages.addAll(images));
+      }
+    } else {
+      final image = await _imagePicker.pickImage(
+        source: ImageSource.camera,
+        imageQuality: 80,
+      );
+      if (image != null) {
+        setState(() => _selectedImages.add(image));
+      }
+    }
+  }
+
+  void _showMachinePickerDialog() {
+    showDialog(
+      context: context,
+      builder: (ctx) => _MachinePickerDialog(
+        onSelected: (machine) {
+          setState(() {
+            _machineId = machine.id;
+            _machineName = machine.name;
+          });
+        },
+      ),
+    );
+  }
+
   InputDecoration _inputDecoration(String label) {
     return InputDecoration(
       labelText: label,
@@ -452,6 +558,98 @@ class _BreakdownFormScreenState extends ConsumerState<BreakdownFormScreen> {
         fontWeight: FontWeight.bold,
         color: AppColors.textPrimary,
       ),
+    );
+  }
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+//  Machine Picker Dialog
+// ═══════════════════════════════════════════════════════════════════════════
+
+class _MachinePickerDialog extends ConsumerStatefulWidget {
+  final ValueChanged<MachineEntity> onSelected;
+
+  const _MachinePickerDialog({required this.onSelected});
+
+  @override
+  ConsumerState<_MachinePickerDialog> createState() =>
+      _MachinePickerDialogState();
+}
+
+class _MachinePickerDialogState extends ConsumerState<_MachinePickerDialog> {
+  String _search = '';
+
+  @override
+  Widget build(BuildContext context) {
+    final params = MachineListParams(
+      limit: 50,
+      search: _search.isNotEmpty ? _search : null,
+      status: 'ACTIVE',
+    );
+    final machinesAsync = ref.watch(machineListProvider(params));
+
+    return AlertDialog(
+      title: const Text('Select Machine'),
+      content: SizedBox(
+        width: double.maxFinite,
+        height: 400,
+        child: Column(
+          children: [
+            TextField(
+              decoration: InputDecoration(
+                hintText: 'Search machines...',
+                prefixIcon: const Icon(Icons.search),
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(10),
+                ),
+                isDense: true,
+              ),
+              onChanged: (v) => setState(() => _search = v),
+            ),
+            const SizedBox(height: 12),
+            Expanded(
+              child: machinesAsync.when(
+                loading: () => const Center(child: CircularProgressIndicator()),
+                error: (err, _) => Center(
+                  child: Text('Error: $err',
+                      style: const TextStyle(color: AppColors.error)),
+                ),
+                data: (machines) {
+                  if (machines.isEmpty) {
+                    return const Center(child: Text('No machines found'));
+                  }
+                  return ListView.separated(
+                    itemCount: machines.length,
+                    separatorBuilder: (_, __) => const Divider(height: 1),
+                    itemBuilder: (ctx, i) {
+                      final m = machines[i];
+                      return ListTile(
+                        leading: const Icon(Icons.precision_manufacturing,
+                            color: AppColors.primary),
+                        title: Text(m.name,
+                            style:
+                                const TextStyle(fontWeight: FontWeight.w600)),
+                        subtitle: Text(m.code),
+                        dense: true,
+                        onTap: () {
+                          widget.onSelected(m);
+                          Navigator.of(context).pop();
+                        },
+                      );
+                    },
+                  );
+                },
+              ),
+            ),
+          ],
+        ),
+      ),
+      actions: [
+        TextButton(
+          onPressed: () => Navigator.of(context).pop(),
+          child: const Text('Cancel'),
+        ),
+      ],
     );
   }
 }

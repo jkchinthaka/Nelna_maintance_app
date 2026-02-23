@@ -10,6 +10,7 @@ import '../../domain/repositories/auth_repository.dart';
 import '../../domain/usecases/get_profile_usecase.dart';
 import '../../domain/usecases/login_usecase.dart';
 import '../../domain/usecases/logout_usecase.dart';
+import '../../domain/usecases/register_usecase.dart';
 
 // ── Infrastructure Providers ──────────────────────────────────────────
 
@@ -44,6 +45,10 @@ final logoutUseCaseProvider = Provider<LogoutUseCase>(
 
 final getProfileUseCaseProvider = Provider<GetProfileUseCase>(
   (ref) => GetProfileUseCase(ref.read(authRepositoryProvider)),
+);
+
+final registerUseCaseProvider = Provider<RegisterUseCase>(
+  (ref) => RegisterUseCase(ref.read(authRepositoryProvider)),
 );
 
 // ── Auth State ────────────────────────────────────────────────────────
@@ -81,6 +86,7 @@ class AuthNotifier extends Notifier<AuthState> {
   late final LoginUseCase _loginUseCase;
   late final LogoutUseCase _logoutUseCase;
   late final GetProfileUseCase _getProfileUseCase;
+  late final RegisterUseCase _registerUseCase;
   late final AuthRepository _authRepository;
 
   @override
@@ -88,6 +94,7 @@ class AuthNotifier extends Notifier<AuthState> {
     _loginUseCase = ref.read(loginUseCaseProvider);
     _logoutUseCase = ref.read(logoutUseCaseProvider);
     _getProfileUseCase = ref.read(getProfileUseCaseProvider);
+    _registerUseCase = ref.read(registerUseCaseProvider);
     _authRepository = ref.read(authRepositoryProvider);
     return const AuthInitial();
   }
@@ -114,6 +121,17 @@ class AuthNotifier extends Notifier<AuthState> {
     state = const AuthLoading();
 
     final result = await _loginUseCase(email: email, password: password);
+    result.fold(
+      (failure) => state = AuthError(failure.message),
+      (authResult) => state = AuthAuthenticated(authResult.user),
+    );
+  }
+
+  /// Register a new user account.
+  Future<void> register(RegisterParams params) async {
+    state = const AuthLoading();
+
+    final result = await _registerUseCase(params);
     result.fold(
       (failure) => state = AuthError(failure.message),
       (authResult) => state = AuthAuthenticated(authResult.user),

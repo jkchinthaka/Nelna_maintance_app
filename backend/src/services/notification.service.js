@@ -4,6 +4,8 @@
 const prisma = require('../config/database');
 const { NotFoundError, BadRequestError } = require('../utils/errors');
 const { parsePagination } = require('../utils/helpers');
+const { getMessaging } = require('../config/firebase');
+const logger = require('../config/logger');
 
 class NotificationService {
   /**
@@ -37,10 +39,10 @@ class NotificationService {
       },
     });
 
-    // TODO: Integrate push notification (FCM) here if user.fcmToken is available
-    // if (user.fcmToken) {
-    //   await this._sendPushNotification(user.fcmToken, title, body, data);
-    // }
+    // Send push notification via FCM if the user has a token
+    if (user.fcmToken) {
+      await this._sendPushNotification(user.fcmToken, title, body, data);
+    }
 
     return notification;
   }
@@ -311,14 +313,50 @@ class NotificationService {
   // ==========================================================================
 
   /**
-   * Send push notification via FCM (placeholder)
+   * Send push notification via Firebase Cloud Messaging.
+   * Silently no-ops when Firebase is not configured.
    * @private
    */
-  // async _sendPushNotification(fcmToken, title, body, data) {
-  //   // Integrate with Firebase Admin SDK
-  //   // const message = { notification: { title, body }, data, token: fcmToken };
-  //   // await admin.messaging().send(message);
-  // }
+  async _sendPushNotification(fcmToken, title, body, data) {
+    const messaging = getMessaging();
+    if (!messaging) return; // Firebase not configured
+
+    try {
+      const message = {
+        notification: { title, body },
+        data: data
+          ? Object.fromEntries(
+              Object.entries(data).map(([k, v]) => [k, String(v)])
+            )
+          : {},
+        token: fcmToken,
+        android: {
+          priority: 'high',
+          notification: { channelId: 'nelna_maintenance' },
+        },
+        apns: {
+          payload: { aps: { sound: 'default', badge: 1 } },
+        },
+      };
+
+      const messageId = await messaging.send(message);
+      logger.info(`FCM push sent – messageId: ${messageId}`);
+    } catch (error) {
+      // If the token is invalid, clear it from the user record
+      if (
+        error.code === 'messaging/invalid-registration-token' ||
+        error.code === 'messaging/registration-token-not-registered'
+      ) {
+        logger.warn(`Invalid FCM token detected, clearing: ${fcmToken}`);
+        await prisma.user.updateMany({
+          where: { fcmToken },
+          data: { fcmToken: null },
+        });
+      } else {
+        logger.error('FCM push failed:', error);
+      }
+    }
+  }
 }
 
 module.exports = new NotificationService();
