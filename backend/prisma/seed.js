@@ -32,36 +32,15 @@ async function main() {
     { id: 7, name: 'finance_officer', displayName: 'Finance Officer', description: 'Manages expenses, reviews reports, and oversees purchase approvals' },
   ];
 
-  // Ensure each role has the correct stable ID.
-  // Delete role_permissions first — they'll be re-created by the seed.
-  // PostgreSQL: disable FK triggers temporarily (requires table owner privileges)
-  await prisma.$executeRawUnsafe('ALTER TABLE role_permissions DISABLE TRIGGER ALL');
-  await prisma.$executeRawUnsafe('ALTER TABLE users DISABLE TRIGGER ALL');
-  await prisma.$executeRawUnsafe('DELETE FROM role_permissions');
-  // Build a name→currentId map so we can untangle ID conflicts
-  const existingRoles = await prisma.role.findMany();
-  const nameToCurrentId = {};
-  for (const r of existingRoles) nameToCurrentId[r.name] = r.id;
-
-  // Pass 1: delete ALL existing roles (FK triggers off, so users are safe)
-  await prisma.$executeRawUnsafe('DELETE FROM roles');
-
-  // Pass 2: insert with explicit stable IDs & update users to new IDs
+  // Fresh database — insert roles directly with explicit stable IDs
   for (const def of roleDefinitions) {
-    const oldId = nameToCurrentId[def.name];
     await prisma.$executeRawUnsafe(
       `INSERT INTO roles (id, name, display_name, description, is_system, created_at, updated_at)
-       VALUES ($1, $2, $3, $4, true, NOW(), NOW())`,
+       VALUES ($1, $2, $3, $4, true, NOW(), NOW())
+       ON CONFLICT (id) DO NOTHING`,
       def.id, def.name, def.displayName, def.description
     );
-    // Remap any existing users that had this role under its old ID
-    if (oldId !== undefined && oldId !== def.id) {
-      await prisma.$executeRawUnsafe('UPDATE users SET role_id = $1 WHERE role_id = $2', def.id, oldId);
-    }
   }
-  // Re-enable FK triggers
-  await prisma.$executeRawUnsafe('ALTER TABLE users ENABLE TRIGGER ALL');
-  await prisma.$executeRawUnsafe('ALTER TABLE role_permissions ENABLE TRIGGER ALL');
   // Ensure PostgreSQL sequence starts after our last stable ID
   await prisma.$executeRawUnsafe(`SELECT setval(pg_get_serial_sequence('roles', 'id'), (SELECT MAX(id) FROM roles))`);
 
@@ -84,145 +63,89 @@ async function main() {
   ];
   const actions = ['create', 'read', 'update', 'delete'];
 
-  let permCount = 0;
+  const permData = [];
   for (const mod of modules) {
     for (const resource of mod.resources) {
       for (const action of actions) {
-        await prisma.permission.upsert({
-          where: { module_action_resource: { module: mod.module, action, resource } },
-          update: {},
-          create: {
-            module: mod.module,
-            action,
-            resource,
-            description: `${action} ${resource} in ${mod.module}`,
-          },
+        permData.push({
+          module: mod.module,
+          action,
+          resource,
+          description: `${action} ${resource} in ${mod.module}`,
         });
-        permCount++;
       }
     }
   }
-  console.log(`  ✅ ${permCount} permissions created`);
+  await prisma.permission.createMany({ data: permData, skipDuplicates: true });
+  console.log(`  ✅ ${permData.length} permissions created`);
 
   // ========================================================================
-  // 3. Assign All Permissions to Super Admin
+  // 3. Assign Permissions to Roles (batch operations for Supabase compat)
   // ========================================================================
-  console.log('Assigning permissions to Super Admin...');
+  console.log('Assigning permissions to roles...');
   const superAdminRole = roles[0];
   const allPermissions = await prisma.permission.findMany();
-  for (const perm of allPermissions) {
-    await prisma.rolePermission.upsert({
-      where: { roleId_permissionId: { roleId: superAdminRole.id, permissionId: perm.id } },
-      update: {},
-      create: { roleId: superAdminRole.id, permissionId: perm.id },
+
+  // Helper: batch-assign permissions to a role
+  async function assignPerms(role, perms) {
+    await prisma.rolePermission.createMany({
+      data: perms.map(p => ({ roleId: role.id, permissionId: p.id })),
+      skipDuplicates: true,
     });
   }
-  console.log(`  ✅ ${allPermissions.length} permissions assigned to Super Admin`);
 
-  // Assign relevant permissions to other roles
-  console.log('Assigning permissions to other roles...');
+  // Super Admin & Company Admin — all permissions
+  await assignPerms(superAdminRole, allPermissions);
+  await assignPerms(roles[1], allPermissions);
 
-  // Maintenance Manager - vehicles, machines, services, assets (full), reports (read)
-  const mmRole = roles[2];
-  const mmPermissions = await prisma.permission.findMany({
-    where: {
-      OR: [
-        { module: { in: ['vehicles', 'machines', 'services', 'assets'] } },
-        { module: 'reports', action: 'read' },
-        { module: 'inventory', action: 'read' },
-      ],
-    },
+  // Maintenance Manager — vehicles, machines, services, assets (full), reports+inventory (read)
+  const mmPerms = await prisma.permission.findMany({
+    where: { OR: [
+      { module: { in: ['vehicles', 'machines', 'services', 'assets'] } },
+      { module: 'reports', action: 'read' },
+      { module: 'inventory', action: 'read' },
+    ]},
   });
-  for (const perm of mmPermissions) {
-    await prisma.rolePermission.upsert({
-      where: { roleId_permissionId: { roleId: mmRole.id, permissionId: perm.id } },
-      update: {},
-      create: { roleId: mmRole.id, permissionId: perm.id },
-    });
-  }
+  await assignPerms(roles[2], mmPerms);
 
-  // Technician - services (read, update), vehicles (read), machines (read)
-  const techRole = roles[3];
+  // Technician — services (read, update), vehicles+machines (read)
   const techPerms = await prisma.permission.findMany({
-    where: {
-      OR: [
-        { module: 'services', action: { in: ['read', 'update'] } },
-        { module: { in: ['vehicles', 'machines'] }, action: 'read' },
-      ],
-    },
+    where: { OR: [
+      { module: 'services', action: { in: ['read', 'update'] } },
+      { module: { in: ['vehicles', 'machines'] }, action: 'read' },
+    ]},
   });
-  for (const perm of techPerms) {
-    await prisma.rolePermission.upsert({
-      where: { roleId_permissionId: { roleId: techRole.id, permissionId: perm.id } },
-      update: {},
-      create: { roleId: techRole.id, permissionId: perm.id },
-    });
-  }
+  await assignPerms(roles[3], techPerms);
 
-  // Store Manager - inventory (full), assets (full), reports (read)
-  const smRole = roles[4];
+  // Store Manager — inventory+assets (full), reports (read)
   const smPerms = await prisma.permission.findMany({
-    where: {
-      OR: [
-        { module: { in: ['inventory', 'assets'] } },
-        { module: 'reports', action: 'read' },
-      ],
-    },
+    where: { OR: [
+      { module: { in: ['inventory', 'assets'] } },
+      { module: 'reports', action: 'read' },
+    ]},
   });
-  for (const perm of smPerms) {
-    await prisma.rolePermission.upsert({
-      where: { roleId_permissionId: { roleId: smRole.id, permissionId: perm.id } },
-      update: {},
-      create: { roleId: smRole.id, permissionId: perm.id },
-    });
-  }
+  await assignPerms(roles[4], smPerms);
 
-  // Driver - vehicles (read), services (create, read)
-  const driverRole = roles[5];
+  // Driver — vehicles (read), services (create, read)
   const driverPerms = await prisma.permission.findMany({
-    where: {
-      OR: [
-        { module: 'vehicles', action: 'read' },
-        { module: 'services', action: { in: ['create', 'read'] } },
-      ],
-    },
+    where: { OR: [
+      { module: 'vehicles', action: 'read' },
+      { module: 'services', action: { in: ['create', 'read'] } },
+    ]},
   });
-  for (const perm of driverPerms) {
-    await prisma.rolePermission.upsert({
-      where: { roleId_permissionId: { roleId: driverRole.id, permissionId: perm.id } },
-      update: {},
-      create: { roleId: driverRole.id, permissionId: perm.id },
-    });
-  }
+  await assignPerms(roles[5], driverPerms);
 
-  // Finance Officer - reports (full), inventory (read), services (read)
-  const finRole = roles[6];
+  // Finance Officer — reports (full), inventory+services+vehicles+machines (read)
   const finPerms = await prisma.permission.findMany({
-    where: {
-      OR: [
-        { module: 'reports' },
-        { module: { in: ['inventory', 'services', 'vehicles', 'machines'] }, action: 'read' },
-      ],
-    },
+    where: { OR: [
+      { module: 'reports' },
+      { module: { in: ['inventory', 'services', 'vehicles', 'machines'] }, action: 'read' },
+    ]},
   });
-  for (const perm of finPerms) {
-    await prisma.rolePermission.upsert({
-      where: { roleId_permissionId: { roleId: finRole.id, permissionId: perm.id } },
-      update: {},
-      create: { roleId: finRole.id, permissionId: perm.id },
-    });
-  }
+  await assignPerms(roles[6], finPerms);
 
-  // Company Admin gets all permissions
-  const caRole = roles[1];
-  for (const perm of allPermissions) {
-    await prisma.rolePermission.upsert({
-      where: { roleId_permissionId: { roleId: caRole.id, permissionId: perm.id } },
-      update: {},
-      create: { roleId: caRole.id, permissionId: perm.id },
-    });
-  }
-  console.log('  ✅ Role permissions assigned');
+  const totalRolePerms = await prisma.rolePermission.count();
+  console.log(`  ✅ ${totalRolePerms} role-permission assignments created`);
 
   // ========================================================================
   // 4. Create Default Company and Branch
