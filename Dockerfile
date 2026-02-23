@@ -1,24 +1,23 @@
 # ============================================
 # Nelna Maintenance System - Render Deployment
 # ============================================
+
 FROM node:20-alpine
 
-# Install OpenSSL (required by Prisma on Alpine)
+# Install OpenSSL (Prisma requirement on Alpine)
 RUN apk add --no-cache openssl
 
 WORKDIR /app
 
-# Copy package files and prisma schema first (for Docker layer caching)
+# Copy package files first (better layer caching)
 COPY backend/package*.json ./
 COPY backend/prisma ./prisma/
 
-# Install ALL dependencies (prisma CLI is a devDependency needed for generate & db push)
+# Install dependencies
 RUN npm ci
 
-# Generate Prisma client (dummy URL for build only; real DATABASE_URL is set in Render env vars)
-ENV DATABASE_URL="postgresql://dummy:dummy@localhost:5432/dummy"
+# Generate Prisma client
 RUN npx prisma generate
-ENV DATABASE_URL=""
 
 # Copy backend source
 COPY backend/src ./src
@@ -26,5 +25,5 @@ COPY backend/src ./src
 # Expose port
 EXPOSE 3000
 
-# Start: push schema, seed (idempotent), then run server
+# Start app (DATABASE_URL comes from Render environment variables)
 CMD sh -c "npx prisma db push --skip-generate && node prisma/seed.js && node src/server.js"
