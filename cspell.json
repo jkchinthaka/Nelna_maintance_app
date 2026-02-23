@@ -1,0 +1,27 @@
+{
+  "version": "0.2",
+  "language": "en",
+  "words": [
+    "Nelna",
+    "nelna",
+    "NELNA",
+    "Horana",
+    "grns",
+    "findstr",
+    "taskkill",
+    "EADDRINUSE",
+    "maintance",
+    "nodemon",
+    "dotenv",
+    "bcrypt",
+    "bcryptjs",
+    "upsert",
+    "phpMyAdmin"
+  ],
+  "ignorePaths": [
+    "node_modules",
+    "build",
+    "*.lock",
+    "package-lock.json"
+  ]
+}

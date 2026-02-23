@@ -8,24 +8,49 @@
 
 ## Table of Contents
 
-1. [Prerequisites](#1-prerequisites)
-2. [Clone the Repository](#2-clone-the-repository)
-3. [Database Setup](#3-database-setup-choose-one)
-4. [Environment Configuration](#4-environment-configuration)
-5. [Install Dependencies](#5-install-dependencies)
-6. [Database Migration](#6-database-migration)
-7. [Seed the Database](#7-seed-the-database)
-8. [Start the Development Server](#8-start-the-development-server)
-9. [Verify the Setup](#9-verify-the-setup)
-10. [API Endpoints Overview](#10-api-endpoints-overview)
-11. [Default Login Credentials](#11-default-login-credentials)
-12. [Common Errors & Troubleshooting](#12-common-errors--troubleshooting)
-13. [Production Readiness Checklist](#13-production-readiness-checklist)
-14. [Useful Commands Reference](#14-useful-commands-reference)
+- [Nelna Maintenance System — Backend Local Setup Guide](#nelna-maintenance-system--backend-local-setup-guide)
+  - [Table of Contents](#table-of-contents)
+  - [Prerequisites](#prerequisites)
+  - [Clone the Repository](#clone-the-repository)
+  - [Database Setup (Choose One)](#database-setup-choose-one)
+    - [Option A — MySQL via Docker (Recommended)](#option-a--mysql-via-docker-recommended)
+    - [Option B — Local MySQL Installation](#option-b--local-mysql-installation)
+  - [Environment Configuration](#environment-configuration)
+  - [Install Dependencies](#install-dependencies)
+  - [Database Migration](#database-migration)
+  - [Seed the Database](#seed-the-database)
+  - [Start the Development Server](#start-the-development-server)
+  - [Verify the Setup](#verify-the-setup)
+    - [Health Check](#health-check)
+    - [Test Authentication](#test-authentication)
+    - [Prisma Studio (Visual Database Browser)](#prisma-studio-visual-database-browser)
+  - [API Endpoints Overview](#api-endpoints-overview)
+  - [Default Login Credentials](#default-login-credentials)
+  - [Common Errors \& Troubleshooting](#common-errors--troubleshooting)
+    - [Database Connection Refused](#database-connection-refused)
+    - [Access Denied for User](#access-denied-for-user)
+    - [Database Does Not Exist (P1003)](#database-does-not-exist-p1003)
+    - [Prisma Client Not Generated](#prisma-client-not-generated)
+    - [Port 3000 Already in Use](#port-3000-already-in-use)
+    - [Seed Script Fails with Unique Constraint](#seed-script-fails-with-unique-constraint)
+    - [`nodemon` Not Recognized](#nodemon-not-recognized)
+    - [JWT Secret Warning on Startup](#jwt-secret-warning-on-startup)
+    - [Migration Drift Detected](#migration-drift-detected)
+  - [Production Readiness Checklist](#production-readiness-checklist)
+    - [Security](#security)
+    - [Database](#database)
+    - [Infrastructure](#infrastructure)
+    - [Performance](#performance)
+    - [Monitoring](#monitoring)
+  - [Useful Commands Reference](#useful-commands-reference)
+    - [Application](#application)
+    - [Prisma / Database](#prisma--database)
+    - [Docker](#docker)
+  - [Quick Start (TL;DR)](#quick-start-tldr)
 
 ---
 
-## 1. Prerequisites
+## Prerequisites
 
 Ensure the following tools are installed on your machine **before** proceeding:
 
@@ -41,7 +66,7 @@ Ensure the following tools are installed on your machine **before** proceeding:
 
 ---
 
-## 2. Clone the Repository
+## Clone the Repository
 
 ```bash
 git clone <repository-url>
@@ -50,7 +75,7 @@ cd Nelna_maintance_app
 
 ---
 
-## 3. Database Setup (Choose One)
+## Database Setup (Choose One)
 
 ### Option A — MySQL via Docker (Recommended)
 
@@ -114,7 +139,7 @@ EXIT;
 
 ---
 
-## 4. Environment Configuration
+## Environment Configuration
 
 Copy the example environment file and configure it:
 
@@ -181,7 +206,7 @@ SMTP_FROM=noreply@nelna.com
 
 ---
 
-## 5. Install Dependencies
+## Install Dependencies
 
 ```bash
 # Make sure you are inside the backend/ directory
@@ -200,7 +225,7 @@ This installs all production and development dependencies including Prisma CLI, 
 
 ---
 
-## 6. Database Migration
+## Database Migration
 
 Generate and apply all database migrations. This creates **34 tables** in your MySQL database covering:
 
@@ -245,7 +270,7 @@ Your database is now in sync with your schema.
 
 ---
 
-## 7. Seed the Database
+## Seed the Database
 
 Populate the database with essential default data:
 
@@ -297,7 +322,7 @@ Default Login Credentials:
 
 ---
 
-## 8. Start the Development Server
+## Start the Development Server
 
 ```bash
 npm run dev
@@ -323,7 +348,7 @@ The server is now running on `http://localhost:3000`.
 
 ---
 
-## 9. Verify the Setup
+## Verify the Setup
 
 ### Health Check
 
@@ -369,7 +394,7 @@ Opens a browser UI at `http://localhost:5555` to browse and edit all 34 database
 
 ---
 
-## 10. API Endpoints Overview
+## API Endpoints Overview
 
 All endpoints are prefixed with `/api/v1`. Authentication is required for all routes except health check and login.
 
@@ -392,7 +417,7 @@ Authorization: Bearer <your-jwt-token>
 
 ---
 
-## 11. Default Login Credentials
+## Default Login Credentials
 
 | Role | Email | Password | Employee ID |
 | --- | --- | --- | --- |
@@ -407,9 +432,9 @@ Authorization: Bearer <your-jwt-token>
 
 ---
 
-## 12. Common Errors & Troubleshooting
+## Common Errors & Troubleshooting
 
-### 12.1 — Database Connection Refused
+### Database Connection Refused
 
 ```text
 Error: Can't reach database server at `localhost:3306`
@@ -428,7 +453,7 @@ Error: Can't reach database server at `localhost:3306`
 
 ---
 
-### 12.2 — Access Denied for User
+### Access Denied for User
 
 ```text
 Error: Access denied for user 'nelna_user'@'localhost'
@@ -445,7 +470,7 @@ Error: Access denied for user 'nelna_user'@'localhost'
 
 ---
 
-### 12.3 — Database Does Not Exist (P1003)
+### Database Does Not Exist (P1003)
 
 ```text
 Error: P1003 — Database `nelna_maintenance` does not exist on the database server
@@ -460,7 +485,7 @@ Error: P1003 — Database `nelna_maintenance` does not exist on the database ser
 
 ---
 
-### 12.4 — Prisma Client Not Generated
+### Prisma Client Not Generated
 
 ```text
 Error: @prisma/client did not initialize yet. Please run "prisma generate"
@@ -474,7 +499,7 @@ npx prisma generate
 
 ---
 
-### 12.5 — Port 3000 Already in Use
+### Port 3000 Already in Use
 
 ```text
 Error: listen EADDRINUSE: address already in use :::3000
@@ -495,7 +520,7 @@ PORT=3001
 
 ---
 
-### 12.6 — Seed Script Fails with Unique Constraint
+### Seed Script Fails with Unique Constraint
 
 ```text
 Error: Unique constraint failed on the fields: (`email`)
@@ -513,7 +538,7 @@ npx prisma migrate reset
 
 ---
 
-### 12.7 — `nodemon` Not Recognized
+### `nodemon` Not Recognized
 
 ```text
 'nodemon' is not recognized as an internal or external command
@@ -529,7 +554,7 @@ npm install -g nodemon
 
 ---
 
-### 12.8 — JWT Secret Warning on Startup
+### JWT Secret Warning on Startup
 
 ```text
 ⚠️  Warning: Missing configuration: jwt.secret
@@ -546,7 +571,7 @@ JWT_REFRESH_SECRET=nelna-refresh-secret-change-in-production-2024-min-32-chars
 
 ---
 
-### 12.9 — Migration Drift Detected
+### Migration Drift Detected
 
 ```text
 Error: Drift detected: Your database schema is not in sync
@@ -567,7 +592,7 @@ npx prisma migrate dev --name fix-drift
 
 ---
 
-## 13. Production Readiness Checklist
+## Production Readiness Checklist
 
 ### Security
 
@@ -625,7 +650,7 @@ npx prisma migrate dev --name fix-drift
 
 ---
 
-## 14. Useful Commands Reference
+## Useful Commands Reference
 
 ### Application
 
