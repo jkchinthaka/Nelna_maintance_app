@@ -11,12 +11,17 @@ services:
     plan: free
     rootDir: backend
     buildCommand: npm ci && npx prisma generate
-    startCommand: npx prisma db push --skip-generate && node prisma/seed.js && node src/server.js
+    startCommand: npx prisma db push --skip-generate && npx prisma db seed && node src/server.js
     envVars:
+      # ⚠️ CRITICAL: Must set DATABASE_URL manually in Render dashboard
+      # Format: postgresql://username:password@host:port/database
+      # Example: postgresql://postgres:Chinthaka2002%40%23@db.zlnhdrdbksrwtfdpetai.supabase.co:5432/postgres
+      # Note: URL-encode special chars (@→%40, #→%23)
+      - key: DATABASE_URL
+        sync: false  # Must set manually - Render won't auto-generate
+      
       - key: NODE_ENV
         value: production
-      - key: DATABASE_URL
-        sync: false  # set manually in Render dashboard
       - key: JWT_SECRET
         generateValue: true
       - key: JWT_REFRESH_SECRET
