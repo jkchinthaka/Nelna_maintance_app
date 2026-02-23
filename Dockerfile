@@ -3,9 +3,12 @@
 # ============================================
 FROM node:20-alpine
 
+# Install OpenSSL (required by Prisma on Alpine)
+RUN apk add --no-cache openssl
+
 WORKDIR /app
 
-# Copy backend package files and prisma schema
+# Copy package files and prisma schema first (for Docker layer caching)
 COPY backend/package*.json ./
 COPY backend/prisma ./prisma/
 
