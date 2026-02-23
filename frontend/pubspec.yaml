@@ -53,7 +53,7 @@ dependencies:
   image_picker: ^1.0.7
   
   # Error Monitoring
-  sentry_flutter: ^8.3.0
+  sentry_flutter: ^9.0.0
 
 dev_dependencies:
   flutter_test:
