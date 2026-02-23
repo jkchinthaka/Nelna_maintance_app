@@ -9,6 +9,13 @@ const prisma = new PrismaClient();
 async function main() {
   console.log('🌱 Starting database seed...\n');
 
+  // Guard: skip seeding if database already has roles (i.e. already seeded)
+  const existingRoleCount = await prisma.role.count();
+  if (existingRoleCount > 0) {
+    console.log('⏭️  Database already seeded (found ' + existingRoleCount + ' roles). Skipping.\n');
+    return;
+  }
+
   // ========================================================================
   // 1. Create Roles (with stable IDs)
   // ========================================================================

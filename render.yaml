@@ -11,7 +11,7 @@ services:
     plan: free
     rootDir: backend
     buildCommand: npm ci && npx prisma generate
-    startCommand: npx prisma migrate deploy && node prisma/seed.js && node src/server.js
+    startCommand: npx prisma db push --skip-generate && node prisma/seed.js && node src/server.js
     envVars:
       - key: NODE_ENV
         value: production
