@@ -40,30 +40,27 @@
    - **Region:** Choose closest to Sri Lanka (e.g., `ap-southeast-1` Singapore)
 5. Click **Create new project** → wait ~2 minutes
 
-### 1.2 Get Connection Strings
+### 1.2 Get Connection String
 
 1. In Supabase dashboard → **Settings** (gear icon) → **Database**
 2. Scroll to **Connection string** section
 3. Select **URI** tab
-4. You'll see two connection modes:
+4. Copy the **direct connection** string (port 5432):
 
-**Transaction mode (port 6543)** — for the app:
 ```
-postgresql://postgres.[YOUR-PROJECT-REF]:[YOUR-PASSWORD]@aws-0-ap-southeast-1.pooler.supabase.com:6543/postgres?pgbouncer=true
-```
-
-**Session mode (port 5432)** — for migrations:
-```
-postgresql://postgres.[YOUR-PROJECT-REF]:[YOUR-PASSWORD]@aws-0-ap-southeast-1.pooler.supabase.com:5432/postgres
+postgresql://postgres:[YOUR-PASSWORD]@db.[YOUR-PROJECT-REF].supabase.co:5432/postgres
 ```
 
-> **IMPORTANT:** Replace `[YOUR-PASSWORD]` with the database password you set when creating the project.
+> **IMPORTANT:** If your password contains special characters (`@`, `#`, etc.), you must URL-encode them:
+> - `@` → `%40`
+> - `#` → `%23`
+>
+> Example: password `Chinthaka2002@#` becomes `Chinthaka2002%40%23`
 
 ### 1.3 Save Your Credentials
 
 ```
-DATABASE_URL=postgresql://postgres.[ref]:[password]@aws-0-ap-southeast-1.pooler.supabase.com:6543/postgres?pgbouncer=true
-DIRECT_URL=postgresql://postgres.[ref]:[password]@aws-0-ap-southeast-1.pooler.supabase.com:5432/postgres
+DATABASE_URL=postgresql://postgres:[URL-ENCODED-PASSWORD]@db.[YOUR-PROJECT-REF].supabase.co:5432/postgres
 ```
 
 ---
@@ -132,8 +129,7 @@ In Render dashboard → your service → **Environment** tab → Add these:
 |---|---|
 | `NODE_ENV` | `production` |
 | `PORT` | `3000` |
-| `DATABASE_URL` | `postgresql://postgres.[ref]:[pass]@...pooler.supabase.com:6543/postgres?pgbouncer=true` |
-| `DIRECT_URL` | `postgresql://postgres.[ref]:[pass]@...pooler.supabase.com:5432/postgres` |
+| `DATABASE_URL` | `postgresql://postgres:[URL-ENCODED-PASS]@db.[PROJECT-REF].supabase.co:5432/postgres` |
 | `JWT_SECRET` | (generate: `node -e "console.log(require('crypto').randomBytes(64).toString('hex'))"`) |
 | `JWT_REFRESH_SECRET` | (generate another random string same way) |
 | `JWT_EXPIRY` | `24h` |
