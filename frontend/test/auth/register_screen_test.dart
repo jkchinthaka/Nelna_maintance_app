@@ -11,7 +11,7 @@ void main() {
     );
   }
 
-  group('RegisterScreen', () => {
+  group('RegisterScreen', () {
     testWidgets('renders all form fields', (tester) async {
       await tester.pumpWidget(buildTestable(const RegisterScreen()));
       await tester.pumpAndSettle();

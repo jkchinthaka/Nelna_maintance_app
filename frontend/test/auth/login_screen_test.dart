@@ -3,7 +3,6 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'package:nelna_maintenance/features/auth/presentation/screens/login_screen.dart';
-import 'package:nelna_maintenance/features/auth/presentation/providers/auth_provider.dart';
 import 'package:nelna_maintenance/features/auth/presentation/widgets/auth_text_field.dart';
 
 void main() {
