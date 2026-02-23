@@ -47,26 +47,24 @@ class InventoryService {
     let total;
 
     if (query.lowStock === 'true') {
-      // Use raw query for field-to-field comparison
-      [products, total] = await Promise.all([
-        prisma.product.findMany({
-          where,
-          include: {
-            branch: { select: { id: true, name: true, code: true } },
-            category: { select: { id: true, name: true } },
-          },
-          orderBy,
-          skip,
-          take: limit,
-        }),
-        prisma.product.count({ where }),
-      ]);
+      // For low-stock filtering, we need to fetch all products and filter client-side
+      // Then apply pagination to the filtered results
+      const allProducts = await prisma.product.findMany({
+        where,
+        include: {
+          branch: { select: { id: true, name: true, code: true } },
+          category: { select: { id: true, name: true } },
+        },
+        orderBy,
+      });
 
       // Post-filter for low stock
-      products = products.filter(
+      const filteredProducts = allProducts.filter(
         (p) => parseFloat(p.currentStock) <= parseFloat(p.reorderLevel || 0)
       );
-      total = products.length;
+      
+      total = filteredProducts.length;
+      products = filteredProducts.slice(skip, skip + limit);
     } else {
       [products, total] = await Promise.all([
         prisma.product.findMany({

@@ -10,47 +10,52 @@ async function main() {
   console.log('🌱 Starting database seed...\n');
 
   // ========================================================================
-  // 1. Create Roles
+  // 1. Create Roles (with stable IDs)
   // ========================================================================
   console.log('Creating roles...');
-  const roles = await Promise.all([
-    prisma.role.upsert({
-      where: { name: 'super_admin' },
-      update: {},
-      create: { name: 'super_admin', displayName: 'Super Admin', description: 'Full system access', isSystem: true },
-    }),
-    prisma.role.upsert({
-      where: { name: 'company_admin' },
-      update: {},
-      create: { name: 'company_admin', displayName: 'Company Admin', description: 'Company-level administration', isSystem: true },
-    }),
-    prisma.role.upsert({
-      where: { name: 'maintenance_manager' },
-      update: {},
-      create: { name: 'maintenance_manager', displayName: 'Maintenance Manager', description: 'Manages maintenance operations', isSystem: true },
-    }),
-    prisma.role.upsert({
-      where: { name: 'technician' },
-      update: {},
-      create: { name: 'technician', displayName: 'Technician', description: 'Performs maintenance tasks', isSystem: true },
-    }),
-    prisma.role.upsert({
-      where: { name: 'store_manager' },
-      update: {},
-      create: { name: 'store_manager', displayName: 'Store Manager', description: 'Manages inventory and stores', isSystem: true },
-    }),
-    prisma.role.upsert({
-      where: { name: 'driver' },
-      update: {},
-      create: { name: 'driver', displayName: 'Driver', description: 'Vehicle driver', isSystem: true },
-    }),
-    prisma.role.upsert({
-      where: { name: 'finance_officer' },
-      update: {},
-      create: { name: 'finance_officer', displayName: 'Finance Officer', description: 'Manages financial aspects', isSystem: true },
-    }),
-  ]);
-  console.log(`  ✅ ${roles.length} roles created`);
+
+  // Reset auto-increment and upsert with explicit IDs for stability
+  const roleDefinitions = [
+    { id: 1, name: 'super_admin', displayName: 'Super Admin', description: 'Full system access — can manage everything including roles and users across all branches' },
+    { id: 2, name: 'company_admin', displayName: 'Company Admin', description: 'Company-level administration — manages branches, users, and all operational data' },
+    { id: 3, name: 'maintenance_manager', displayName: 'Maintenance Manager', description: 'Manages vehicles, machines, and service requests — approves maintenance work' },
+    { id: 4, name: 'technician', displayName: 'Technician', description: 'Performs maintenance tasks — can view and update assigned service requests' },
+    { id: 5, name: 'store_manager', displayName: 'Store Manager', description: 'Manages inventory, suppliers, purchase orders, and asset tracking' },
+    { id: 6, name: 'driver', displayName: 'Driver', description: 'Vehicle driver — can view assigned vehicles and raise service requests' },
+    { id: 7, name: 'finance_officer', displayName: 'Finance Officer', description: 'Manages expenses, reviews reports, and oversees purchase approvals' },
+  ];
+
+  // Ensure each role has the correct stable ID.
+  // Delete role_permissions first — they'll be re-created by the seed.
+  await prisma.$executeRawUnsafe('SET FOREIGN_KEY_CHECKS = 0');
+  await prisma.$executeRawUnsafe('DELETE FROM role_permissions');
+  // Build a name→currentId map so we can untangle ID conflicts
+  const existingRoles = await prisma.role.findMany();
+  const nameToCurrentId = {};
+  for (const r of existingRoles) nameToCurrentId[r.name] = r.id;
+
+  // Pass 1: delete ALL existing roles (FK checks off, so users are safe)
+  await prisma.$executeRawUnsafe('DELETE FROM roles');
+
+  // Pass 2: insert with explicit stable IDs & update users to new IDs
+  for (const def of roleDefinitions) {
+    const oldId = nameToCurrentId[def.name];
+    await prisma.$executeRawUnsafe(
+      `INSERT INTO roles (id, name, display_name, description, is_system, created_at, updated_at)
+       VALUES (?, ?, ?, ?, true, NOW(), NOW())`,
+      def.id, def.name, def.displayName, def.description
+    );
+    // Remap any existing users that had this role under its old ID
+    if (oldId !== undefined && oldId !== def.id) {
+      await prisma.$executeRawUnsafe('UPDATE users SET role_id = ? WHERE role_id = ?', def.id, oldId);
+    }
+  }
+  await prisma.$executeRawUnsafe('SET FOREIGN_KEY_CHECKS = 1');
+  // Ensure auto-increment starts after our last stable ID
+  await prisma.$executeRawUnsafe('ALTER TABLE roles AUTO_INCREMENT = 8');
+
+  const roles = await prisma.role.findMany({ orderBy: { id: 'asc' } });
+  console.log(`  ✅ ${roles.length} roles created (IDs 1-7 stable)`);
 
   // ========================================================================
   // 2. Create Permissions
@@ -269,7 +274,7 @@ async function main() {
   for (const userData of defaultUsers) {
     await prisma.user.upsert({
       where: { email: userData.email },
-      update: {},
+      update: { roleId: userData.roleId },
       create: {
         companyId: company.id,
         branchId: userData.branchId,

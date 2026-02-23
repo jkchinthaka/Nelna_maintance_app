@@ -34,6 +34,7 @@ const inventoryRoutes = require('./routes/inventory.routes');
 const assetRoutes = require('./routes/asset.routes');
 const reportRoutes = require('./routes/report.routes');
 const uploadRoutes = require('./routes/upload.routes');
+const roleRoutes = require('./routes/role.routes');
 
 const app = express();
 
@@ -111,6 +112,7 @@ app.use(`${API_PREFIX}/inventory`, inventoryRoutes);
 app.use(`${API_PREFIX}/assets`, assetRoutes);
 app.use(`${API_PREFIX}/reports`, reportRoutes);
 app.use(`${API_PREFIX}/uploads`, uploadRoutes);
+app.use(`${API_PREFIX}/roles`, roleRoutes);
 
 // ============================================================================
 // Health Check

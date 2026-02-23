@@ -42,19 +42,10 @@ class ReportService {
         },
       }),
       // Low stock items (current stock <= reorder level)
-      prisma.product.count({
-        where: {
-          ...branchFilter,
-          isActive: true,
-          deletedAt: null,
-          currentStock: { lte: prisma.raw('reorder_level') },
-        },
-      }).catch(() => {
-        // Fallback: use raw query for column comparison
-        return prisma.$queryRawUnsafe(
-          `SELECT COUNT(*) as count FROM products WHERE ${branchId ? `branch_id = ${parseInt(branchId, 10)} AND` : ''} is_active = true AND deleted_at IS NULL AND current_stock <= reorder_level`
-        ).then((r) => Number(r[0]?.count || 0));
-      }),
+      // Prisma doesn't support comparing two columns, so use a raw query
+      prisma.$queryRawUnsafe(
+        `SELECT COUNT(*) as count FROM products WHERE ${branchId ? `branch_id = ${parseInt(branchId, 10)} AND` : ''} is_active = true AND deleted_at IS NULL AND current_stock <= reorder_level`
+      ).then((r) => Number(r[0]?.count || 0)),
       // Pending purchase orders
       prisma.purchaseOrder.count({
         where: {

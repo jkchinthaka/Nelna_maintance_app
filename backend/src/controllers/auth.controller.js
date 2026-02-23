@@ -17,9 +17,13 @@ class AuthController {
 
   /**
    * POST /api/v1/auth/register
+   * Supports both self-registration (public) and admin-created accounts.
    */
   register = asyncHandler(async (req, res) => {
-    const result = await authService.register(req.body);
+    // Attach request metadata for audit logging
+    req.body._ip = req.ip || req.connection?.remoteAddress;
+    req.body._userAgent = req.headers['user-agent'];
+    const result = await authService.register(req.body, req.user || null);
     ApiResponse.created(res, result, 'User registered successfully');
   });
 

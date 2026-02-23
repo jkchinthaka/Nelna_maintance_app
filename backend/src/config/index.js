@@ -69,6 +69,7 @@ for (const key of requiredConfigs) {
     if (config.app.env === 'production') {
       throw new Error(`Missing required configuration: ${key}`);
     }
+    // Use console.warn here (logger requires this config to be loaded first)
     console.warn(`⚠️  Warning: Missing configuration: ${key}`);
   }
 }

@@ -36,8 +36,8 @@ const registerValidator = [
     .isMobilePhone()
     .withMessage('Invalid phone number'),
   body('roleId')
-    .isInt({ min: 1 })
-    .withMessage('Valid role ID is required'),
+    .isInt({ min: 1, max: 7 })
+    .withMessage('Valid role ID is required (1-7)'),
   body('companyId')
     .isInt({ min: 1 })
     .withMessage('Valid company ID is required'),
@@ -45,6 +45,11 @@ const registerValidator = [
     .optional()
     .isInt({ min: 1 })
     .withMessage('Valid branch ID is required'),
+  body('employeeId')
+    .optional()
+    .trim()
+    .isLength({ min: 1, max: 50 })
+    .withMessage('Employee ID must be 1-50 characters'),
 ];
 
 const changePasswordValidator = [

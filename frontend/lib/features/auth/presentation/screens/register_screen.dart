@@ -6,6 +6,7 @@ import '../../../../core/constants/app_constants.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../domain/entities/user_entity.dart';
 import '../providers/auth_provider.dart';
+import '../providers/role_provider.dart';
 import '../widgets/auth_text_field.dart';
 
 /// Enterprise-grade registration screen matching the login screen style.
@@ -32,9 +33,8 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
   final _passwordFocus = FocusNode();
   final _confirmPasswordFocus = FocusNode();
 
-  // Hardcoded defaults — adjust or fetch from API as needed.
   static const int _defaultCompanyId = 1;
-  static const int _defaultRoleId = 6; // driver
+  int? _selectedRoleId;
 
   @override
   void dispose() {
@@ -56,6 +56,22 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
   Future<void> _onRegister() async {
     if (!(_formKey.currentState?.validate() ?? false)) return;
 
+    if (_selectedRoleId == null) {
+      ScaffoldMessenger.of(context)
+        ..hideCurrentSnackBar()
+        ..showSnackBar(
+          SnackBar(
+            content: const Text('Please select a role'),
+            backgroundColor: Theme.of(context).colorScheme.error,
+            behavior: SnackBarBehavior.floating,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(10),
+            ),
+          ),
+        );
+      return;
+    }
+
     final params = RegisterParams(
       firstName: _firstNameController.text.trim(),
       lastName: _lastNameController.text.trim(),
@@ -65,7 +81,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
           ? _phoneController.text.trim()
           : null,
       companyId: _defaultCompanyId,
-      roleId: _defaultRoleId,
+      roleId: _selectedRoleId!,
     );
 
     await ref.read(authStateProvider.notifier).register(params);
@@ -143,6 +159,15 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                               ),
                             ),
                             const SizedBox(height: 24),
+
+                            // ── Role selector ────────────────────────
+                            _RoleDropdown(
+                              selectedRoleId: _selectedRoleId,
+                              enabled: !isLoading,
+                              onChanged: (id) =>
+                                  setState(() => _selectedRoleId = id),
+                            ),
+                            const SizedBox(height: 16),
 
                             // ── First name ──────────────────────────
                             AuthTextField(
@@ -400,5 +425,164 @@ class _LogoSection extends StatelessWidget {
         ),
       ],
     );
+  }
+}
+
+// ── Role Dropdown ─────────────────────────────────────────────────────────
+
+/// Fetches available roles from the API and renders a styled dropdown.
+class _RoleDropdown extends ConsumerWidget {
+  final int? selectedRoleId;
+  final bool enabled;
+  final ValueChanged<int?> onChanged;
+
+  const _RoleDropdown({
+    required this.selectedRoleId,
+    required this.enabled,
+    required this.onChanged,
+  });
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final rolesAsync = ref.watch(availableRolesProvider);
+    final theme = Theme.of(context);
+
+    return rolesAsync.when(
+      loading: () => const SizedBox(
+        height: 56,
+        child: Center(child: CircularProgressIndicator(strokeWidth: 2)),
+      ),
+      error: (error, _) => Container(
+        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 14),
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(12),
+          border: Border.all(color: theme.colorScheme.error),
+        ),
+        child: Row(
+          children: [
+            Icon(Icons.error_outline, color: theme.colorScheme.error, size: 20),
+            const SizedBox(width: 8),
+            Expanded(
+              child: Text(
+                'Failed to load roles. Tap to retry.',
+                style: TextStyle(color: theme.colorScheme.error, fontSize: 13),
+              ),
+            ),
+            IconButton(
+              icon: const Icon(Icons.refresh, size: 20),
+              onPressed: () => ref.invalidate(availableRolesProvider),
+              padding: EdgeInsets.zero,
+              constraints: const BoxConstraints(),
+            ),
+          ],
+        ),
+      ),
+      data: (roles) {
+        if (roles.isEmpty) {
+          return Container(
+            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 14),
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(12),
+              border:
+                  Border.all(color: theme.colorScheme.outline.withOpacity(0.5)),
+            ),
+            child: Text(
+              'No roles available',
+              style: theme.textTheme.bodyMedium?.copyWith(
+                color: theme.colorScheme.onSurfaceVariant,
+              ),
+            ),
+          );
+        }
+
+        return DropdownButtonFormField<int>(
+          value: selectedRoleId,
+          onChanged: enabled ? onChanged : null,
+          decoration: InputDecoration(
+            labelText: 'Register As',
+            prefixIcon: const Icon(Icons.badge_outlined, size: 22),
+            filled: true,
+            fillColor:
+                theme.colorScheme.surfaceContainerHighest.withOpacity(0.35),
+            contentPadding:
+                const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+            border: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(12),
+              borderSide: BorderSide(color: theme.colorScheme.outline),
+            ),
+            enabledBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(12),
+              borderSide:
+                  BorderSide(color: theme.colorScheme.outline.withOpacity(0.5)),
+            ),
+            focusedBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(12),
+              borderSide:
+                  BorderSide(color: theme.colorScheme.primary, width: 2),
+            ),
+          ),
+          validator: (value) => value == null ? 'Please select a role' : null,
+          items: roles.map((role) {
+            return DropdownMenuItem<int>(
+              value: role.id,
+              child: Text(
+                role.displayName,
+                style: theme.textTheme.bodyMedium?.copyWith(
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+            );
+          }).toList(),
+          selectedItemBuilder: (context) {
+            return roles.map((role) {
+              return Align(
+                alignment: Alignment.centerLeft,
+                child: Row(
+                  children: [
+                    Icon(
+                      _roleIcon(role.name),
+                      size: 18,
+                      color: theme.colorScheme.primary,
+                    ),
+                    const SizedBox(width: 10),
+                    Text(
+                      role.displayName,
+                      style: theme.textTheme.bodyMedium?.copyWith(
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                  ],
+                ),
+              );
+            }).toList();
+          },
+          isExpanded: true,
+          icon: const Icon(Icons.keyboard_arrow_down),
+          dropdownColor: theme.colorScheme.surface,
+          borderRadius: BorderRadius.circular(12),
+        );
+      },
+    );
+  }
+
+  IconData _roleIcon(String roleName) {
+    switch (roleName) {
+      case 'super_admin':
+        return Icons.admin_panel_settings;
+      case 'company_admin':
+        return Icons.business;
+      case 'maintenance_manager':
+        return Icons.engineering;
+      case 'technician':
+        return Icons.build;
+      case 'store_manager':
+        return Icons.inventory_2;
+      case 'driver':
+        return Icons.directions_car;
+      case 'finance_officer':
+        return Icons.account_balance;
+      default:
+        return Icons.person;
+    }
   }
 }

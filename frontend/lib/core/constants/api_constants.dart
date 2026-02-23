@@ -10,6 +10,8 @@ class ApiConstants {
   static const String logout = '/auth/logout';
   static const String profile = '/auth/profile';
   static const String changePassword = '/auth/change-password';
+  // roles
+  static const String roles = '/roles';
   // vehicles
   static const String vehicles = '/vehicles';
   static const String vehicleReminders = '/vehicles/reminders';

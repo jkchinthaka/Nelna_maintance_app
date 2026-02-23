@@ -3,7 +3,7 @@
 // ============================================================================
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
-const { UnauthorizedError, ConflictError, BadRequestError, NotFoundError } = require('../../../src/utils/errors');
+const { UnauthorizedError, ConflictError, BadRequestError, NotFoundError, ForbiddenError } = require('../../../src/utils/errors');
 
 // ── Mock Prisma ─────────────────────────────────────────────────────────────
 const mockPrisma = {
@@ -14,6 +14,9 @@ const mockPrisma = {
   },
   role: {
     findUnique: jest.fn(),
+  },
+  auditLog: {
+    create: jest.fn(),
   },
 };
 
@@ -43,9 +46,15 @@ const sampleUser = {
   branch: { id: 1, name: 'HQ', code: 'HQ' },
 };
 
+/** Convenience caller objects used to simulate req.user */
+const superAdminCaller = { id: 1, roleId: 1, roleName: 'super_admin', email: 'sa@test.com' };
+const companyAdminCaller = { id: 2, roleId: 2, roleName: 'company_admin', email: 'ca@test.com' };
+const technicianCaller = { id: 3, roleId: 4, roleName: 'technician', email: 'tech@test.com' };
+
 beforeEach(() => {
   jest.clearAllMocks();
   jwt.sign.mockReturnValue('mock-token');
+  mockPrisma.auditLog.create.mockResolvedValue({});
 });
 
 // ═════════════════════════════════════════════════════════════════════════════
@@ -93,43 +102,160 @@ describe('AuthService.login', () => {
 });
 
 // ═════════════════════════════════════════════════════════════════════════════
-// register
+// register — role-based access control
 // ═════════════════════════════════════════════════════════════════════════════
 describe('AuthService.register', () => {
-  const regData = {
+  const baseRegData = {
     firstName: 'Jane',
     lastName: 'Doe',
     email: 'jane@test.com',
     password: 'Str0ng!Pass',
     companyId: 1,
-    roleId: 2,
   };
 
-  it('should create a new user and return tokens', async () => {
+  const mockCreatedUser = (roleId) => ({
+    ...sampleUser,
+    id: 10,
+    email: 'jane@test.com',
+    roleId,
+    role: { id: roleId, name: `role_${roleId}` },
+  });
+
+  // helper to set up "happy path" mocks for user creation
+  const setupCreateMocks = (roleId) => {
     mockPrisma.user.findUnique.mockResolvedValue(null);
-    mockPrisma.role.findUnique.mockResolvedValue({ id: 2, name: 'company_admin' });
+    mockPrisma.role.findUnique.mockResolvedValue({ id: roleId, name: `role_${roleId}` });
     bcrypt.hash.mockResolvedValue('hashed-pw');
-    mockPrisma.user.create.mockResolvedValue({ ...sampleUser, id: 10, email: 'jane@test.com' });
+    mockPrisma.user.create.mockResolvedValue(mockCreatedUser(roleId));
     mockPrisma.user.update.mockResolvedValue({});
+  };
 
-    const result = await AuthService.register(regData);
+  // ── Self-registration (no caller / public) ──────────────────────────────
 
+  it('should allow self-registration as Technician (roleId=4)', async () => {
+    setupCreateMocks(4);
+    const result = await AuthService.register({ ...baseRegData, roleId: 4 }, null);
     expect(result.user).toBeDefined();
     expect(result.accessToken).toBe('mock-token');
     expect(mockPrisma.user.create).toHaveBeenCalledTimes(1);
   });
 
-  it('should throw ConflictError for duplicate email', async () => {
-    mockPrisma.user.findUnique.mockResolvedValue(sampleUser);
-
-    await expect(AuthService.register(regData)).rejects.toThrow(ConflictError);
+  it('should allow self-registration as Driver (roleId=6)', async () => {
+    setupCreateMocks(6);
+    const result = await AuthService.register({ ...baseRegData, roleId: 6 }, null);
+    expect(result.user).toBeDefined();
+    expect(result.accessToken).toBe('mock-token');
   });
 
-  it('should throw BadRequestError for invalid role', async () => {
+  it('should REJECT self-registration as Super Admin (roleId=1)', async () => {
+    await expect(
+      AuthService.register({ ...baseRegData, roleId: 1 }, null)
+    ).rejects.toThrow(ForbiddenError);
+    expect(mockPrisma.user.create).not.toHaveBeenCalled();
+  });
+
+  it('should REJECT self-registration as Company Admin (roleId=2)', async () => {
+    await expect(
+      AuthService.register({ ...baseRegData, roleId: 2 }, null)
+    ).rejects.toThrow(ForbiddenError);
+  });
+
+  it('should REJECT self-registration as Maintenance Manager (roleId=3)', async () => {
+    await expect(
+      AuthService.register({ ...baseRegData, roleId: 3 }, null)
+    ).rejects.toThrow(ForbiddenError);
+  });
+
+  it('should REJECT self-registration as Store Manager (roleId=5)', async () => {
+    await expect(
+      AuthService.register({ ...baseRegData, roleId: 5 }, null)
+    ).rejects.toThrow(ForbiddenError);
+  });
+
+  it('should REJECT self-registration as Finance Officer (roleId=7)', async () => {
+    await expect(
+      AuthService.register({ ...baseRegData, roleId: 7 }, null)
+    ).rejects.toThrow(ForbiddenError);
+  });
+
+  // ── Admin-created accounts ──────────────────────────────────────────────
+
+  it('should allow Super Admin to create any role', async () => {
+    for (const roleId of [1, 2, 3, 4, 5, 6, 7]) {
+      jest.clearAllMocks();
+      jwt.sign.mockReturnValue('mock-token');
+      mockPrisma.auditLog.create.mockResolvedValue({});
+      setupCreateMocks(roleId);
+      const result = await AuthService.register(
+        { ...baseRegData, roleId },
+        superAdminCaller
+      );
+      expect(result.user).toBeDefined();
+    }
+  });
+
+  it('should allow Company Admin to create roles 2-7', async () => {
+    for (const roleId of [2, 3, 4, 5, 6, 7]) {
+      jest.clearAllMocks();
+      jwt.sign.mockReturnValue('mock-token');
+      mockPrisma.auditLog.create.mockResolvedValue({});
+      setupCreateMocks(roleId);
+      const result = await AuthService.register(
+        { ...baseRegData, roleId },
+        companyAdminCaller
+      );
+      expect(result.user).toBeDefined();
+    }
+  });
+
+  it('should REJECT Company Admin creating a Super Admin', async () => {
+    await expect(
+      AuthService.register({ ...baseRegData, roleId: 1 }, companyAdminCaller)
+    ).rejects.toThrow(ForbiddenError);
+  });
+
+  // ── Non-admin authenticated users ───────────────────────────────────────
+
+  it('should REJECT Technician from creating any account', async () => {
+    await expect(
+      AuthService.register({ ...baseRegData, roleId: 4 }, technicianCaller)
+    ).rejects.toThrow(ForbiddenError);
+  });
+
+  // ── Duplicate email / invalid role ──────────────────────────────────────
+
+  it('should throw ConflictError for duplicate email', async () => {
+    mockPrisma.user.findUnique.mockResolvedValue(sampleUser);
+    await expect(
+      AuthService.register({ ...baseRegData, roleId: 4 }, null)
+    ).rejects.toThrow(ConflictError);
+  });
+
+  it('should throw BadRequestError for non-existent role', async () => {
     mockPrisma.user.findUnique.mockResolvedValue(null);
     mockPrisma.role.findUnique.mockResolvedValue(null);
+    await expect(
+      AuthService.register({ ...baseRegData, roleId: 4 }, null)
+    ).rejects.toThrow(BadRequestError);
+  });
 
-    await expect(AuthService.register(regData)).rejects.toThrow(BadRequestError);
+  // ── Audit logging ──────────────────────────────────────────────────────
+
+  it('should write an audit log on successful registration', async () => {
+    setupCreateMocks(4);
+    await AuthService.register({ ...baseRegData, roleId: 4 }, null);
+    expect(mockPrisma.auditLog.create).toHaveBeenCalledTimes(1);
+    const auditArg = mockPrisma.auditLog.create.mock.calls[0][0].data;
+    expect(auditArg.action).toBe('CREATE');
+    expect(auditArg.module).toBe('users');
+    expect(auditArg.entityType).toBe('User');
+  });
+
+  it('should record admin email when admin creates user', async () => {
+    setupCreateMocks(3);
+    await AuthService.register({ ...baseRegData, roleId: 3 }, superAdminCaller);
+    const auditArg = mockPrisma.auditLog.create.mock.calls[0][0].data;
+    expect(auditArg.newValues.registeredBy).toBe('sa@test.com');
   });
 });
 

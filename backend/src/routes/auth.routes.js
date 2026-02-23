@@ -3,7 +3,7 @@
 // ============================================================================
 const { Router } = require('express');
 const authController = require('../controllers/auth.controller');
-const { authenticate } = require('../middleware/auth');
+const { authenticate, optionalAuth } = require('../middleware/auth');
 const validate = require('../middleware/validate');
 const {
   loginValidator,
@@ -16,7 +16,7 @@ const router = Router();
 
 // Public routes
 router.post('/login', loginValidator, validate, authController.login);
-router.post('/register', registerValidator, validate, authController.register);
+router.post('/register', optionalAuth, registerValidator, validate, authController.register);
 router.post('/refresh-token', refreshTokenValidator, validate, authController.refreshToken);
 
 // Protected routes

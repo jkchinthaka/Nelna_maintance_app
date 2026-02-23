@@ -1,0 +1,35 @@
+{
+  "env": {
+    "node": true,
+    "es2021": true,
+    "jest": true
+  },
+  "extends": ["airbnb-base"],
+  "parserOptions": {
+    "ecmaVersion": "latest",
+    "sourceType": "module"
+  },
+  "rules": {
+    "no-console": ["warn", { "allow": ["warn", "error"] }],
+    "no-unused-vars": ["error", { "argsIgnorePattern": "^_" }],
+    "func-names": "off",
+    "object-shorthand": "warn",
+    "prefer-destructuring": "warn",
+    "no-param-reassign": ["error", { "props": false }],
+    "consistent-return": "warn",
+    "max-classes-per-file": "off",
+    "class-methods-use-this": "warn",
+    "no-underscore-dangle": "off"
+  },
+  "overrides": [
+    {
+      "files": ["tests/**/*.js"],
+      "env": {
+        "jest": true
+      },
+      "rules": {
+        "no-undef": "off"
+      }
+    }
+  ]
+}

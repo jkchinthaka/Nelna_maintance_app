@@ -51,12 +51,15 @@ const captureOldValues = (model) => {
   return async (req, res, next) => {
     try {
       const id = parseInt(req.params.id, 10);
-      if (id && prisma[model]) {
+      // Validate model exists in prisma
+      if (id && prisma[model] && typeof prisma[model].findUnique === 'function') {
         const oldRecord = await prisma[model].findUnique({ where: { id } });
         req._auditOldValues = oldRecord;
+      } else if (!prisma[model]) {
+        logger.warn(`Audit: Invalid model name "${model}" - skipping old values capture`);
       }
     } catch (error) {
-      logger.error('Capture old values failed', { error: error.message });
+      logger.error('Capture old values failed', { error: error.message, model });
     }
     next();
   };

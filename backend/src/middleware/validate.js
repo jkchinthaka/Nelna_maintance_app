@@ -16,7 +16,8 @@ const validate = (req, res, next) => {
       message: err.msg,
       value: err.value,
     }));
-    throw new ValidationError('Validation failed', formattedErrors);
+    const error = new ValidationError('Validation failed', formattedErrors);
+    return next(error);
   }
   next();
 };

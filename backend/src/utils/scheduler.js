@@ -114,16 +114,7 @@ const initScheduledTasks = () => {
   cron.schedule('0 9 * * *', async () => {
     logger.info('Running: Low stock alert check');
     try {
-      const lowStockProducts = await prisma.product.findMany({
-        where: {
-          deletedAt: null,
-          isActive: true,
-          currentStock: { lte: prisma.product.fields.reorderLevel },
-        },
-      });
-
-      // Use raw query for the comparison
-      const rawLowStock = await prisma.$queryRaw`
+      const lowStockProducts = await prisma.$queryRaw`
         SELECT id, name, sku, current_stock, reorder_level, branch_id
         FROM products
         WHERE deleted_at IS NULL
@@ -131,7 +122,7 @@ const initScheduledTasks = () => {
         AND current_stock <= reorder_level
       `;
 
-      if (rawLowStock.length > 0) {
+      if (lowStockProducts.length > 0) {
         const storeManagers = await prisma.user.findMany({
           where: {
             role: { name: { in: ['store_manager', 'company_admin'] } },
@@ -143,9 +134,9 @@ const initScheduledTasks = () => {
           await notificationService.createNotification(
             manager.id,
             'Low Stock Alert',
-            `${rawLowStock.length} products are below reorder level and need restocking.`,
+            `${lowStockProducts.length} products are below reorder level and need restocking.`,
             'LOW_STOCK_ALERT',
-            { count: rawLowStock.length }
+            { count: lowStockProducts.length }
           );
         }
       }

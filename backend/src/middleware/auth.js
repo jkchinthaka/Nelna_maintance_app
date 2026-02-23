@@ -140,8 +140,8 @@ const optionalAuth = async (req, res, next) => {
         };
       }
     }
-  } catch {
-    // Token invalid - continue without auth
+  } catch (error) {
+    logger.debug('Token validation failed', { error: error.message });
   }
   next();
 };

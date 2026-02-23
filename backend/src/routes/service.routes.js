@@ -126,7 +126,7 @@ router.post(
 );
 
 router.put(
-  '/tasks/:taskId',
+  '/:id/tasks/:taskId',
   checkPermission('services', 'update', 'service_task'),
   updateTaskValidator,
   validate,
