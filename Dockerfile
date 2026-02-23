@@ -16,7 +16,7 @@ COPY backend/prisma ./prisma/
 RUN npm ci
 
 # Generate Prisma client (dummy DATABASE_URL needed at build time; real one is set at runtime)
-ENV DATABASE_URL="postgresql://dummy:dummy@localhost:5432/dummy"
+ENV DATABASE_URL=postgresql://postgres:Chinthaka2002@#@db.zlnhdrdbksrwtfdpetai.supabase.co:5432/postgres
 RUN npx prisma generate
 ENV DATABASE_URL=""
 
