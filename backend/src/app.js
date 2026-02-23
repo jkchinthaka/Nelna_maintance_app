@@ -100,6 +100,18 @@ app.use(morgan(morganFormat, {
 app.use('/uploads', express.static(path.join(__dirname, '..', 'uploads')));
 
 // ============================================================================
+// Root Route (health check for Render / load balancers)
+// ============================================================================
+app.all('/', (req, res) => {
+  res.status(200).json({
+    success: true,
+    message: 'Nelna Maintenance System API',
+    api: '/api/v1',
+    health: '/api/v1/health',
+  });
+});
+
+// ============================================================================
 // API Routes
 // ============================================================================
 const API_PREFIX = '/api/v1';
@@ -117,15 +129,6 @@ app.use(`${API_PREFIX}/roles`, roleRoutes);
 // ============================================================================
 // Health Check
 // ============================================================================
-app.get('/', (req, res) => {
-  res.status(200).json({
-    success: true,
-    message: 'Nelna Maintenance System API',
-    api: '/api/v1',
-    health: '/api/v1/health',
-  });
-});
-
 app.get(`${API_PREFIX}/health`, (req, res) => {
   res.status(200).json({
     success: true,
