@@ -15,10 +15,9 @@ COPY backend/prisma ./prisma/
 # Install ALL dependencies (prisma CLI is a devDependency needed for generate & db push)
 RUN npm ci
 
-# Generate Prisma client (dummy URL for build only; real DATABASE_URL is set in Render env vars)
-ENV DATABASE_URL="postgresql://postgres:Chinthaka2002@#@db.zlnhdrdbksrwtfdpetai.supabase.co:5432/postgres"
+# Generate Prisma client
+# Note: Prisma generate doesn't need a valid DATABASE_URL, it just generates the client
 RUN npx prisma generate
-ENV DATABASE_URL="postgresql://postgres:Chinthaka2002@#@db.zlnhdrdbksrwtfdpetai.supabase.co:5432/postgres"
 
 # Copy backend source
 COPY backend/src ./src
@@ -26,5 +25,10 @@ COPY backend/src ./src
 # Expose port
 EXPOSE 3000
 
+# Health check
+HEALTHCHECK --interval=30s --timeout=10s --start-period=40s --retries=3 \
+  CMD node -e "require('http').get('http://localhost:3000/api/v1/health', (r) => {if (r.statusCode !== 200) throw new Error(r.statusCode)})"
+
 # Start: push schema, seed (idempotent), then run server
-CMD sh -c "npx prisma db push --skip-generate && node prisma/seed.js && node src/server.js"
+# DATABASE_URL must be provided as environment variable from Render
+CMD sh -c "npx prisma db push --skip-generate && npx prisma db seed && node src/server.js"
