@@ -10,7 +10,7 @@ import '../providers/notification_provider.dart';
 /// Call [NotificationPanel.show] from any widget that has access to a
 /// [BuildContext].
 class NotificationPanel extends ConsumerStatefulWidget {
-  const NotificationPanel({super.key});
+  const NotificationPanel({super.key, this.controller});
 
   /// Convenience method to open the panel as a modal bottom-sheet.
   static void show(BuildContext context) {
@@ -25,16 +25,11 @@ class NotificationPanel extends ConsumerStatefulWidget {
         minChildSize: 0.3,
         maxChildSize: 0.9,
         expand: false,
-        builder: (_, controller) => NotificationPanel._(controller: controller),
+        builder: (_, controller) =>
+            NotificationPanel(controller: controller),
       ),
     );
   }
-
-  /// Internal named constructor used by the DraggableScrollableSheet.
-  const NotificationPanel._({
-    super.key,
-    required this.controller,
-  });
 
   final ScrollController? controller;
 

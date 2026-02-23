@@ -34,10 +34,14 @@ class NotificationState {
 
 // ── Notifier ──────────────────────────────────────────────────────────
 
-class NotificationNotifier extends StateNotifier<NotificationState> {
-  final ApiClient _api;
+class NotificationNotifier extends Notifier<NotificationState> {
+  late final ApiClient _api;
 
-  NotificationNotifier(this._api) : super(const NotificationState());
+  @override
+  NotificationState build() {
+    _api = ApiClient();
+    return const NotificationState();
+  }
 
   /// Fetch all notifications for the current user from the API.
   Future<void> fetchNotifications() async {
@@ -45,8 +49,8 @@ class NotificationNotifier extends StateNotifier<NotificationState> {
     try {
       final response = await _api.dio.get('/notifications');
       final list = (response.data['data'] as List?)
-              ?.map((e) =>
-                  NotificationEntity.fromJson(e as Map<String, dynamic>))
+              ?.map(
+                  (e) => NotificationEntity.fromJson(e as Map<String, dynamic>))
               .toList() ??
           [];
       state = state.copyWith(notifications: list, isLoading: false);
@@ -104,6 +108,6 @@ class NotificationNotifier extends StateNotifier<NotificationState> {
 // ── Providers ─────────────────────────────────────────────────────────
 
 final notificationProvider =
-    StateNotifierProvider<NotificationNotifier, NotificationState>(
-  (ref) => NotificationNotifier(ApiClient()),
+    NotifierProvider<NotificationNotifier, NotificationState>(
+  NotificationNotifier.new,
 );

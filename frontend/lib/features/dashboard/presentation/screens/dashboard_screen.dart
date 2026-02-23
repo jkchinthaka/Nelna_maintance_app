@@ -82,8 +82,7 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
                 if (isAdmin) _buildBranchSelector(context),
                 Consumer(
                   builder: (context, ref, _) {
-                    final unread =
-                        ref.watch(notificationProvider).unreadCount;
+                    final unread = ref.watch(notificationProvider).unreadCount;
                     return IconButton(
                       icon: Badge(
                         isLabelVisible: unread > 0,
@@ -139,7 +138,7 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
     ref.invalidate(monthlyTrendsProvider);
     ref.invalidate(serviceRequestStatsProvider);
     // Wait for the providers to re-fetch
-    await Future.wait([
+    await Future.wait<dynamic>([
       ref
           .read(dashboardKPIsProvider.future)
           .catchError((_) => const DashboardKPIs()),
