@@ -15,10 +15,10 @@ COPY backend/prisma ./prisma/
 # Install ALL dependencies (prisma CLI is a devDependency needed for generate & db push)
 RUN npm ci
 
-# Generate Prisma client (dummy DATABASE_URL needed at build time; real one is set at runtime)
-ENV DATABASE_URL=postgresql://postgres:Chinthaka2002@#@db.zlnhdrdbksrwtfdpetai.supabase.co:5432/postgres
+# Generate Prisma client (dummy URL for build only; real DATABASE_URL is set in Render env vars)
+ENV DATABASE_URL="postgresql://dummy:dummy@localhost:5432/dummy"
 RUN npx prisma generate
-ENV DATABASE_URL="postgresql://postgres:Chinthaka2002@#@db.zlnhdrdbksrwtfdpetai.supabase.co:5432/postgres"
+ENV DATABASE_URL=""
 
 # Copy backend source
 COPY backend/src ./src
