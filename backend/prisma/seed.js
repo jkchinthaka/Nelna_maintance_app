@@ -27,14 +27,16 @@ async function main() {
 
   // Ensure each role has the correct stable ID.
   // Delete role_permissions first — they'll be re-created by the seed.
-  await prisma.$executeRawUnsafe('SET FOREIGN_KEY_CHECKS = 0');
+  // PostgreSQL: disable FK triggers temporarily (requires table owner privileges)
+  await prisma.$executeRawUnsafe('ALTER TABLE role_permissions DISABLE TRIGGER ALL');
+  await prisma.$executeRawUnsafe('ALTER TABLE users DISABLE TRIGGER ALL');
   await prisma.$executeRawUnsafe('DELETE FROM role_permissions');
   // Build a name→currentId map so we can untangle ID conflicts
   const existingRoles = await prisma.role.findMany();
   const nameToCurrentId = {};
   for (const r of existingRoles) nameToCurrentId[r.name] = r.id;
 
-  // Pass 1: delete ALL existing roles (FK checks off, so users are safe)
+  // Pass 1: delete ALL existing roles (FK triggers off, so users are safe)
   await prisma.$executeRawUnsafe('DELETE FROM roles');
 
   // Pass 2: insert with explicit stable IDs & update users to new IDs
@@ -42,17 +44,19 @@ async function main() {
     const oldId = nameToCurrentId[def.name];
     await prisma.$executeRawUnsafe(
       `INSERT INTO roles (id, name, display_name, description, is_system, created_at, updated_at)
-       VALUES (?, ?, ?, ?, true, NOW(), NOW())`,
+       VALUES ($1, $2, $3, $4, true, NOW(), NOW())`,
       def.id, def.name, def.displayName, def.description
     );
     // Remap any existing users that had this role under its old ID
     if (oldId !== undefined && oldId !== def.id) {
-      await prisma.$executeRawUnsafe('UPDATE users SET role_id = ? WHERE role_id = ?', def.id, oldId);
+      await prisma.$executeRawUnsafe('UPDATE users SET role_id = $1 WHERE role_id = $2', def.id, oldId);
     }
   }
-  await prisma.$executeRawUnsafe('SET FOREIGN_KEY_CHECKS = 1');
-  // Ensure auto-increment starts after our last stable ID
-  await prisma.$executeRawUnsafe('ALTER TABLE roles AUTO_INCREMENT = 8');
+  // Re-enable FK triggers
+  await prisma.$executeRawUnsafe('ALTER TABLE users ENABLE TRIGGER ALL');
+  await prisma.$executeRawUnsafe('ALTER TABLE role_permissions ENABLE TRIGGER ALL');
+  // Ensure PostgreSQL sequence starts after our last stable ID
+  await prisma.$executeRawUnsafe(`SELECT setval(pg_get_serial_sequence('roles', 'id'), (SELECT MAX(id) FROM roles))`);
 
   const roles = await prisma.role.findMany({ orderBy: { id: 'asc' } });
   console.log(`  ✅ ${roles.length} roles created (IDs 1-7 stable)`);

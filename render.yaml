@@ -1,0 +1,37 @@
+# ============================================================================
+# Nelna Maintenance System - Render.com Blueprint (Infrastructure-as-Code)
+# Deploy: Connect your GitHub repo → Render auto-detects this file
+# ============================================================================
+
+services:
+  - type: web
+    name: nelna-maintenance-api
+    runtime: node
+    region: singapore  # closest to Sri Lanka
+    plan: free
+    rootDir: backend
+    buildCommand: npm ci && npx prisma generate
+    startCommand: npx prisma migrate deploy && node prisma/seed.js && node src/server.js
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: DATABASE_URL
+        sync: false  # set manually in Render dashboard
+      - key: DIRECT_URL
+        sync: false  # set manually in Render dashboard
+      - key: JWT_SECRET
+        generateValue: true
+      - key: JWT_REFRESH_SECRET
+        generateValue: true
+      - key: JWT_EXPIRY
+        value: 24h
+      - key: JWT_REFRESH_EXPIRY
+        value: 7d
+      - key: CORS_ORIGIN
+        value: https://nelna-maintenance.netlify.app
+      - key: PORT
+        value: 3000
+      - key: LOG_LEVEL
+        value: info
+    healthCheckPath: /api/v1/health
+    autoDeploy: true
