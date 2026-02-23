@@ -1,5 +1,5 @@
 # ============================================
-# Nelna Maintenance System - Render Deployment
+# Nelna Maintenance System - Docker Build
 # ============================================
 
 FROM node:20-alpine
@@ -25,5 +25,5 @@ COPY backend/src ./src
 # Expose port
 EXPOSE 3000
 
-# Start app (DATABASE_URL comes from Render environment variables)
-CMD sh -c "npx prisma db push --skip-generate && node prisma/seed.js && node src/server.js"
+# Start app (DATABASE_URL from environment: postgresql://postgres:Chinthaka2002@#@db.zlnhdrdbksrwtfdpetai.supabase.co:5432/postgres)
+CMD sh -c "npx prisma db push --skip-generate && npx prisma db seed && node src/server.js"
