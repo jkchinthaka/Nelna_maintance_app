@@ -117,6 +117,15 @@ app.use(`${API_PREFIX}/roles`, roleRoutes);
 // ============================================================================
 // Health Check
 // ============================================================================
+app.get('/', (req, res) => {
+  res.status(200).json({
+    success: true,
+    message: 'Nelna Maintenance System API',
+    api: '/api/v1',
+    health: '/api/v1/health',
+  });
+});
+
 app.get(`${API_PREFIX}/health`, (req, res) => {
   res.status(200).json({
     success: true,
