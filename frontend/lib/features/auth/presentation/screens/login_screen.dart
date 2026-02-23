@@ -238,9 +238,8 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                         ),
                       ),
                       TextButton(
-                        onPressed: isLoading
-                            ? null
-                            : () => context.go('/register'),
+                        onPressed:
+                            isLoading ? null : () => context.go('/register'),
                         child: const Text(
                           'Create Account',
                           style: TextStyle(fontWeight: FontWeight.w600),

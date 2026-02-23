@@ -44,7 +44,8 @@ void main() {
       expect(find.text('Password is required'), findsOneWidget);
     });
 
-    testWidgets('shows email validation error for invalid format', (tester) async {
+    testWidgets('shows email validation error for invalid format',
+        (tester) async {
       await tester.pumpWidget(buildTestable(const LoginScreen()));
       await tester.pumpAndSettle();
 

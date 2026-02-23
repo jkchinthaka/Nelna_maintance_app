@@ -18,7 +18,8 @@ Future<void> main() async {
         options.tracesSampleRate = AppConfig.isProduction ? 0.2 : 1.0;
         options.debug = AppConfig.isDebug;
       },
-      appRunner: () => runApp(const ProviderScope(child: NelnaMaintenanceApp())),
+      appRunner: () =>
+          runApp(const ProviderScope(child: NelnaMaintenanceApp())),
     );
   } else {
     // No Sentry DSN — run without error monitoring
