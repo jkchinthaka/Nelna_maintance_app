@@ -7,6 +7,8 @@ import '../../../../core/widgets/error_widget.dart';
 import '../../../../core/widgets/kpi_card.dart';
 import '../../../../core/widgets/loading_widget.dart';
 import '../../../auth/presentation/providers/auth_provider.dart';
+import '../../../notifications/presentation/providers/notification_provider.dart';
+import '../../../notifications/presentation/widgets/notification_panel.dart';
 import '../../domain/entities/dashboard_entity.dart';
 import '../providers/dashboard_provider.dart';
 import '../widgets/monthly_trend_chart.dart';
@@ -78,13 +80,21 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
               actions: [
                 // Branch filter for admins
                 if (isAdmin) _buildBranchSelector(context),
-                IconButton(
-                  icon: const Icon(
-                    Icons.notifications_outlined,
-                    color: AppColors.textPrimary,
-                  ),
-                  onPressed: () {
-                    // Navigate to notifications
+                Consumer(
+                  builder: (context, ref, _) {
+                    final unread =
+                        ref.watch(notificationProvider).unreadCount;
+                    return IconButton(
+                      icon: Badge(
+                        isLabelVisible: unread > 0,
+                        label: Text('$unread'),
+                        child: const Icon(
+                          Icons.notifications_outlined,
+                          color: AppColors.textPrimary,
+                        ),
+                      ),
+                      onPressed: () => NotificationPanel.show(context),
+                    );
                   },
                 ),
                 const SizedBox(width: 4),

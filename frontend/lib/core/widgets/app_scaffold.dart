@@ -3,6 +3,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../features/auth/presentation/providers/auth_provider.dart';
+import '../../features/notifications/presentation/providers/notification_provider.dart';
+import '../../features/notifications/presentation/widgets/notification_panel.dart';
 import '../theme/app_colors.dart';
 
 /// Responsive enterprise scaffold with collapsible sidebar, app bar, and
@@ -121,13 +123,17 @@ class _AppScaffoldState extends ConsumerState<AppScaffold> {
     return AppBar(
       title: Text(widget.title),
       actions: [
-        IconButton(
-          icon: const Badge(
-            label: Text('3'),
-            child: Icon(Icons.notifications_outlined),
-          ),
-          onPressed: () {
-            // TODO: show notifications
+        Consumer(
+          builder: (context, ref, _) {
+            final unread = ref.watch(notificationProvider).unreadCount;
+            return IconButton(
+              icon: Badge(
+                isLabelVisible: unread > 0,
+                label: Text('$unread'),
+                child: const Icon(Icons.notifications_outlined),
+              ),
+              onPressed: () => NotificationPanel.show(context),
+            );
           },
         ),
         const SizedBox(width: 4),
@@ -177,12 +183,18 @@ class _AppScaffoldState extends ConsumerState<AppScaffold> {
             ).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.w600),
           ),
           const Spacer(),
-          IconButton(
-            icon: const Badge(
-              label: Text('3'),
-              child: Icon(Icons.notifications_outlined),
-            ),
-            onPressed: () {},
+          Consumer(
+            builder: (context, ref, _) {
+              final unread = ref.watch(notificationProvider).unreadCount;
+              return IconButton(
+                icon: Badge(
+                  isLabelVisible: unread > 0,
+                  label: Text('$unread'),
+                  child: const Icon(Icons.notifications_outlined),
+                ),
+                onPressed: () => NotificationPanel.show(context),
+              );
+            },
           ),
           const SizedBox(width: 8),
           PopupMenuButton<String>(
