@@ -11,7 +11,7 @@ services:
     plan: free
     rootDir: backend
     buildCommand: npm ci && npx prisma generate
-    startCommand: node prisma/seed.js && node src/server.js
+    startCommand: node src/server.js
     envVars:
       # ⚠️ CRITICAL: Must set DATABASE_URL manually in Render dashboard
       # Use Supabase SESSION MODE pooler (port 5432) URL
