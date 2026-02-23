@@ -7,12 +7,32 @@ const logger = require('./config/logger');
 const prisma = require('./config/database');
 
 const PORT = config.app.port;
+const MAX_RETRIES = 5;
+const RETRY_DELAY_MS = 3000; // 3 seconds, increases with each retry
+
+async function connectWithRetry() {
+  for (let attempt = 1; attempt <= MAX_RETRIES; attempt++) {
+    try {
+      await prisma.$connect();
+      logger.info('✅ Database connection established successfully');
+      return;
+    } catch (error) {
+      if (attempt === MAX_RETRIES) {
+        throw error;
+      }
+      const delay = RETRY_DELAY_MS * attempt;
+      logger.warn(
+        `⏳ Database connection attempt ${attempt}/${MAX_RETRIES} failed: ${error.message}. Retrying in ${delay / 1000}s...`
+      );
+      await new Promise((resolve) => setTimeout(resolve, delay));
+    }
+  }
+}
 
 async function startServer() {
   try {
-    // Test database connection
-    await prisma.$connect();
-    logger.info('✅ Database connection established successfully');
+    // Test database connection with retry
+    await connectWithRetry();
 
     // Start HTTP server
     const server = app.listen(PORT, () => {

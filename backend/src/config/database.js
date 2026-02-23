@@ -10,6 +10,11 @@ const prisma = new PrismaClient({
       ? ['query', 'info', 'warn', 'error']
       : ['error'],
   errorFormat: config.app.env === 'development' ? 'pretty' : 'minimal',
+  datasources: {
+    db: {
+      url: process.env.DATABASE_URL,
+    },
+  },
 });
 
 // Middleware: Soft delete filter
