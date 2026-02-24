@@ -22,7 +22,8 @@ class VehicleRemoteDatasource {
       'limit': limit,
       if (search != null && search.isNotEmpty) 'search': search,
       if (status != null && status.isNotEmpty) 'status': status,
-      if (vehicleType != null && vehicleType.isNotEmpty) 'vehicleType': vehicleType,
+      if (vehicleType != null && vehicleType.isNotEmpty)
+        'vehicleType': vehicleType,
       if (branchId != null) 'branchId': branchId,
     };
 

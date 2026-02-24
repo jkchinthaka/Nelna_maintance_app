@@ -131,45 +131,35 @@ class ApiClient {
   }
 
   // ── Error Interceptor ─────────────────────────────────────────────────
+  // Uses handler.reject() (NOT throw) so the error stays in Dio's
+  // pipeline as a proper DioException that datasource catch-blocks can
+  // process via _handleDioError.
   InterceptorsWrapper _errorInterceptor() {
     return InterceptorsWrapper(
       onError: (error, handler) {
-        switch (error.type) {
-          case DioExceptionType.connectionTimeout:
-          case DioExceptionType.sendTimeout:
-          case DioExceptionType.receiveTimeout:
-            throw NetworkException(message: 'Connection timed out');
-          case DioExceptionType.connectionError:
-            throw NetworkException(
-              message: 'Unable to connect to server. Check your internet.',
-            );
-          case DioExceptionType.badResponse:
-            final statusCode = error.response?.statusCode;
-            final data = error.response?.data;
-            final message = data is Map<String, dynamic>
-                ? (data['message'] ?? 'Something went wrong')
-                : 'Something went wrong';
-            final errorCode = data is Map<String, dynamic>
-                ? data['errorCode'] as String?
-                : null;
+        // For badResponse, enrich the message from the JSON body and
+        // reject with the same type so the datasource can inspect it.
+        if (error.type == DioExceptionType.badResponse) {
+          final data = error.response?.data;
+          final message = data is Map<String, dynamic>
+              ? (data['message'] as String? ?? 'Something went wrong')
+              : 'Something went wrong';
 
-            if (statusCode == 401) {
-              throw AuthException(message: message);
-            }
-            throw ServerException(
+          handler.reject(
+            DioException(
+              requestOptions: error.requestOptions,
+              response: error.response,
+              type: error.type,
               message: message,
-              statusCode: statusCode,
-              errorCode: errorCode,
-            );
-          case DioExceptionType.cancel:
-            throw ServerException(message: 'Request cancelled');
-          case DioExceptionType.badCertificate:
-            throw ServerException(message: 'Bad certificate');
-          case DioExceptionType.unknown:
-            throw NetworkException(
-              message: error.message ?? 'An unexpected error occurred',
-            );
+              error: error.error,
+            ),
+          );
+          return;
         }
+
+        // All other error types: pass through unchanged so the
+        // datasource's _handleDioError can map by DioExceptionType.
+        handler.next(error);
       },
     );
   }

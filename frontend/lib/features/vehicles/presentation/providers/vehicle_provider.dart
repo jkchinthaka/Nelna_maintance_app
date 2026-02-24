@@ -59,7 +59,8 @@ class VehicleListParams extends Equatable {
   }
 
   @override
-  List<Object?> get props => [page, limit, search, status, vehicleType, branchId];
+  List<Object?> get props =>
+      [page, limit, search, status, vehicleType, branchId];
 }
 
 class CostAnalyticsParams extends Equatable {

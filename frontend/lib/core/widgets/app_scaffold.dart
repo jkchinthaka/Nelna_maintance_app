@@ -90,9 +90,8 @@ class _AppScaffoldState extends ConsumerState<AppScaffold> {
     final isMobile = MediaQuery.of(context).size.width < 768;
     final currentPath = GoRouterState.of(context).matchedLocation;
     final authState = ref.watch(authStateProvider);
-    final userRole = authState is AuthAuthenticated
-        ? authState.user.roleName
-        : null;
+    final userRole =
+        authState is AuthAuthenticated ? authState.user.roleName : null;
 
     // Filter nav items by current user's role
     final visibleItems = _navItems.where((item) {
@@ -247,7 +246,8 @@ class _AppScaffoldState extends ConsumerState<AppScaffold> {
   }
 
   // ── Desktop Sidebar ─────────────────────────────────────────────────
-  Widget _buildSidebar(BuildContext context, String currentPath, List<_NavItem> visibleItems) {
+  Widget _buildSidebar(
+      BuildContext context, String currentPath, List<_NavItem> visibleItems) {
     final width = _sidebarExpanded ? 260.0 : 72.0;
 
     return AnimatedContainer(
@@ -347,7 +347,8 @@ class _AppScaffoldState extends ConsumerState<AppScaffold> {
   }
 
   // ── Mobile Drawer ───────────────────────────────────────────────────
-  Widget _buildDrawer(BuildContext context, String currentPath, List<_NavItem> visibleItems) {
+  Widget _buildDrawer(
+      BuildContext context, String currentPath, List<_NavItem> visibleItems) {
     return Drawer(
       child: Container(
         color: AppColors.primaryDark,

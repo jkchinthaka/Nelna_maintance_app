@@ -43,10 +43,11 @@ class _VehicleListScreenState extends ConsumerState<VehicleListScreen> {
   ];
 
   VehicleListParams get _params => VehicleListParams(
-    search: _searchController.text.isNotEmpty ? _searchController.text : null,
-    status: _selectedStatus,
-    vehicleType: _selectedType,
-  );
+        search:
+            _searchController.text.isNotEmpty ? _searchController.text : null,
+        status: _selectedStatus,
+        vehicleType: _selectedType,
+      );
 
   @override
   void dispose() {
