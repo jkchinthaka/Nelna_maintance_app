@@ -1,21 +1,31 @@
 // ============================================================================
 // Nelna Maintenance System - Prisma Database Client
+// Serverless-compatible singleton pattern (Vercel / AWS Lambda)
 // ============================================================================
 const { PrismaClient } = require('@prisma/client');
 const config = require('./index');
 
-const prisma = new PrismaClient({
-  log:
-    config.app.env === 'development'
-      ? ['query', 'info', 'warn', 'error']
-      : ['error'],
-  errorFormat: config.app.env === 'development' ? 'pretty' : 'minimal',
-  datasources: {
-    db: {
-      url: process.env.DATABASE_URL,
+// Prevent multiple PrismaClient instances in serverless hot-reloads
+const globalForPrisma = globalThis;
+
+const prisma =
+  globalForPrisma.prisma ||
+  new PrismaClient({
+    log:
+      config.app.env === 'development'
+        ? ['query', 'info', 'warn', 'error']
+        : ['error'],
+    errorFormat: config.app.env === 'development' ? 'pretty' : 'minimal',
+    datasources: {
+      db: {
+        url: process.env.DATABASE_URL,
+      },
     },
-  },
-});
+  });
+
+if (config.app.env !== 'production') {
+  globalForPrisma.prisma = prisma;
+}
 
 // Middleware: Soft delete filter
 prisma.$use(async (params, next) => {

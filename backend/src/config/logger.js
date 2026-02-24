@@ -22,11 +22,14 @@ const consoleFormat = winston.format.combine(
   })
 );
 
-const logger = winston.createLogger({
-  level: config.logging.level,
-  format: logFormat,
-  defaultMeta: { service: config.app.name },
-  transports: [
+// Vercel / serverless environments have a read-only filesystem.
+// Use file transports only when NOT running on Vercel.
+const isServerless = !!process.env.VERCEL;
+
+const transports = [];
+
+if (!isServerless) {
+  transports.push(
     // Error log file
     new winston.transports.File({
       filename: path.join(logDir, 'error.log'),
@@ -47,16 +50,23 @@ const logger = winston.createLogger({
       maxsize: 10485760,
       maxFiles: 30,
     }),
-  ],
-});
+  );
+}
 
-// Console transport for non-production
-if (config.app.env !== 'production') {
-  logger.add(
+// Always add console transport (Vercel captures stdout/stderr automatically)
+if (config.app.env !== 'production' || isServerless) {
+  transports.push(
     new winston.transports.Console({
       format: consoleFormat,
     })
   );
 }
+
+const logger = winston.createLogger({
+  level: config.logging.level,
+  format: logFormat,
+  defaultMeta: { service: config.app.name },
+  transports,
+});
 
 module.exports = logger;
