@@ -28,6 +28,7 @@ class VehicleListParams extends Equatable {
   final int limit;
   final String? search;
   final String? status;
+  final String? vehicleType;
   final int? branchId;
 
   const VehicleListParams({
@@ -35,6 +36,7 @@ class VehicleListParams extends Equatable {
     this.limit = 20,
     this.search,
     this.status,
+    this.vehicleType,
     this.branchId,
   });
 
@@ -43,6 +45,7 @@ class VehicleListParams extends Equatable {
     int? limit,
     String? search,
     String? status,
+    String? vehicleType,
     int? branchId,
   }) {
     return VehicleListParams(
@@ -50,12 +53,13 @@ class VehicleListParams extends Equatable {
       limit: limit ?? this.limit,
       search: search ?? this.search,
       status: status ?? this.status,
+      vehicleType: vehicleType ?? this.vehicleType,
       branchId: branchId ?? this.branchId,
     );
   }
 
   @override
-  List<Object?> get props => [page, limit, search, status, branchId];
+  List<Object?> get props => [page, limit, search, status, vehicleType, branchId];
 }
 
 class CostAnalyticsParams extends Equatable {
@@ -89,6 +93,7 @@ final vehicleListProvider =
     limit: params.limit,
     search: params.search,
     status: params.status,
+    vehicleType: params.vehicleType,
     branchId: params.branchId,
   );
   return result.fold(

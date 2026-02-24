@@ -11,6 +11,7 @@ abstract class VehicleRepository {
     int limit = 20,
     String? search,
     String? status,
+    String? vehicleType,
     int? branchId,
   });
 

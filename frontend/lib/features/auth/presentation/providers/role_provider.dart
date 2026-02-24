@@ -8,14 +8,14 @@ import '../../data/models/role_model.dart';
 ///
 /// Public callers see only self-register roles (Technician, Driver).
 /// Authenticated admins see all roles.
-final availableRolesProvider = FutureProvider<List<RoleModel>>((ref) async {
+final availableRolesProvider = FutureProvider<List<RoleListModel>>((ref) async {
   final response = await ApiClient().get(ApiConstants.roles);
   final data = response.data;
 
   if (data is Map<String, dynamic> && data['success'] == true) {
     final list = data['data'] as List<dynamic>;
     return list
-        .map((e) => RoleModel.fromJson(e as Map<String, dynamic>))
+        .map((e) => RoleListModel.fromJson(e as Map<String, dynamic>))
         .toList();
   }
 

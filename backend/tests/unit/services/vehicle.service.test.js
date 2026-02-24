@@ -183,12 +183,15 @@ describe('VehicleService.update', () => {
 describe('VehicleService.delete', () => {
   it('should soft-delete an existing vehicle', async () => {
     mockPrisma.vehicle.findFirst.mockResolvedValue(sampleVehicle);
-    mockPrisma.vehicle.delete.mockResolvedValue(sampleVehicle);
+    mockPrisma.vehicle.update.mockResolvedValue({ ...sampleVehicle, deletedAt: new Date() });
 
     const result = await VehicleService.delete(1);
 
     expect(result).toBeDefined();
-    expect(mockPrisma.vehicle.delete).toHaveBeenCalledWith({ where: { id: 1 } });
+    expect(mockPrisma.vehicle.update).toHaveBeenCalledWith({
+      where: { id: 1 },
+      data: { deletedAt: expect.any(Date) },
+    });
   });
 
   it('should throw NotFoundError for non-existent vehicle', async () => {

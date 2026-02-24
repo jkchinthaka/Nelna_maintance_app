@@ -43,8 +43,9 @@ class ReportService {
       }),
       // Low stock items (current stock <= reorder level)
       // Prisma doesn't support comparing two columns, so use a raw query
-      prisma.$queryRawUnsafe(
-        `SELECT COUNT(*) as count FROM products WHERE ${branchId ? `branch_id = ${parseInt(branchId, 10)} AND` : ''} is_active = true AND deleted_at IS NULL AND current_stock <= reorder_level`
+      (branchId
+        ? prisma.$queryRaw`SELECT COUNT(*)::int as count FROM products WHERE branch_id = ${parseInt(branchId, 10)} AND is_active = true AND deleted_at IS NULL AND current_stock <= reorder_level`
+        : prisma.$queryRaw`SELECT COUNT(*)::int as count FROM products WHERE is_active = true AND deleted_at IS NULL AND current_stock <= reorder_level`
       ).then((r) => Number(r[0]?.count || 0)),
       // Pending purchase orders
       prisma.purchaseOrder.count({
@@ -327,26 +328,22 @@ class ReportService {
     });
     const productMap = Object.fromEntries(products.map((p) => [p.id, p]));
 
-    // Low stock products
-    const lowStockProducts = await prisma.product.findMany({
-      where: {
-        ...branchFilter,
-        isActive: true,
-        deletedAt: null,
-      },
-      select: {
-        id: true,
-        sku: true,
-        name: true,
-        unit: true,
-        currentStock: true,
-        reorderLevel: true,
-        minimumStock: true,
-      },
-    });
-    const actualLowStock = lowStockProducts.filter(
-      (p) => parseFloat(p.currentStock) <= parseFloat(p.reorderLevel)
-    );
+    // Low stock products (use raw SQL to compare two columns)
+    const lowStockFilter = branchId
+      ? prisma.$queryRaw`
+          SELECT id, sku, name, unit, current_stock, reorder_level, minimum_stock
+          FROM products
+          WHERE branch_id = ${parseInt(branchId, 10)}
+            AND is_active = true AND deleted_at IS NULL
+            AND current_stock <= reorder_level
+        `
+      : prisma.$queryRaw`
+          SELECT id, sku, name, unit, current_stock, reorder_level, minimum_stock
+          FROM products
+          WHERE is_active = true AND deleted_at IS NULL
+            AND current_stock <= reorder_level
+        `;
+    const actualLowStock = await lowStockFilter;
 
     return {
       period: { startDate: start, endDate: end },
@@ -539,24 +536,28 @@ class ReportService {
       }),
     ]);
 
-    // Average resolution time for completed requests
-    const completedRequests = await prisma.serviceRequest.findMany({
-      where: {
-        ...where,
-        status: { in: ['COMPLETED', 'CLOSED'] },
-        completedAt: { not: null },
-      },
-      select: { createdAt: true, completedAt: true },
-    });
+    // Average resolution time for completed requests (efficient SQL aggregate)
+    const avgResolutionResult = branchId
+      ? await prisma.$queryRaw`
+          SELECT AVG(EXTRACT(EPOCH FROM (completed_at - created_at)) / 3600) as avg_hours,
+                 COUNT(*) as completed_count
+          FROM service_requests
+          WHERE status IN ('COMPLETED', 'CLOSED')
+            AND completed_at IS NOT NULL
+            AND deleted_at IS NULL
+            AND branch_id = ${parseInt(branchId, 10)}
+        `
+      : await prisma.$queryRaw`
+          SELECT AVG(EXTRACT(EPOCH FROM (completed_at - created_at)) / 3600) as avg_hours,
+                 COUNT(*) as completed_count
+          FROM service_requests
+          WHERE status IN ('COMPLETED', 'CLOSED')
+            AND completed_at IS NOT NULL
+            AND deleted_at IS NULL
+        `;
 
-    let avgResolutionHours = 0;
-    if (completedRequests.length > 0) {
-      const totalHours = completedRequests.reduce((sum, sr) => {
-        const diffMs = new Date(sr.completedAt).getTime() - new Date(sr.createdAt).getTime();
-        return sum + diffMs / (1000 * 60 * 60);
-      }, 0);
-      avgResolutionHours = Math.round((totalHours / completedRequests.length) * 100) / 100;
-    }
+    const avgResolutionHours = Math.round((parseFloat(avgResolutionResult[0]?.avg_hours) || 0) * 100) / 100;
+    const completedCount = Number(avgResolutionResult[0]?.completed_count || 0);
 
     return {
       byStatus: byStatus.map((s) => ({
@@ -578,7 +579,7 @@ class ReportService {
         totalEstimatedCost: overallAgg._sum.estimatedCost ? parseFloat(overallAgg._sum.estimatedCost) : 0,
         averageCost: overallAgg._avg.actualCost ? parseFloat(overallAgg._avg.actualCost) : 0,
         avgResolutionHours,
-        completedCount: completedRequests.length,
+        completedCount,
       },
     };
   }

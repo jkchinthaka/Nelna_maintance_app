@@ -381,18 +381,24 @@ class ServiceService {
     if (!product) throw new NotFoundError('Product not found');
 
     const quantity = parseFloat(data.quantity);
-    if (parseFloat(product.currentStock) < quantity) {
-      throw new BadRequestError(
-        `Insufficient stock for ${product.name}. Available: ${product.currentStock}, Requested: ${quantity}`
-      );
-    }
-
     const unitCost = parseFloat(data.unitCost);
     const totalCost = quantity * unitCost;
 
-    // Create spare part record and decrement stock in a transaction
-    const [sparePart] = await prisma.$transaction([
-      prisma.serviceSparePart.create({
+    // Use interactive transaction with isolation to prevent race-condition stock over-decrement
+    const sparePart = await prisma.$transaction(async (tx) => {
+      // Re-read stock inside the transaction for consistency
+      const freshProduct = await tx.product.findUnique({
+        where: { id: data.productId },
+        select: { currentStock: true, name: true },
+      });
+
+      if (parseFloat(freshProduct.currentStock) < quantity) {
+        throw new BadRequestError(
+          `Insufficient stock for ${freshProduct.name}. Available: ${freshProduct.currentStock}, Requested: ${quantity}`
+        );
+      }
+
+      const created = await tx.serviceSparePart.create({
         data: {
           serviceRequestId,
           productId: data.productId,
@@ -403,12 +409,15 @@ class ServiceService {
         include: {
           product: { select: { id: true, sku: true, name: true, unit: true } },
         },
-      }),
-      prisma.product.update({
+      });
+
+      await tx.product.update({
         where: { id: data.productId },
         data: { currentStock: { decrement: quantity } },
-      }),
-    ]);
+      });
+
+      return created;
+    });
 
     // Recalculate actual cost
     await this.calculateCost(serviceRequestId);

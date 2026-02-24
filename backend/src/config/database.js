@@ -23,9 +23,10 @@ const prisma =
     },
   });
 
-if (config.app.env !== 'production') {
-  globalForPrisma.prisma = prisma;
-}
+// Cache the client globally to avoid multiple instances in serverless hot-reloads.
+// In production on Vercel, each cold start creates a new global scope, so this
+// prevents accumulating connections during warm invocations.
+globalForPrisma.prisma = prisma;
 
 // Middleware: Soft delete filter
 prisma.$use(async (params, next) => {

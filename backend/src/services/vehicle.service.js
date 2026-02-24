@@ -152,7 +152,11 @@ class VehicleService {
   async delete(id) {
     const vehicle = await prisma.vehicle.findFirst({ where: { id, deletedAt: null } });
     if (!vehicle) throw new NotFoundError('Vehicle not found');
-    return prisma.vehicle.delete({ where: { id } }); // Intercepted by soft-delete middleware
+    // Explicit soft-delete — consistent with other services
+    return prisma.vehicle.update({
+      where: { id },
+      data: { deletedAt: new Date() },
+    });
   }
 
   /**
@@ -221,6 +225,11 @@ class VehicleService {
    * Add vehicle document
    */
   async addDocument(data) {
+    const vehicle = await prisma.vehicle.findFirst({
+      where: { id: data.vehicleId, deletedAt: null },
+    });
+    if (!vehicle) throw new NotFoundError('Vehicle not found');
+
     return prisma.vehicleDocument.create({
       data: {
         vehicleId: data.vehicleId,

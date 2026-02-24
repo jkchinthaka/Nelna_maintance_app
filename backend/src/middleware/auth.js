@@ -4,6 +4,7 @@
 const jwt = require('jsonwebtoken');
 const config = require('../config');
 const prisma = require('../config/database');
+const logger = require('../config/logger');
 const { UnauthorizedError, ForbiddenError } = require('../utils/errors');
 
 /**
@@ -141,7 +142,12 @@ const optionalAuth = async (req, res, next) => {
       }
     }
   } catch (error) {
-    logger.debug('Token validation failed', { error: error.message });
+    // Only silently ignore JWT validation errors; log unexpected failures
+    if (error.name !== 'JsonWebTokenError' && error.name !== 'TokenExpiredError') {
+      logger.warn('Unexpected error in optionalAuth', { error: error.message });
+    } else {
+      logger.debug('Token validation failed', { error: error.message });
+    }
   }
   next();
 };

@@ -21,7 +21,7 @@ class AuthController {
    */
   register = asyncHandler(async (req, res) => {
     // Attach request metadata for audit logging
-    req.body._ip = req.ip || req.connection?.remoteAddress;
+    req.body._ip = req.ip || req.socket?.remoteAddress;
     req.body._userAgent = req.headers['user-agent'];
     const result = await authService.register(req.body, req.user || null);
     ApiResponse.created(res, result, 'User registered successfully');
@@ -66,7 +66,10 @@ class AuthController {
    */
   updateFCMToken = asyncHandler(async (req, res) => {
     const { fcmToken } = req.body;
-    await authService.updateFCMToken(req.user.id, fcmToken);
+    if (!fcmToken || typeof fcmToken !== 'string' || fcmToken.trim().length === 0) {
+      return ApiResponse.badRequest(res, 'A valid FCM token string is required');
+    }
+    await authService.updateFCMToken(req.user.id, fcmToken.trim());
     ApiResponse.success(res, null, 'FCM token updated');
   });
 }

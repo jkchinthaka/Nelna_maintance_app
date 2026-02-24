@@ -140,13 +140,13 @@ const initScheduledTasks = () => {
           );
         }
       }
-      logger.info(`Low stock check: ${rawLowStock.length} items below reorder level`);
+      logger.info(`Low stock check: ${lowStockProducts.length} items below reorder level`);
     } catch (error) {
       logger.error('Low stock cron failed:', error);
     }
   });
 
-  // Every hour - Check SLA breaches
+  // Every hour - Check SLA breaches (dedup: only notify once per request)
   cron.schedule('0 * * * *', async () => {
     try {
       const breachedRequests = await prisma.serviceRequest.findMany({
@@ -157,16 +157,35 @@ const initScheduledTasks = () => {
         include: { requester: true },
       });
 
+      if (breachedRequests.length === 0) return;
+
+      // Batch-fetch all unique branch managers (avoid N+1)
+      const branchIds = [...new Set(breachedRequests.map((r) => r.branchId).filter(Boolean))];
+      const managers = await prisma.user.findMany({
+        where: {
+          role: { name: 'maintenance_manager' },
+          branchId: { in: branchIds },
+          isActive: true,
+        },
+      });
+      const managersByBranch = managers.reduce((acc, m) => {
+        (acc[m.branchId] = acc[m.branchId] || []).push(m);
+        return acc;
+      }, {});
+
       for (const request of breachedRequests) {
-        const managers = await prisma.user.findMany({
+        // Dedup: skip if notification already sent for this request today
+        const existingNotification = await prisma.notification.findFirst({
           where: {
-            role: { name: 'maintenance_manager' },
-            branchId: request.branchId,
-            isActive: true,
+            type: 'SLA_BREACH',
+            data: { path: ['ticketNo'], equals: request.ticketNo },
+            createdAt: { gte: new Date(new Date().setHours(0, 0, 0, 0)) },
           },
         });
+        if (existingNotification) continue;
 
-        for (const manager of managers) {
+        const branchManagers = managersByBranch[request.branchId] || [];
+        for (const manager of branchManagers) {
           await notificationService.createNotification(
             manager.id,
             `SLA Breach: ${request.ticketNo}`,

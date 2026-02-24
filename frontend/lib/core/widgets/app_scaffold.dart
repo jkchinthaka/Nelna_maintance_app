@@ -89,11 +89,21 @@ class _AppScaffoldState extends ConsumerState<AppScaffold> {
   Widget build(BuildContext context) {
     final isMobile = MediaQuery.of(context).size.width < 768;
     final currentPath = GoRouterState.of(context).matchedLocation;
+    final authState = ref.watch(authStateProvider);
+    final userRole = authState is AuthAuthenticated
+        ? authState.user.roleName
+        : null;
+
+    // Filter nav items by current user's role
+    final visibleItems = _navItems.where((item) {
+      if (item.roles == null) return true; // visible to all
+      return userRole != null && item.roles!.contains(userRole);
+    }).toList();
 
     if (isMobile) {
       return Scaffold(
         appBar: _buildAppBar(context, isMobile: true),
-        drawer: _buildDrawer(context, currentPath),
+        drawer: _buildDrawer(context, currentPath, visibleItems),
         body: widget.child,
       );
     }
@@ -101,7 +111,7 @@ class _AppScaffoldState extends ConsumerState<AppScaffold> {
     return Scaffold(
       body: Row(
         children: [
-          _buildSidebar(context, currentPath),
+          _buildSidebar(context, currentPath, visibleItems),
           Expanded(
             child: Column(
               children: [
@@ -153,6 +163,8 @@ class _AppScaffoldState extends ConsumerState<AppScaffold> {
           onSelected: (value) {
             if (value == 'logout') {
               ref.read(authStateProvider.notifier).logout();
+            } else if (value == 'profile') {
+              context.push('/profile');
             }
           },
         ),
@@ -223,6 +235,8 @@ class _AppScaffoldState extends ConsumerState<AppScaffold> {
             onSelected: (value) {
               if (value == 'logout') {
                 ref.read(authStateProvider.notifier).logout();
+              } else if (value == 'profile') {
+                context.push('/profile');
               }
             },
           ),
@@ -233,7 +247,7 @@ class _AppScaffoldState extends ConsumerState<AppScaffold> {
   }
 
   // ── Desktop Sidebar ─────────────────────────────────────────────────
-  Widget _buildSidebar(BuildContext context, String currentPath) {
+  Widget _buildSidebar(BuildContext context, String currentPath, List<_NavItem> visibleItems) {
     final width = _sidebarExpanded ? 260.0 : 72.0;
 
     return AnimatedContainer(
@@ -301,11 +315,10 @@ class _AppScaffoldState extends ConsumerState<AppScaffold> {
           ),
           const Divider(color: Colors.white12, height: 1),
 
-          // Nav items
           Expanded(
             child: ListView(
               padding: const EdgeInsets.symmetric(vertical: 8),
-              children: _navItems.map((item) {
+              children: visibleItems.map((item) {
                 final isActive = currentPath.startsWith(item.path);
                 return _SidebarTile(
                   item: item,
@@ -334,7 +347,7 @@ class _AppScaffoldState extends ConsumerState<AppScaffold> {
   }
 
   // ── Mobile Drawer ───────────────────────────────────────────────────
-  Widget _buildDrawer(BuildContext context, String currentPath) {
+  Widget _buildDrawer(BuildContext context, String currentPath, List<_NavItem> visibleItems) {
     return Drawer(
       child: Container(
         color: AppColors.primaryDark,
@@ -374,7 +387,7 @@ class _AppScaffoldState extends ConsumerState<AppScaffold> {
               Expanded(
                 child: ListView(
                   padding: const EdgeInsets.symmetric(vertical: 8),
-                  children: _navItems.map((item) {
+                  children: visibleItems.map((item) {
                     final isActive = currentPath.startsWith(item.path);
                     return _SidebarTile(
                       item: item,

@@ -164,7 +164,11 @@ class MachineService {
   async delete(id) {
     const machine = await prisma.machine.findFirst({ where: { id, deletedAt: null } });
     if (!machine) throw new NotFoundError('Machine not found');
-    return prisma.machine.delete({ where: { id } }); // Intercepted by soft-delete middleware
+    // Explicit soft-delete — consistent with other services
+    return prisma.machine.update({
+      where: { id },
+      data: { deletedAt: new Date() },
+    });
   }
 
   // ==========================================================================
@@ -298,6 +302,12 @@ class MachineService {
 
     const resolvedAt = new Date(data.resolvedAt);
     const reportedAt = new Date(breakdown.reportedAt);
+
+    // Validate resolvedAt is after reportedAt to prevent negative downtime
+    if (resolvedAt <= reportedAt) {
+      throw new BadRequestError('Resolution time must be after the reported time');
+    }
+
     const downtimeMinutes = Math.round((resolvedAt - reportedAt) / (1000 * 60));
 
     const resolved = await prisma.breakdownLog.update({

@@ -153,7 +153,9 @@ app.get(`${API_PREFIX}/health`, (req, res) => {
 // ============================================================================
 // System Info (Admin only)
 // ============================================================================
-app.get(`${API_PREFIX}/system/info`, (req, res) => {
+// System info: requires authentication + super_admin role
+const { authenticate, authorize } = require('./middleware/auth');
+app.get(`${API_PREFIX}/system/info`, authenticate, authorize('super_admin'), (req, res) => {
   res.status(200).json({
     success: true,
     data: {

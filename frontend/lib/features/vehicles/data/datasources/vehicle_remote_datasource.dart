@@ -14,6 +14,7 @@ class VehicleRemoteDatasource {
     int limit = 20,
     String? search,
     String? status,
+    String? vehicleType,
     int? branchId,
   }) async {
     final queryParameters = <String, dynamic>{
@@ -21,6 +22,7 @@ class VehicleRemoteDatasource {
       'limit': limit,
       if (search != null && search.isNotEmpty) 'search': search,
       if (status != null && status.isNotEmpty) 'status': status,
+      if (vehicleType != null && vehicleType.isNotEmpty) 'vehicleType': vehicleType,
       if (branchId != null) 'branchId': branchId,
     };
 

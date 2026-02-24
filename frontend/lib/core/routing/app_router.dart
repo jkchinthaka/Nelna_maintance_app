@@ -41,11 +41,16 @@ import '../../features/reports/presentation/screens/inventory_report_screen.dart
 final appRouterProvider = Provider<GoRouter>((ref) {
   final authState = ref.watch(authStateProvider);
   final isAuthenticated = authState is AuthAuthenticated;
+  // While the app is still checking persisted tokens, allow the current route.
+  final isLoading = authState is AuthLoading;
 
   return GoRouter(
     initialLocation: '/login',
     debugLogDiagnostics: true,
     redirect: (context, state) {
+      // Don't redirect while auth state is being resolved (avoids login flash)
+      if (isLoading) return null;
+
       final loggingIn = state.matchedLocation == '/login';
       final registering = state.matchedLocation == '/register';
 
@@ -53,6 +58,12 @@ final appRouterProvider = Provider<GoRouter>((ref) {
       if (isAuthenticated && (loggingIn || registering)) return '/dashboard';
       return null;
     },
+    errorBuilder: (context, state) => Scaffold(
+      body: Center(
+        child: Text('Page not found: ${state.uri}',
+            style: const TextStyle(fontSize: 18)),
+      ),
+    ),
     routes: [
       // ── Login (no shell) ────────────────────────────────────────────
       GoRoute(
@@ -102,7 +113,8 @@ final appRouterProvider = Provider<GoRouter>((ref) {
                 path: ':id',
                 name: 'vehicle-detail',
                 builder: (context, state) => VehicleDetailScreen(
-                  vehicleId: int.parse(state.pathParameters['id'] ?? '0'),
+                  vehicleId:
+                      int.tryParse(state.pathParameters['id'] ?? '') ?? 0,
                 ),
               ),
             ],
@@ -126,7 +138,8 @@ final appRouterProvider = Provider<GoRouter>((ref) {
                 path: ':id',
                 name: 'machine-detail',
                 builder: (context, state) => MachineDetailScreen(
-                  machineId: int.parse(state.pathParameters['id'] ?? '0'),
+                  machineId:
+                      int.tryParse(state.pathParameters['id'] ?? '') ?? 0,
                 ),
                 routes: [
                   GoRoute(
@@ -162,7 +175,8 @@ final appRouterProvider = Provider<GoRouter>((ref) {
                 path: ':id',
                 name: 'service-detail',
                 builder: (context, state) => ServiceDetailScreen(
-                  serviceId: int.parse(state.pathParameters['id'] ?? '0'),
+                  serviceId:
+                      int.tryParse(state.pathParameters['id'] ?? '') ?? 0,
                 ),
               ),
             ],
@@ -184,7 +198,8 @@ final appRouterProvider = Provider<GoRouter>((ref) {
                 path: 'products/:id',
                 name: 'product-detail',
                 builder: (context, state) => ProductDetailScreen(
-                  productId: int.parse(state.pathParameters['id'] ?? '0'),
+                  productId:
+                      int.tryParse(state.pathParameters['id'] ?? '') ?? 0,
                 ),
               ),
               GoRoute(
@@ -237,7 +252,7 @@ final appRouterProvider = Provider<GoRouter>((ref) {
                 path: ':id',
                 name: 'asset-detail',
                 builder: (context, state) => AssetDetailScreen(
-                  assetId: int.parse(state.pathParameters['id'] ?? '0'),
+                  assetId: int.tryParse(state.pathParameters['id'] ?? '') ?? 0,
                 ),
                 routes: [
                   GoRoute(

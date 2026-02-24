@@ -21,6 +21,7 @@ class VehicleRepositoryImpl implements VehicleRepository {
     int limit = 20,
     String? search,
     String? status,
+    String? vehicleType,
     int? branchId,
   }) async {
     try {
@@ -29,6 +30,7 @@ class VehicleRepositoryImpl implements VehicleRepository {
         limit: limit,
         search: search,
         status: status,
+        vehicleType: vehicleType,
         branchId: branchId,
       );
 

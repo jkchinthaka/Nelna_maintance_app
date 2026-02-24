@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -20,6 +22,7 @@ class VehicleListScreen extends ConsumerStatefulWidget {
 
 class _VehicleListScreenState extends ConsumerState<VehicleListScreen> {
   final TextEditingController _searchController = TextEditingController();
+  Timer? _debounce;
   String? _selectedStatus;
   String? _selectedType;
 
@@ -42,15 +45,22 @@ class _VehicleListScreenState extends ConsumerState<VehicleListScreen> {
   VehicleListParams get _params => VehicleListParams(
     search: _searchController.text.isNotEmpty ? _searchController.text : null,
     status: _selectedStatus,
+    vehicleType: _selectedType,
   );
 
   @override
   void dispose() {
+    _debounce?.cancel();
     _searchController.dispose();
     super.dispose();
   }
 
-  void _onSearchChanged(String _) => setState(() {});
+  void _onSearchChanged(String _) {
+    _debounce?.cancel();
+    _debounce = Timer(const Duration(milliseconds: 400), () {
+      if (mounted) setState(() {});
+    });
+  }
 
   void _clearFilters() {
     setState(() {

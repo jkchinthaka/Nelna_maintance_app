@@ -32,7 +32,10 @@ class VehicleController {
   });
 
   addFuelLog = asyncHandler(async (req, res) => {
-    const log = await vehicleService.addFuelLog(req.body);
+    const log = await vehicleService.addFuelLog({
+      ...req.body,
+      vehicleId: parseInt(req.params.id, 10),
+    });
     ApiResponse.created(res, log, 'Fuel log added successfully');
   });
 
@@ -42,12 +45,18 @@ class VehicleController {
   });
 
   addDocument = asyncHandler(async (req, res) => {
-    const doc = await vehicleService.addDocument(req.body);
+    const doc = await vehicleService.addDocument({
+      ...req.body,
+      vehicleId: parseInt(req.params.id, 10),
+    });
     ApiResponse.created(res, doc, 'Document added successfully');
   });
 
   assignDriver = asyncHandler(async (req, res) => {
-    const assignment = await vehicleService.assignDriver(req.body);
+    const assignment = await vehicleService.assignDriver({
+      ...req.body,
+      vehicleId: parseInt(req.params.id, 10),
+    });
     ApiResponse.created(res, assignment, 'Driver assigned successfully');
   });
 

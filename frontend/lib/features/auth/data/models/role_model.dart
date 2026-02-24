@@ -1,14 +1,16 @@
 import 'package:equatable/equatable.dart';
 
 /// Lightweight role returned by GET /api/v1/roles.
-class RoleModel extends Equatable {
+/// Named [RoleListModel] to avoid collision with the data-layer
+/// [RoleModel] defined in user_model.dart that extends [RoleEntity].
+class RoleListModel extends Equatable {
   final int id;
   final String name;
   final String displayName;
   final String? description;
   final bool isSystem;
 
-  const RoleModel({
+  const RoleListModel({
     required this.id,
     required this.name,
     required this.displayName,
@@ -16,8 +18,8 @@ class RoleModel extends Equatable {
     this.isSystem = false,
   });
 
-  factory RoleModel.fromJson(Map<String, dynamic> json) {
-    return RoleModel(
+  factory RoleListModel.fromJson(Map<String, dynamic> json) {
+    return RoleListModel(
       id: json['id'] as int,
       name: json['name'] as String,
       displayName: json['displayName'] as String,

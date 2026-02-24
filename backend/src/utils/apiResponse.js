@@ -58,6 +58,13 @@ class ApiResponse {
   }
 
   /**
+   * Bad request response
+   */
+  static badRequest(res, message = 'Bad request', errors = null) {
+    return ApiResponse.error(res, message, 400, 'BAD_REQUEST', errors);
+  }
+
+  /**
    * No content response
    */
   static noContent(res) {

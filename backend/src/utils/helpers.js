@@ -2,9 +2,11 @@
 // Nelna Maintenance System - Utility Helpers
 // ============================================================================
 const { v4: uuidv4 } = require('uuid');
+const crypto = require('crypto');
 
 /**
- * Generate a unique ticket/reference number
+ * Generate a unique ticket/reference number.
+ * Uses crypto.randomBytes for better entropy to reduce collision risk.
  * @param {string} prefix - Prefix for the number (e.g., 'SR', 'PO', 'GRN')
  * @returns {string} Formatted reference number
  */
@@ -12,7 +14,7 @@ const generateReferenceNo = (prefix = 'REF') => {
   const date = new Date();
   const year = date.getFullYear().toString().slice(-2);
   const month = String(date.getMonth() + 1).padStart(2, '0');
-  const random = Math.floor(Math.random() * 10000).toString().padStart(4, '0');
+  const random = crypto.randomBytes(4).toString('hex').toUpperCase().slice(0, 6);
   return `${prefix}-${year}${month}-${random}`;
 };
 
@@ -43,7 +45,7 @@ const buildSearchFilter = (query, searchFields = []) => {
 
   if (query.search && searchFields.length > 0) {
     where.OR = searchFields.map((field) => ({
-      [field]: { contains: query.search },
+      [field]: { contains: query.search, mode: 'insensitive' },
     }));
   }
 

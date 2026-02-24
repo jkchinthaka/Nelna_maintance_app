@@ -15,6 +15,7 @@ class GetVehiclesUseCase {
     int limit = 20,
     String? search,
     String? status,
+    String? vehicleType,
     int? branchId,
   }) {
     return _repository.getVehicles(
@@ -22,6 +23,7 @@ class GetVehiclesUseCase {
       limit: limit,
       search: search,
       status: status,
+      vehicleType: vehicleType,
       branchId: branchId,
     );
   }

@@ -28,14 +28,25 @@ class InventoryService {
       ...(query.isActive !== undefined && { isActive: query.isActive === 'true' }),
     };
 
-    // Filter low-stock products
+    // Filter low-stock products using raw SQL for field-to-field comparison
     if (query.lowStock === 'true') {
-      where.currentStock = { lte: prisma.$queryRaw ? undefined : undefined };
-      // Use raw comparison: currentStock <= reorderLevel
-      // Prisma doesn't support field-to-field comparison in where, so we handle it post-query
-      // Instead, add a flag to filter after fetch, or use a raw approach
-      // For Prisma, we use a workaround:
-      delete where.currentStock;
+      // Build a raw query with proper branch filtering instead of in-memory approach
+      const branchCondition = where.branchId
+        ? `AND branch_id = ${parseInt(where.branchId, 10)}`
+        : (user.roleName !== 'super_admin' && user.roleName !== 'company_admin' && user.branchId)
+          ? `AND branch_id = ${parseInt(user.branchId, 10)}`
+          : '';
+
+      const lowStockIds = await prisma.$queryRawUnsafe(
+        `SELECT id FROM products WHERE deleted_at IS NULL AND is_active = true AND current_stock <= reorder_level ${branchCondition} ORDER BY created_at DESC`
+      );
+      const ids = lowStockIds.map((r) => r.id);
+
+      if (ids.length === 0) {
+        return { data: [], pagination: { page, limit, total: 0, totalPages: 0 } };
+      }
+
+      where.id = { in: ids };
     }
 
     // Branch-level filtering for non-admin users
@@ -46,40 +57,19 @@ class InventoryService {
     let products;
     let total;
 
-    if (query.lowStock === 'true') {
-      // For low-stock filtering, we need to fetch all products and filter client-side
-      // Then apply pagination to the filtered results
-      const allProducts = await prisma.product.findMany({
+    [products, total] = await Promise.all([
+      prisma.product.findMany({
         where,
         include: {
           branch: { select: { id: true, name: true, code: true } },
           category: { select: { id: true, name: true } },
         },
         orderBy,
-      });
-
-      // Post-filter for low stock
-      const filteredProducts = allProducts.filter(
-        (p) => parseFloat(p.currentStock) <= parseFloat(p.reorderLevel || 0)
-      );
-      
-      total = filteredProducts.length;
-      products = filteredProducts.slice(skip, skip + limit);
-    } else {
-      [products, total] = await Promise.all([
-        prisma.product.findMany({
-          where,
-          include: {
-            branch: { select: { id: true, name: true, code: true } },
-            category: { select: { id: true, name: true } },
-          },
-          orderBy,
-          skip,
-          take: limit,
-        }),
-        prisma.product.count({ where }),
-      ]);
-    }
+        skip,
+        take: limit,
+      }),
+      prisma.product.count({ where }),
+    ]);
 
     return { products, pagination: { page, limit, total } };
   }
