@@ -8,19 +8,22 @@ const fs = require('fs');
 const config = require('../config');
 const { BadRequestError } = require('../utils/errors');
 
-// Ensure the upload directory exists
+// Ensure the upload directory exists (skip on serverless — read-only FS)
+const isServerless = !!process.env.VERCEL;
 const uploadDir = path.resolve(config.upload.path);
-if (!fs.existsSync(uploadDir)) {
-  fs.mkdirSync(uploadDir, { recursive: true });
-}
 
 // Sub-folders for each upload category
 const CATEGORIES = ['vehicles', 'machines', 'assets', 'avatars', 'general'];
 
-for (const cat of CATEGORIES) {
-  const dir = path.join(uploadDir, cat);
-  if (!fs.existsSync(dir)) {
-    fs.mkdirSync(dir, { recursive: true });
+if (!isServerless) {
+  if (!fs.existsSync(uploadDir)) {
+    fs.mkdirSync(uploadDir, { recursive: true });
+  }
+  for (const cat of CATEGORIES) {
+    const dir = path.join(uploadDir, cat);
+    if (!fs.existsSync(dir)) {
+      fs.mkdirSync(dir, { recursive: true });
+    }
   }
 }
 

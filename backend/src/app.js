@@ -15,14 +15,19 @@ const errorHandler = require('./middleware/errorHandler');
 const { NotFoundError } = require('./utils/errors');
 
 // ── Sentry error monitoring (optional) ──────────────────────────────────────
-const Sentry = require('@sentry/node');
-if (config.sentry.dsn) {
-  Sentry.init({
-    dsn: config.sentry.dsn,
-    environment: config.app.env,
-    tracesSampleRate: config.app.env === 'production' ? 0.2 : 1.0,
-  });
-  logger.info('Sentry error monitoring initialised');
+let Sentry = null;
+try {
+  Sentry = require('@sentry/node');
+  if (config.sentry.dsn) {
+    Sentry.init({
+      dsn: config.sentry.dsn,
+      environment: config.app.env,
+      tracesSampleRate: config.app.env === 'production' ? 0.2 : 1.0,
+    });
+    logger.info('Sentry error monitoring initialised');
+  }
+} catch (err) {
+  logger.warn('Sentry not available, skipping error monitoring');
 }
 
 // Import routes
@@ -169,7 +174,7 @@ app.use('*', (req, res, next) => {
 // Global Error Handler
 // ============================================================================
 // Report errors to Sentry (when configured) before Express handles them
-if (config.sentry.dsn) {
+if (Sentry && config.sentry.dsn) {
   Sentry.setupExpressErrorHandler(app);
 }
 app.use(errorHandler);

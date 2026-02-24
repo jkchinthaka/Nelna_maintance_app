@@ -66,10 +66,7 @@ for (const key of requiredConfigs) {
     value = value?.[k];
   }
   if (!value) {
-    if (config.app.env === 'production') {
-      throw new Error(`Missing required configuration: ${key}`);
-    }
-    // Use console.warn here (logger requires this config to be loaded first)
+    // Log warning but do NOT throw — Vercel serverless will crash on import
     console.warn(`⚠️  Warning: Missing configuration: ${key}`);
   }
 }
