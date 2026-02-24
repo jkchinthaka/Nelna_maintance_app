@@ -29,8 +29,8 @@ class AppConfig {
   static final Map<Environment, String> _baseUrls = {
     // Android emulator → host machine's localhost
     Environment.dev: 'http://10.0.2.2:3000/api/v1',
-    Environment.staging: 'https://nelna-maintenance-api.onrender.com/api/v1',
-    Environment.prod: 'https://nelna-maintenance-api.onrender.com/api/v1',
+    Environment.staging: 'https://nelna-maintance-app-d3dn.vercel.app/api/v1',
+    Environment.prod: 'https://nelna-maintance-app-d3dn.vercel.app/api/v1',
   };
 
   /// The API base URL for the current environment.
