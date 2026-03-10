@@ -2,6 +2,7 @@
 // Nelna Maintenance System - Auth Service (Business Logic Layer)
 // ============================================================================
 const bcrypt = require('bcryptjs');
+const crypto = require('crypto');
 const jwt = require('jsonwebtoken');
 const config = require('../config');
 const prisma = require('../config/database');
@@ -43,13 +44,13 @@ class AuthService {
 
     // Generate tokens
     const accessToken = this._generateAccessToken(user);
-    const refreshToken = this._generateRefreshToken(user);
+    const { rawToken: refreshToken, tokenHash } = this._generateRefreshToken(user);
 
-    // Save refresh token and update last login
+    // Save refresh token HASH and update last login
     await prisma.user.update({
       where: { id: user.id },
       data: {
-        refreshToken,
+        refreshToken: tokenHash,
         lastLoginAt: new Date(),
       },
     });
@@ -57,7 +58,7 @@ class AuthService {
     return {
       user: this._sanitizeUser(user),
       accessToken,
-      refreshToken,
+      refreshToken, // Raw token sent to client
     };
   }
 
@@ -95,6 +96,16 @@ class AuthService {
         throw new ForbiddenError(
           'Only Super Admin can create another Super Admin account'
         );
+      }
+      // ── Privilege escalation prevention: company_admin cannot create users
+      // in a different company (cross-tenant account hijacking)
+      if (caller.roleId !== 1 && userData.companyId !== undefined) {
+        const targetCompanyId = parseInt(userData.companyId, 10);
+        if (targetCompanyId !== caller.companyId) {
+          throw new ForbiddenError(
+            'Company Admin cannot create users in a different company'
+          );
+        }
       }
     }
 
@@ -138,11 +149,11 @@ class AuthService {
     });
 
     const accessToken = this._generateAccessToken(user);
-    const refreshToken = this._generateRefreshToken(user);
+    const { rawToken: refreshToken, tokenHash } = this._generateRefreshToken(user);
 
     await prisma.user.update({
       where: { id: user.id },
-      data: { refreshToken },
+      data: { refreshToken: tokenHash },
     });
 
     // ── Audit log ─────────────────────────────────────────────────────────
@@ -154,14 +165,15 @@ class AuthService {
           module: 'users',
           entityType: 'User',
           entityId: user.id,
-          newValues: {
+          // Stored as JSON string in SQL Server (NVarChar Max)
+          newValues: JSON.stringify({
             email: user.email,
             roleId: user.roleId,
             roleName: role.name,
             registeredBy: caller ? caller.email : 'self-registration',
-          },
-          ipAddress: userData._ip || null,
-          userAgent: userData._userAgent || null,
+          }),
+          ipAddress: (userData._ip || '').slice(0, 45) || null,
+          userAgent: (userData._userAgent || '').slice(0, 500) || null,
         },
       });
     } catch (_) {
@@ -191,16 +203,24 @@ class AuthService {
         throw new UnauthorizedError('Invalid refresh token');
       }
 
-      if (user.refreshToken !== token) {
+      // Compare hash of incoming token against stored hash (timing-safe comparison
+      // prevents timing-based token oracle attacks)
+      const incomingHash = this._hashToken(token);
+      const storedHash = user.refreshToken || '';
+      const valid =
+        incomingHash.length === storedHash.length &&
+        incomingHash.length > 0 &&
+        crypto.timingSafeEqual(Buffer.from(incomingHash), Buffer.from(storedHash));
+      if (!valid) {
         throw new UnauthorizedError('Refresh token has been revoked');
       }
 
       const accessToken = this._generateAccessToken(user);
-      const newRefreshToken = this._generateRefreshToken(user);
+      const { rawToken: newRefreshToken, tokenHash: newTokenHash } = this._generateRefreshToken(user);
 
       await prisma.user.update({
         where: { id: user.id },
-        data: { refreshToken: newRefreshToken },
+        data: { refreshToken: newTokenHash },
       });
 
       return {
@@ -287,20 +307,43 @@ class AuthService {
         roleName: user.role.name,
       },
       config.jwt.secret,
-      { expiresIn: config.jwt.expiry }
+      { expiresIn: config.jwt.expiry, algorithm: 'HS256' }
     );
   }
 
+  /**
+   * Generate a signed refresh JWT and return both the raw token (for the
+   * client) and a SHA-256 HMAC hash (for database storage).
+   * Storing only the hash means a DB leak cannot be used to forge sessions.
+   */
   _generateRefreshToken(user) {
-    return jwt.sign(
+    const rawToken = jwt.sign(
       { userId: user.id },
       config.jwt.refreshSecret,
-      { expiresIn: config.jwt.refreshExpiry }
+      { expiresIn: config.jwt.refreshExpiry, algorithm: 'HS256' }
     );
+    const tokenHash = this._hashToken(rawToken);
+    return { rawToken, tokenHash };
+  }
+
+  /** SHA-256 HMAC using JWT refresh secret as key */
+  _hashToken(token) {
+    return crypto
+      .createHmac('sha256', config.jwt.refreshSecret)
+      .update(token)
+      .digest('hex');
   }
 
   _sanitizeUser(user) {
-    const { passwordHash, refreshToken, passwordResetToken, passwordResetExpiry, ...sanitized } = user;
+    // Strip ALL credential/token fields before sending to client
+    const {
+      passwordHash,
+      refreshToken,
+      passwordResetToken,
+      passwordResetExpiry,
+      fcmToken,
+      ...sanitized
+    } = user;
     return sanitized;
   }
 }

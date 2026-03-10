@@ -4,6 +4,38 @@
 const prisma = require('../config/database');
 const logger = require('../config/logger');
 
+// Fields that must NEVER appear in audit logs (security)
+const SENSITIVE_KEYS = new Set([
+  'password', 'passwordHash', 'password_hash', 'currentPassword', 'newPassword',
+  'refreshToken', 'refresh_token', 'accessToken', 'token', 'secret',
+  'fcmToken', 'fcm_token', 'passwordResetToken', 'password_reset_token',
+  'privateKey', 'private_key', 'creditCard', 'cvv', '_ip', '_userAgent',
+]);
+
+/**
+ * Produce a JSON string safe for audit storage.
+ * Strips sensitive keys and private underscore metadata.
+ * @param {*} value
+ * @returns {string|null}
+ */
+function toAuditJson(value) {
+  if (value === null || value === undefined) return null;
+  try {
+    return JSON.stringify(value, (key, val) => {
+      if (SENSITIVE_KEYS.has(key) || key.startsWith('_')) return '[REDACTED]';
+      return val;
+    });
+  } catch {
+    return null;
+  }
+}
+
+// Allowlisted Prisma model names for captureOldValues (prevents prototype injection)
+const AUDITABLE_MODELS = new Set([
+  'user', 'vehicle', 'machine', 'asset', 'product', 'supplier',
+  'serviceRequest', 'purchaseOrder', 'expense', 'branch', 'company',
+]);
+
 /**
  * Log audit trail for data mutations
  * @param {string} action - CREATE, UPDATE, DELETE
@@ -25,10 +57,11 @@ const auditLog = (action, module, entityType) => {
               module,
               entityType,
               entityId: body.data?.id || parseInt(req.params.id, 10) || null,
-              oldValues: req._auditOldValues || null,
-              newValues: action !== 'DELETE' ? (req.body || null) : null,
-              ipAddress: req.ip || req.connection?.remoteAddress,
-              userAgent: req.headers['user-agent'] || null,
+              // Stored as NVarChar(Max) JSON strings in SQL Server
+              oldValues: toAuditJson(req._auditOldValues || null),
+              newValues: action !== 'DELETE' ? toAuditJson(req.body || null) : null,
+              ipAddress: req.ip || req.socket?.remoteAddress || null,
+              userAgent: (req.headers['user-agent'] || '').slice(0, 500) || null,
             },
           });
         }
@@ -44,19 +77,23 @@ const auditLog = (action, module, entityType) => {
 };
 
 /**
- * Capture existing data before update/delete for audit trail
- * @param {string} model - Prisma model name
+ * Capture existing data before update/delete for audit trail.
+ * Only operates on allowlisted model names to prevent prototype injection.
+ * @param {string} model - Prisma model name (must be in AUDITABLE_MODELS)
  */
 const captureOldValues = (model) => {
   return async (req, res, next) => {
     try {
       const id = parseInt(req.params.id, 10);
-      // Validate model exists in prisma
+
+      if (!AUDITABLE_MODELS.has(model)) {
+        logger.warn(`Audit: Model "${model}" is not in the audit allowlist — skipping.`);
+        return next();
+      }
+
       if (id && prisma[model] && typeof prisma[model].findUnique === 'function') {
         const oldRecord = await prisma[model].findUnique({ where: { id } });
         req._auditOldValues = oldRecord;
-      } else if (!prisma[model]) {
-        logger.warn(`Audit: Invalid model name "${model}" - skipping old values capture`);
       }
     } catch (error) {
       logger.error('Capture old values failed', { error: error.message, model });

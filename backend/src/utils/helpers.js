@@ -38,14 +38,19 @@ const parseSort = (query, allowedFields = ['createdAt']) => {
 };
 
 /**
- * Build search/filter where clause
+ * Build search/filter where clause.
+ * Note: mode:'insensitive' is removed — SQL Server uses a case-insensitive
+ * collation (SQL_Latin1_General_CP1_CI_AS) by default, so CONTAINS already
+ * does a case-insensitive match without the Prisma option.
  */
 const buildSearchFilter = (query, searchFields = []) => {
   const where = {};
 
-  if (query.search && searchFields.length > 0) {
+  if (query.search && typeof query.search === 'string' && searchFields.length > 0) {
+    // Limit search string length to prevent ReDoS / excessive query plans
+    const safeSearch = query.search.slice(0, 200);
     where.OR = searchFields.map((field) => ({
-      [field]: { contains: query.search, mode: 'insensitive' },
+      [field]: { contains: safeSearch },
     }));
   }
 

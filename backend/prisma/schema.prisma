@@ -9,7 +9,7 @@ generator client {
 }
 
 datasource db {
-  provider = "postgresql"
+  provider = "sqlserver"
   url      = env("DATABASE_URL")
 }
 
@@ -19,12 +19,12 @@ datasource db {
 
 model Company {
   id          Int       @id @default(autoincrement())
-  name        String    @db.VarChar(255)
-  code        String    @unique @db.VarChar(50)
-  address     String?   @db.Text
-  phone       String?   @db.VarChar(20)
-  email       String?   @db.VarChar(255)
-  logo        String?   @db.VarChar(500)
+  name        String    @db.NVarChar(255)
+  code        String    @unique @db.NVarChar(50)
+  address     String?   @db.NVarChar(Max)
+  phone       String?   @db.NVarChar(20)
+  email       String?   @db.NVarChar(255)
+  logo        String?   @db.NVarChar(500)
   isActive    Boolean   @default(true) @map("is_active")
   createdAt   DateTime  @default(now()) @map("created_at")
   updatedAt   DateTime  @updatedAt @map("updated_at")
@@ -39,11 +39,11 @@ model Company {
 model Branch {
   id          Int       @id @default(autoincrement())
   companyId   Int       @map("company_id")
-  name        String    @db.VarChar(255)
-  code        String    @unique @db.VarChar(50)
-  address     String?   @db.Text
-  phone       String?   @db.VarChar(20)
-  email       String?   @db.VarChar(255)
+  name        String    @db.NVarChar(255)
+  code        String    @unique @db.NVarChar(50)
+  address     String?   @db.NVarChar(Max)
+  phone       String?   @db.NVarChar(20)
+  email       String?   @db.NVarChar(255)
   isActive    Boolean   @default(true) @map("is_active")
   createdAt   DateTime  @default(now()) @map("created_at")
   updatedAt   DateTime  @updatedAt @map("updated_at")
@@ -66,9 +66,9 @@ model Branch {
 
 model Role {
   id          Int       @id @default(autoincrement())
-  name        String    @unique @db.VarChar(100)
-  displayName String   @map("display_name") @db.VarChar(100)
-  description String?   @db.Text
+  name        String    @unique @db.NVarChar(100)
+  displayName String   @map("display_name") @db.NVarChar(100)
+  description String?   @db.NVarChar(Max)
   isSystem    Boolean   @default(false) @map("is_system")
   createdAt   DateTime  @default(now()) @map("created_at")
   updatedAt   DateTime  @updatedAt @map("updated_at")
@@ -81,10 +81,10 @@ model Role {
 
 model Permission {
   id          Int       @id @default(autoincrement())
-  module      String    @db.VarChar(100)
-  action      String    @db.VarChar(100)
-  resource    String    @db.VarChar(100)
-  description String?   @db.Text
+  module      String    @db.NVarChar(100)
+  action      String    @db.NVarChar(100)
+  resource    String    @db.NVarChar(100)
+  description String?   @db.NVarChar(Max)
   createdAt   DateTime  @default(now()) @map("created_at")
 
   roles RolePermission[]
@@ -110,19 +110,19 @@ model User {
   companyId       Int       @map("company_id")
   branchId        Int?      @map("branch_id")
   roleId          Int       @map("role_id")
-  employeeId      String?   @unique @map("employee_id") @db.VarChar(50)
-  firstName       String    @map("first_name") @db.VarChar(100)
-  lastName        String    @map("last_name") @db.VarChar(100)
-  email           String    @unique @db.VarChar(255)
-  passwordHash    String    @map("password_hash") @db.VarChar(255)
-  phone           String?   @db.VarChar(20)
-  avatar          String?   @db.VarChar(500)
+  employeeId      String?   @unique @map("employee_id") @db.NVarChar(50)
+  firstName       String    @map("first_name") @db.NVarChar(100)
+  lastName        String    @map("last_name") @db.NVarChar(100)
+  email           String    @unique @db.NVarChar(255)
+  passwordHash    String    @map("password_hash") @db.NVarChar(255)
+  phone           String?   @db.NVarChar(20)
+  avatar          String?   @db.NVarChar(500)
   isActive        Boolean   @default(true) @map("is_active")
   lastLoginAt     DateTime? @map("last_login_at")
-  passwordResetToken String? @map("password_reset_token") @db.VarChar(255)
+  passwordResetToken String? @map("password_reset_token") @db.NVarChar(255)
   passwordResetExpiry DateTime? @map("password_reset_expiry")
-  refreshToken    String?   @map("refresh_token") @db.Text
-  fcmToken        String?   @map("fcm_token") @db.VarChar(500)
+  refreshToken    String?   @map("refresh_token") @db.NVarChar(Max)
+  fcmToken        String?   @map("fcm_token") @db.NVarChar(500)
   createdAt       DateTime  @default(now()) @map("created_at")
   updatedAt       DateTime  @updatedAt @map("updated_at")
   deletedAt       DateTime? @map("deleted_at")
@@ -152,15 +152,15 @@ model User {
 model Vehicle {
   id                Int       @id @default(autoincrement())
   branchId          Int       @map("branch_id")
-  registrationNo    String    @unique @map("registration_no") @db.VarChar(50)
-  make              String    @db.VarChar(100)
-  model             String    @db.VarChar(100)
+  registrationNo    String    @unique @map("registration_no") @db.NVarChar(50)
+  make              String    @db.NVarChar(100)
+  model             String    @db.NVarChar(100)
   year              Int?
-  engineNo          String?   @map("engine_no") @db.VarChar(100)
-  chassisNo         String?   @map("chassis_no") @db.VarChar(100)
+  engineNo          String?   @map("engine_no") @db.NVarChar(100)
+  chassisNo         String?   @map("chassis_no") @db.NVarChar(100)
   fuelType          FuelType  @default(DIESEL) @map("fuel_type")
-  vehicleType       String    @map("vehicle_type") @db.VarChar(50)
-  color             String?   @db.VarChar(50)
+  vehicleType       String    @map("vehicle_type") @db.NVarChar(50)
+  color             String?   @db.NVarChar(50)
   mileage           Decimal   @default(0) @db.Decimal(12, 2)
   status            VehicleStatus @default(ACTIVE)
   purchaseDate      DateTime? @map("purchase_date")
@@ -170,8 +170,8 @@ model Vehicle {
   lastServiceDate   DateTime? @map("last_service_date")
   nextServiceDate   DateTime? @map("next_service_date")
   nextServiceMileage Decimal? @map("next_service_mileage") @db.Decimal(12, 2)
-  imageUrl          String?   @map("image_url") @db.VarChar(500)
-  notes             String?   @db.Text
+  imageUrl          String?   @map("image_url") @db.NVarChar(500)
+  notes             String?   @db.NVarChar(Max)
   createdAt         DateTime  @default(now()) @map("created_at")
   updatedAt         DateTime  @updatedAt @map("updated_at")
   deletedAt         DateTime? @map("deleted_at")
@@ -193,13 +193,13 @@ model VehicleDocument {
   id          Int       @id @default(autoincrement())
   vehicleId   Int       @map("vehicle_id")
   type        DocumentType
-  documentNo  String    @map("document_no") @db.VarChar(100)
+  documentNo  String    @map("document_no") @db.NVarChar(100)
   issueDate   DateTime  @map("issue_date")
   expiryDate  DateTime  @map("expiry_date")
-  provider    String?   @db.VarChar(255)
+  provider    String?   @db.NVarChar(255)
   amount      Decimal?  @db.Decimal(12, 2)
-  fileUrl     String?   @map("file_url") @db.VarChar(500)
-  notes       String?   @db.Text
+  fileUrl     String?   @map("file_url") @db.NVarChar(500)
+  notes       String?   @db.NVarChar(Max)
   isActive    Boolean   @default(true) @map("is_active")
   createdAt   DateTime  @default(now()) @map("created_at")
   updatedAt   DateTime  @updatedAt @map("updated_at")
@@ -220,10 +220,10 @@ model FuelLog {
   unitPrice     Decimal   @map("unit_price") @db.Decimal(10, 2)
   totalCost     Decimal   @map("total_cost") @db.Decimal(12, 2)
   mileage       Decimal   @db.Decimal(12, 2)
-  station       String?   @db.VarChar(255)
-  receiptNo     String?   @map("receipt_no") @db.VarChar(100)
-  receiptUrl    String?   @map("receipt_url") @db.VarChar(500)
-  notes         String?   @db.Text
+  station       String?   @db.NVarChar(255)
+  receiptNo     String?   @map("receipt_no") @db.NVarChar(100)
+  receiptUrl    String?   @map("receipt_url") @db.NVarChar(500)
+  notes         String?   @db.NVarChar(Max)
   createdAt     DateTime  @default(now()) @map("created_at")
   updatedAt     DateTime  @updatedAt @map("updated_at")
 
@@ -238,15 +238,15 @@ model VehicleServiceHistory {
   id             Int       @id @default(autoincrement())
   vehicleId      Int       @map("vehicle_id")
   serviceDate    DateTime  @map("service_date")
-  serviceType    String    @map("service_type") @db.VarChar(100)
-  description    String    @db.Text
+  serviceType    String    @map("service_type") @db.NVarChar(100)
+  description    String    @db.NVarChar(Max)
   mileageAtService Decimal @map("mileage_at_service") @db.Decimal(12, 2)
   cost           Decimal   @db.Decimal(12, 2)
-  serviceProvider String?  @map("service_provider") @db.VarChar(255)
-  invoiceNo      String?   @map("invoice_no") @db.VarChar(100)
+  serviceProvider String?  @map("service_provider") @db.NVarChar(255)
+  invoiceNo      String?   @map("invoice_no") @db.NVarChar(100)
   nextServiceDate DateTime? @map("next_service_date")
   nextServiceMileage Decimal? @map("next_service_mileage") @db.Decimal(12, 2)
-  notes          String?   @db.Text
+  notes          String?   @db.NVarChar(Max)
   createdAt      DateTime  @default(now()) @map("created_at")
   updatedAt      DateTime  @updatedAt @map("updated_at")
 
@@ -264,7 +264,7 @@ model VehicleDriver {
   assignedDate DateTime @map("assigned_date")
   releasedDate DateTime? @map("released_date")
   isActive    Boolean   @default(true) @map("is_active")
-  notes       String?   @db.Text
+  notes       String?   @db.NVarChar(Max)
   createdAt   DateTime  @default(now()) @map("created_at")
   updatedAt   DateTime  @updatedAt @map("updated_at")
 
@@ -283,27 +283,27 @@ model VehicleDriver {
 model Machine {
   id                  Int       @id @default(autoincrement())
   branchId            Int       @map("branch_id")
-  machineCode         String    @unique @map("machine_code") @db.VarChar(50)
-  name                String    @db.VarChar(255)
-  category            String?   @db.VarChar(100)
-  manufacturer        String?   @db.VarChar(255)
-  modelNumber         String?   @map("model_number") @db.VarChar(100)
-  serialNumber        String?   @map("serial_number") @db.VarChar(100)
+  machineCode         String    @unique @map("machine_code") @db.NVarChar(50)
+  name                String    @db.NVarChar(255)
+  category            String?   @db.NVarChar(100)
+  manufacturer        String?   @db.NVarChar(255)
+  modelNumber         String?   @map("model_number") @db.NVarChar(100)
+  serialNumber        String?   @map("serial_number") @db.NVarChar(100)
   purchaseDate        DateTime? @map("purchase_date")
   purchasePrice       Decimal?  @map("purchase_price") @db.Decimal(12, 2)
   warrantyExpiry      DateTime? @map("warranty_expiry")
-  location            String?   @db.VarChar(255)
-  department          String?   @db.VarChar(100)
+  location            String?   @db.NVarChar(255)
+  department          String?   @db.NVarChar(100)
   status              MachineStatus @default(OPERATIONAL)
   criticality         Criticality @default(MEDIUM)
   operatingHours      Decimal   @default(0) @map("operating_hours") @db.Decimal(10, 2)
   lastMaintenanceDate DateTime? @map("last_maintenance_date")
   nextMaintenanceDate DateTime? @map("next_maintenance_date")
   maintenanceInterval Int?      @map("maintenance_interval_days")
-  qrCode              String?   @map("qr_code") @db.VarChar(500)
-  imageUrl            String?   @map("image_url") @db.VarChar(500)
-  specifications      Json?
-  notes               String?   @db.Text
+  qrCode              String?   @map("qr_code") @db.NVarChar(500)
+  imageUrl            String?   @map("image_url") @db.NVarChar(500)
+  specifications      String?   @db.NVarChar(Max)
+  notes               String?   @db.NVarChar(Max)
   createdAt           DateTime  @default(now()) @map("created_at")
   updatedAt           DateTime  @updatedAt @map("updated_at")
   deletedAt           DateTime? @map("deleted_at")
@@ -324,13 +324,13 @@ model Machine {
 model MachineMaintenanceSchedule {
   id                Int       @id @default(autoincrement())
   machineId         Int       @map("machine_id")
-  maintenanceType   String    @map("maintenance_type") @db.VarChar(100)
-  description       String    @db.Text
+  maintenanceType   String    @map("maintenance_type") @db.NVarChar(100)
+  description       String    @db.NVarChar(Max)
   frequencyDays     Int       @map("frequency_days")
   frequencyHours    Int?      @map("frequency_hours")
   lastPerformedDate DateTime? @map("last_performed_date")
   nextDueDate       DateTime  @map("next_due_date")
-  assignedTeam      String?   @map("assigned_team") @db.VarChar(100)
+  assignedTeam      String?   @map("assigned_team") @db.NVarChar(100)
   estimatedDuration Int?      @map("estimated_duration_minutes")
   estimatedCost     Decimal?  @map("estimated_cost") @db.Decimal(12, 2)
   isActive          Boolean   @default(true) @map("is_active")
@@ -350,13 +350,13 @@ model BreakdownLog {
   reportedAt        DateTime  @map("reported_at")
   resolvedAt        DateTime? @map("resolved_at")
   severity          Severity  @default(MEDIUM)
-  description       String    @db.Text
-  rootCause         String?   @map("root_cause") @db.Text
-  resolution        String?   @db.Text
+  description       String    @db.NVarChar(Max)
+  rootCause         String?   @map("root_cause") @db.NVarChar(Max)
+  resolution        String?   @db.NVarChar(Max)
   downtimeMinutes   Int?      @map("downtime_minutes")
   costOfRepair      Decimal?  @map("cost_of_repair") @db.Decimal(12, 2)
-  reportedBy        String?   @map("reported_by") @db.VarChar(100)
-  resolvedBy        String?   @map("resolved_by") @db.VarChar(100)
+  reportedBy        String?   @map("reported_by") @db.NVarChar(100)
+  resolvedBy        String?   @map("resolved_by") @db.NVarChar(100)
   createdAt         DateTime  @default(now()) @map("created_at")
   updatedAt         DateTime  @updatedAt @map("updated_at")
 
@@ -370,15 +370,15 @@ model BreakdownLog {
 model AMCContract {
   id                Int       @id @default(autoincrement())
   machineId         Int       @map("machine_id")
-  contractNo        String    @unique @map("contract_no") @db.VarChar(100)
-  vendor            String    @db.VarChar(255)
+  contractNo        String    @unique @map("contract_no") @db.NVarChar(100)
+  vendor            String    @db.NVarChar(255)
   startDate         DateTime  @map("start_date")
   endDate           DateTime  @map("end_date")
   annualCost        Decimal   @map("annual_cost") @db.Decimal(12, 2)
-  coverageDetails   String?   @map("coverage_details") @db.Text
-  contactPerson     String?   @map("contact_person") @db.VarChar(100)
-  contactPhone      String?   @map("contact_phone") @db.VarChar(20)
-  documentUrl       String?   @map("document_url") @db.VarChar(500)
+  coverageDetails   String?   @map("coverage_details") @db.NVarChar(Max)
+  contactPerson     String?   @map("contact_person") @db.NVarChar(100)
+  contactPhone      String?   @map("contact_phone") @db.NVarChar(20)
+  documentUrl       String?   @map("document_url") @db.NVarChar(500)
   status            AMCStatus @default(ACTIVE)
   createdAt         DateTime  @default(now()) @map("created_at")
   updatedAt         DateTime  @updatedAt @map("updated_at")
@@ -394,12 +394,12 @@ model MachineServiceHistory {
   id             Int       @id @default(autoincrement())
   machineId      Int       @map("machine_id")
   serviceDate    DateTime  @map("service_date")
-  serviceType    String    @map("service_type") @db.VarChar(100)
-  description    String    @db.Text
+  serviceType    String    @map("service_type") @db.NVarChar(100)
+  description    String    @db.NVarChar(Max)
   hoursAtService Decimal?  @map("hours_at_service") @db.Decimal(10, 2)
   cost           Decimal   @db.Decimal(12, 2)
-  performedBy    String?   @map("performed_by") @db.VarChar(100)
-  notes          String?   @db.Text
+  performedBy    String?   @map("performed_by") @db.NVarChar(100)
+  notes          String?   @db.NVarChar(Max)
   createdAt      DateTime  @default(now()) @map("created_at")
   updatedAt      DateTime  @updatedAt @map("updated_at")
 
@@ -416,7 +416,7 @@ model MachineServiceHistory {
 model ServiceRequest {
   id                Int       @id @default(autoincrement())
   branchId          Int       @map("branch_id")
-  ticketNo          String    @unique @map("ticket_no") @db.VarChar(50)
+  ticketNo          String    @unique @map("ticket_no") @db.NVarChar(50)
   requesterId       Int       @map("requester_id")
   approverId        Int?      @map("approver_id")
   vehicleId         Int?      @map("vehicle_id")
@@ -424,18 +424,18 @@ model ServiceRequest {
   assetId           Int?      @map("asset_id")
   category          ServiceCategory
   priority          Priority  @default(MEDIUM)
-  subject           String    @db.VarChar(255)
-  description       String    @db.Text
+  subject           String    @db.NVarChar(255)
+  description       String    @db.NVarChar(Max)
   status            ServiceStatus @default(PENDING)
   approvedAt        DateTime? @map("approved_at")
-  rejectedReason    String?   @map("rejected_reason") @db.Text
+  rejectedReason    String?   @map("rejected_reason") @db.NVarChar(Max)
   estimatedCost     Decimal?  @map("estimated_cost") @db.Decimal(12, 2)
   actualCost        Decimal?  @map("actual_cost") @db.Decimal(12, 2)
   slaDeadline       DateTime? @map("sla_deadline")
   completedAt       DateTime? @map("completed_at")
   closedAt          DateTime? @map("closed_at")
-  closedReason      String?   @map("closed_reason") @db.Text
-  reportUrl         String?   @map("report_url") @db.VarChar(500)
+  closedReason      String?   @map("closed_reason") @db.NVarChar(Max)
+  reportUrl         String?   @map("report_url") @db.NVarChar(500)
   createdAt         DateTime  @default(now()) @map("created_at")
   updatedAt         DateTime  @updatedAt @map("updated_at")
   deletedAt         DateTime? @map("deleted_at")
@@ -461,13 +461,13 @@ model ServiceTask {
   id                Int       @id @default(autoincrement())
   serviceRequestId  Int       @map("service_request_id")
   technicianId      Int       @map("technician_id")
-  taskDescription   String    @map("task_description") @db.Text
+  taskDescription   String    @map("task_description") @db.NVarChar(Max)
   status            TaskStatus @default(ASSIGNED)
   startedAt         DateTime? @map("started_at")
   completedAt       DateTime? @map("completed_at")
   timeSpentMinutes  Int?      @map("time_spent_minutes")
   laborCost         Decimal?  @map("labor_cost") @db.Decimal(12, 2)
-  notes             String?   @db.Text
+  notes             String?   @db.NVarChar(Max)
   createdAt         DateTime  @default(now()) @map("created_at")
   updatedAt         DateTime  @updatedAt @map("updated_at")
 
@@ -501,14 +501,14 @@ model ServiceSparePart {
 
 model ProductCategory {
   id          Int       @id @default(autoincrement())
-  name        String    @unique @db.VarChar(255)
-  description String?   @db.Text
+  name        String    @unique @db.NVarChar(255)
+  description String?   @db.NVarChar(Max)
   parentId    Int?      @map("parent_id")
   isActive    Boolean   @default(true) @map("is_active")
   createdAt   DateTime  @default(now()) @map("created_at")
   updatedAt   DateTime  @updatedAt @map("updated_at")
 
-  parent   ProductCategory?  @relation("CategoryHierarchy", fields: [parentId], references: [id])
+  parent   ProductCategory?  @relation("CategoryHierarchy", fields: [parentId], references: [id], onDelete: NoAction, onUpdate: NoAction)
   children ProductCategory[] @relation("CategoryHierarchy")
   products Product[]
 
@@ -520,11 +520,11 @@ model Product {
   id                Int       @id @default(autoincrement())
   branchId          Int       @map("branch_id")
   categoryId        Int?      @map("category_id")
-  sku               String    @unique @db.VarChar(100)
-  barcode           String?   @unique @db.VarChar(100)
-  name              String    @db.VarChar(255)
-  description       String?   @db.Text
-  unit              String    @db.VarChar(50)
+  sku               String    @unique @db.NVarChar(100)
+  barcode           String?   @unique @db.NVarChar(100)
+  name              String    @db.NVarChar(255)
+  description       String?   @db.NVarChar(Max)
+  unit              String    @db.NVarChar(50)
   unitPrice         Decimal   @map("unit_price") @db.Decimal(12, 2)
   costPrice         Decimal?  @map("cost_price") @db.Decimal(12, 2)
   currentStock      Decimal   @default(0) @map("current_stock") @db.Decimal(12, 2)
@@ -532,8 +532,8 @@ model Product {
   maximumStock      Decimal?  @map("maximum_stock") @db.Decimal(12, 2)
   reorderLevel      Decimal   @default(0) @map("reorder_level") @db.Decimal(12, 2)
   reorderQuantity   Decimal?  @map("reorder_quantity") @db.Decimal(12, 2)
-  location          String?   @db.VarChar(100)
-  imageUrl          String?   @map("image_url") @db.VarChar(500)
+  location          String?   @db.NVarChar(100)
+  imageUrl          String?   @map("image_url") @db.NVarChar(500)
   isActive          Boolean   @default(true) @map("is_active")
   createdAt         DateTime  @default(now()) @map("created_at")
   updatedAt         DateTime  @updatedAt @map("updated_at")
@@ -560,12 +560,12 @@ model StockMovement {
   type          StockMovementType
   quantity      Decimal   @db.Decimal(12, 2)
   unitCost      Decimal?  @map("unit_cost") @db.Decimal(12, 2)
-  referenceType String?   @map("reference_type") @db.VarChar(50)
+  referenceType String?   @map("reference_type") @db.NVarChar(50)
   referenceId   Int?      @map("reference_id")
-  reason        String?   @db.Text
+  reason        String?   @db.NVarChar(Max)
   previousStock Decimal   @map("previous_stock") @db.Decimal(12, 2)
   newStock      Decimal   @map("new_stock") @db.Decimal(12, 2)
-  performedBy   String?   @map("performed_by") @db.VarChar(100)
+  performedBy   String?   @map("performed_by") @db.NVarChar(100)
   createdAt     DateTime  @default(now()) @map("created_at")
 
   branch  Branch  @relation(fields: [branchId], references: [id])
@@ -580,15 +580,15 @@ model StockMovement {
 
 model Supplier {
   id            Int       @id @default(autoincrement())
-  name          String    @db.VarChar(255)
-  code          String    @unique @db.VarChar(50)
-  contactPerson String?   @map("contact_person") @db.VarChar(100)
-  email         String?   @db.VarChar(255)
-  phone         String?   @db.VarChar(20)
-  address       String?   @db.Text
-  taxId         String?   @map("tax_id") @db.VarChar(50)
-  bankDetails   String?   @map("bank_details") @db.Text
-  paymentTerms  String?   @map("payment_terms") @db.VarChar(100)
+  name          String    @db.NVarChar(255)
+  code          String    @unique @db.NVarChar(50)
+  contactPerson String?   @map("contact_person") @db.NVarChar(100)
+  email         String?   @db.NVarChar(255)
+  phone         String?   @db.NVarChar(20)
+  address       String?   @db.NVarChar(Max)
+  taxId         String?   @map("tax_id") @db.NVarChar(50)
+  bankDetails   String?   @map("bank_details") @db.NVarChar(Max)
+  paymentTerms  String?   @map("payment_terms") @db.NVarChar(100)
   rating        Int?      @default(0)
   isActive      Boolean   @default(true) @map("is_active")
   createdAt     DateTime  @default(now()) @map("created_at")
@@ -605,7 +605,7 @@ model PurchaseOrder {
   id              Int       @id @default(autoincrement())
   branchId        Int       @map("branch_id")
   supplierId      Int       @map("supplier_id")
-  poNumber        String    @unique @map("po_number") @db.VarChar(50)
+  poNumber        String    @unique @map("po_number") @db.NVarChar(50)
   orderDate       DateTime  @map("order_date")
   expectedDate    DateTime? @map("expected_date")
   status          POStatus  @default(DRAFT)
@@ -613,8 +613,8 @@ model PurchaseOrder {
   taxAmount       Decimal   @default(0) @map("tax_amount") @db.Decimal(12, 2)
   discountAmount  Decimal   @default(0) @map("discount_amount") @db.Decimal(12, 2)
   totalAmount     Decimal   @default(0) @map("total_amount") @db.Decimal(12, 2)
-  notes           String?   @db.Text
-  approvedBy      String?   @map("approved_by") @db.VarChar(100)
+  notes           String?   @db.NVarChar(Max)
+  approvedBy      String?   @map("approved_by") @db.NVarChar(100)
   approvedAt      DateTime? @map("approved_at")
   createdAt       DateTime  @default(now()) @map("created_at")
   updatedAt       DateTime  @updatedAt @map("updated_at")
@@ -650,11 +650,11 @@ model GRN {
   id              Int       @id @default(autoincrement())
   purchaseOrderId Int       @map("purchase_order_id")
   supplierId      Int       @map("supplier_id")
-  grnNumber       String    @unique @map("grn_number") @db.VarChar(50)
+  grnNumber       String    @unique @map("grn_number") @db.NVarChar(50)
   receivedDate    DateTime  @map("received_date")
-  invoiceNo       String?   @map("invoice_no") @db.VarChar(100)
-  notes           String?   @db.Text
-  receivedBy      String?   @map("received_by") @db.VarChar(100)
+  invoiceNo       String?   @map("invoice_no") @db.NVarChar(100)
+  notes           String?   @db.NVarChar(Max)
+  receivedBy      String?   @map("received_by") @db.NVarChar(100)
   status          GRNStatus @default(PENDING)
   createdAt       DateTime  @default(now()) @map("created_at")
   updatedAt       DateTime  @updatedAt @map("updated_at")
@@ -675,7 +675,7 @@ model GRNItem {
   receivedQty   Decimal @map("received_qty") @db.Decimal(12, 2)
   acceptedQty   Decimal @map("accepted_qty") @db.Decimal(12, 2)
   rejectedQty   Decimal @default(0) @map("rejected_qty") @db.Decimal(12, 2)
-  rejectReason  String? @map("reject_reason") @db.Text
+  rejectReason  String? @map("reject_reason") @db.NVarChar(Max)
   unitCost      Decimal @map("unit_cost") @db.Decimal(12, 2)
 
   grn     GRN     @relation(fields: [grnId], references: [id], onDelete: Cascade)
@@ -692,12 +692,12 @@ model GRNItem {
 model Asset {
   id                Int       @id @default(autoincrement())
   branchId          Int       @map("branch_id")
-  assetCode         String    @unique @map("asset_code") @db.VarChar(50)
-  name              String    @db.VarChar(255)
-  category          String    @db.VarChar(100)
-  location          String?   @db.VarChar(255)
-  department        String?   @db.VarChar(100)
-  serialNumber      String?   @map("serial_number") @db.VarChar(100)
+  assetCode         String    @unique @map("asset_code") @db.NVarChar(50)
+  name              String    @db.NVarChar(255)
+  category          String    @db.NVarChar(100)
+  location          String?   @db.NVarChar(255)
+  department        String?   @db.NVarChar(100)
+  serialNumber      String?   @map("serial_number") @db.NVarChar(100)
   purchaseDate      DateTime? @map("purchase_date")
   purchasePrice     Decimal?  @map("purchase_price") @db.Decimal(12, 2)
   currentValue      Decimal?  @map("current_value") @db.Decimal(12, 2)
@@ -705,9 +705,9 @@ model Asset {
   warrantyExpiry    DateTime? @map("warranty_expiry")
   condition         AssetCondition @default(GOOD)
   status            AssetStatus @default(IN_USE)
-  assignedTo        String?   @map("assigned_to") @db.VarChar(100)
-  imageUrl          String?   @map("image_url") @db.VarChar(500)
-  notes             String?   @db.Text
+  assignedTo        String?   @map("assigned_to") @db.NVarChar(100)
+  imageUrl          String?   @map("image_url") @db.NVarChar(500)
+  notes             String?   @db.NVarChar(Max)
   createdAt         DateTime  @default(now()) @map("created_at")
   updatedAt         DateTime  @updatedAt @map("updated_at")
   deletedAt         DateTime? @map("deleted_at")
@@ -727,11 +727,11 @@ model AssetRepairLog {
   id            Int       @id @default(autoincrement())
   assetId       Int       @map("asset_id")
   repairDate    DateTime  @map("repair_date")
-  description   String    @db.Text
+  description   String    @db.NVarChar(Max)
   cost          Decimal   @db.Decimal(12, 2)
-  vendor        String?   @db.VarChar(255)
+  vendor        String?   @db.NVarChar(255)
   completedDate DateTime? @map("completed_date")
-  notes         String?   @db.Text
+  notes         String?   @db.NVarChar(Max)
   createdAt     DateTime  @default(now()) @map("created_at")
   updatedAt     DateTime  @updatedAt @map("updated_at")
 
@@ -744,13 +744,13 @@ model AssetRepairLog {
 model AssetTransfer {
   id              Int       @id @default(autoincrement())
   assetId         Int       @map("asset_id")
-  fromLocation    String    @map("from_location") @db.VarChar(255)
-  toLocation      String    @map("to_location") @db.VarChar(255)
-  fromDepartment  String?   @map("from_department") @db.VarChar(100)
-  toDepartment    String?   @map("to_department") @db.VarChar(100)
+  fromLocation    String    @map("from_location") @db.NVarChar(255)
+  toLocation      String    @map("to_location") @db.NVarChar(255)
+  fromDepartment  String?   @map("from_department") @db.NVarChar(100)
+  toDepartment    String?   @map("to_department") @db.NVarChar(100)
   transferDate    DateTime  @map("transfer_date")
-  reason          String?   @db.Text
-  approvedBy      String?   @map("approved_by") @db.VarChar(100)
+  reason          String?   @db.NVarChar(Max)
+  approvedBy      String?   @map("approved_by") @db.NVarChar(100)
   createdAt       DateTime  @default(now()) @map("created_at")
 
   asset Asset @relation(fields: [assetId], references: [id])
@@ -767,20 +767,20 @@ model Expense {
   id              Int       @id @default(autoincrement())
   branchId        Int       @map("branch_id")
   createdById     Int       @map("created_by_id")
-  expenseNo       String    @unique @map("expense_no") @db.VarChar(50)
+  expenseNo       String    @unique @map("expense_no") @db.NVarChar(50)
   category        ExpenseCategory
-  referenceType   String?   @map("reference_type") @db.VarChar(50)
+  referenceType   String?   @map("reference_type") @db.NVarChar(50)
   referenceId     Int?      @map("reference_id")
-  description     String    @db.Text
+  description     String    @db.NVarChar(Max)
   amount          Decimal   @db.Decimal(12, 2)
   date            DateTime
-  invoiceNo       String?   @map("invoice_no") @db.VarChar(100)
-  vendor          String?   @db.VarChar(255)
-  receiptUrl      String?   @map("receipt_url") @db.VarChar(500)
+  invoiceNo       String?   @map("invoice_no") @db.NVarChar(100)
+  vendor          String?   @db.NVarChar(255)
+  receiptUrl      String?   @map("receipt_url") @db.NVarChar(500)
   status          ExpenseStatus @default(PENDING)
-  approvedBy      String?   @map("approved_by") @db.VarChar(100)
+  approvedBy      String?   @map("approved_by") @db.NVarChar(100)
   approvedAt      DateTime? @map("approved_at")
-  notes           String?   @db.Text
+  notes           String?   @db.NVarChar(Max)
   createdAt       DateTime  @default(now()) @map("created_at")
   updatedAt       DateTime  @updatedAt @map("updated_at")
 
@@ -800,14 +800,14 @@ model Expense {
 model AuditLog {
   id          Int      @id @default(autoincrement())
   userId      Int?     @map("user_id")
-  action      String   @db.VarChar(50)
-  module      String   @db.VarChar(100)
-  entityType  String   @map("entity_type") @db.VarChar(100)
+  action      String   @db.NVarChar(50)
+  module      String   @db.NVarChar(100)
+  entityType  String   @map("entity_type") @db.NVarChar(100)
   entityId    Int?     @map("entity_id")
-  oldValues   Json?    @map("old_values")
-  newValues   Json?    @map("new_values")
-  ipAddress   String?  @map("ip_address") @db.VarChar(45)
-  userAgent   String?  @map("user_agent") @db.VarChar(500)
+  oldValues   String?   @map("old_values") @db.NVarChar(Max)
+  newValues   String?   @map("new_values") @db.NVarChar(Max)
+  ipAddress   String?  @map("ip_address") @db.NVarChar(45)
+  userAgent   String?  @map("user_agent") @db.NVarChar(500)
   createdAt   DateTime @default(now()) @map("created_at")
 
   user User? @relation(fields: [userId], references: [id])
@@ -822,10 +822,10 @@ model AuditLog {
 model Notification {
   id        Int       @id @default(autoincrement())
   userId    Int       @map("user_id")
-  title     String    @db.VarChar(255)
-  body      String    @db.Text
-  type      String    @db.VarChar(50)
-  data      Json?
+  title     String    @db.NVarChar(255)
+  body      String    @db.NVarChar(Max)
+  type      String    @db.NVarChar(50)
+  data      String?  @db.NVarChar(Max)
   isRead    Boolean   @default(false) @map("is_read")
   readAt    DateTime? @map("read_at")
   createdAt DateTime  @default(now()) @map("created_at")
@@ -839,10 +839,10 @@ model Notification {
 
 model SystemConfig {
   id        Int      @id @default(autoincrement())
-  key       String   @unique @db.VarChar(100)
-  value     String   @db.Text
-  type      String   @default("string") @db.VarChar(20)
-  module    String?  @db.VarChar(100)
+  key       String   @unique @db.NVarChar(100)
+  value     String   @db.NVarChar(Max)
+  type      String   @default("string") @db.NVarChar(20)
+  module    String?  @db.NVarChar(100)
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt @map("updated_at")
 
