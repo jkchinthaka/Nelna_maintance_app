@@ -127,10 +127,12 @@ class _DriverAssignFormState extends ConsumerState<DriverAssignForm> {
                 ),
                 keyboardType: TextInputType.number,
                 validator: (v) {
-                  if (v == null || v.trim().isEmpty)
+                  if (v == null || v.trim().isEmpty) {
                     return 'Driver ID is required';
-                  if (int.tryParse(v.trim()) == null)
+                  }
+                  if (int.tryParse(v.trim()) == null) {
                     return 'Enter a valid number';
+                  }
                   return null;
                 },
               ),
