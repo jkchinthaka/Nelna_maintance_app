@@ -326,10 +326,10 @@ class AuthService {
     return { rawToken, tokenHash };
   }
 
-  /** SHA-256 HMAC using JWT refresh secret as key */
+  /** SHA-256 HMAC using dedicated HMAC secret as key */
   _hashToken(token) {
     return crypto
-      .createHmac('sha256', config.jwt.refreshSecret)
+      .createHmac('sha256', config.jwt.hmacSecret || config.jwt.refreshSecret)
       .update(token)
       .digest('hex');
   }

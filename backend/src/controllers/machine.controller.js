@@ -13,7 +13,7 @@ class MachineController {
   });
 
   getById = asyncHandler(async (req, res) => {
-    const machine = await machineService.getById(parseInt(req.params.id, 10));
+    const machine = await machineService.getById(parseInt(req.params.id, 10), req.user);
     ApiResponse.success(res, machine);
   });
 

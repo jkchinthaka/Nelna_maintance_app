@@ -12,7 +12,7 @@ class VehicleController {
   });
 
   getById = asyncHandler(async (req, res) => {
-    const vehicle = await vehicleService.getById(parseInt(req.params.id, 10));
+    const vehicle = await vehicleService.getById(parseInt(req.params.id, 10), req.user);
     ApiResponse.success(res, vehicle);
   });
 

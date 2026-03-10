@@ -50,11 +50,21 @@ class MachineService {
   }
 
   /**
-   * Get single machine by ID with all related data
+   * Get single machine by ID with all related data.
+   * Enforces branch-level tenant isolation for non-admin users.
    */
-  async getById(id) {
+  async getById(id, user) {
+    const where = { id, deletedAt: null };
+    if (
+      user &&
+      user.roleName !== 'super_admin' &&
+      user.roleName !== 'company_admin'
+    ) {
+      where.branchId = user.branchId;
+    }
+
     const machine = await prisma.machine.findFirst({
-      where: { id, deletedAt: null },
+      where,
       include: {
         branch: true,
         maintenanceSchedules: {

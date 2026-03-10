@@ -22,7 +22,7 @@ const authenticate = async (req, res, next) => {
       throw new UnauthorizedError('Access token is required');
     }
 
-    const decoded = jwt.verify(token, config.jwt.secret);
+    const decoded = jwt.verify(token, config.jwt.secret, { algorithms: ['HS256'] });
 
     const user = await prisma.user.findUnique({
       where: { id: decoded.userId },
@@ -126,7 +126,7 @@ const optionalAuth = async (req, res, next) => {
     const authHeader = req.headers.authorization;
     if (authHeader && authHeader.startsWith('Bearer ')) {
       const token = authHeader.split(' ')[1];
-      const decoded = jwt.verify(token, config.jwt.secret);
+      const decoded = jwt.verify(token, config.jwt.secret, { algorithms: ['HS256'] });
       const user = await prisma.user.findUnique({
         where: { id: decoded.userId },
         include: { role: true },

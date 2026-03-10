@@ -57,12 +57,40 @@ const ALLOWED_MIME_TYPES = [
   'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
 ];
 
+// Allowlisted extensions mapped to their expected MIME prefixes.
+// This prevents MIME-spoofing attacks (e.g., a .php file with image/jpeg header).
+const ALLOWED_EXTENSIONS = new Map([
+  ['.jpg',  'image/jpeg'],
+  ['.jpeg', 'image/jpeg'],
+  ['.png',  'image/png'],
+  ['.gif',  'image/gif'],
+  ['.webp', 'image/webp'],
+  ['.pdf',  'application/pdf'],
+  ['.doc',  'application/msword'],
+  ['.docx', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document'],
+  ['.xls',  'application/vnd.ms-excel'],
+  ['.xlsx', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'],
+]);
+
 const fileFilter = (_req, file, cb) => {
-  if (ALLOWED_MIME_TYPES.includes(file.mimetype)) {
-    cb(null, true);
-  } else {
-    cb(new BadRequestError(`File type '${file.mimetype}' is not allowed`), false);
+  const ext = path.extname(file.originalname).toLowerCase();
+
+  // Both MIME type AND extension must be in the allowlist
+  if (!ALLOWED_MIME_TYPES.includes(file.mimetype)) {
+    return cb(new BadRequestError(`File type '${file.mimetype}' is not allowed`), false);
   }
+  if (!ALLOWED_EXTENSIONS.has(ext)) {
+    return cb(new BadRequestError(`File extension '${ext}' is not allowed`), false);
+  }
+  // Cross-check: declared MIME must correspond to the extension
+  const expectedMime = ALLOWED_EXTENSIONS.get(ext);
+  if (file.mimetype !== expectedMime) {
+    return cb(
+      new BadRequestError(`File extension '${ext}' does not match MIME type '${file.mimetype}'`),
+      false
+    );
+  }
+  cb(null, true);
 };
 
 // ── Multer instances ────────────────────────────────────────────────────────

@@ -47,7 +47,45 @@ const app = express();
 // Security Middleware
 // ============================================================================
 app.use(helmet({
+  // Block cross-origin resource sharing at the browser level unless the
+  // response explicitly permits it (images/attachments served from /uploads
+  // are tagged cross-origin so Flutter/web clients can load them).
   crossOriginResourcePolicy: { policy: 'cross-origin' },
+
+  // Content Security Policy — restrict sources to same-origin by default.
+  // This is an API-only server so a strict policy is safe.
+  contentSecurityPolicy: {
+    directives: {
+      defaultSrc:   ["'self'"],
+      scriptSrc:    ["'self'"],
+      styleSrc:     ["'self'"],
+      imgSrc:       ["'self'", 'data:', 'blob:'],
+      connectSrc:   ["'self'"],
+      fontSrc:      ["'self'"],
+      objectSrc:    ["'none'"],
+      mediaSrc:     ["'self'"],
+      frameSrc:     ["'none'"],
+      baseUri:      ["'self'"],
+      formAction:   ["'self'"],
+      frameAncestors: ["'none'"],
+    },
+  },
+
+  // HTTP Strict Transport Security — tell browsers to only use HTTPS for 1 yr.
+  hsts: {
+    maxAge: 31_536_000,
+    includeSubDomains: true,
+    preload: true,
+  },
+
+  // Prevent this API from being embedded in iframes (clickjacking).
+  frameguard: { action: 'deny' },
+
+  // Leak no referrer information to third-party URLs.
+  referrerPolicy: { policy: 'no-referrer' },
+
+  // Disallow cross-domain Flash/PDF access (legacy, belt-and-braces).
+  permittedCrossDomainPolicies: { permittedPolicies: 'none' },
 }));
 app.use(cors({
   origin: config.cors.origin,
