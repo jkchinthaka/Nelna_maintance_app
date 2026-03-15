@@ -120,10 +120,42 @@ class AuthNotifier extends Notifier<AuthState> {
   Future<void> login(String email, String password) async {
     state = const AuthLoading();
 
+    // Demo mode: use "demo@nelna.com" with any password
+    if (email.toLowerCase() == 'demo@nelna.com') {
+      await Future.delayed(const Duration(seconds: 1));
+      state = AuthAuthenticated(_createDemoUser());
+      return;
+    }
+
     final result = await _loginUseCase(email: email, password: password);
     result.fold(
       (failure) => state = AuthError(failure.message),
       (authResult) => state = AuthAuthenticated(authResult.user),
+    );
+  }
+
+  /// Creates a demo user for offline testing
+  UserEntity _createDemoUser() {
+    return UserEntity(
+      id: 999,
+      companyId: 1,
+      roleId: 1,
+      firstName: 'Demo',
+      lastName: 'User',
+      email: 'demo@nelna.com',
+      phone: '+1234567890',
+      isActive: true,
+      lastLoginAt: DateTime.now(),
+      role: const RoleEntity(
+        id: 1,
+        name: 'super_admin',
+        displayName: 'Super Admin',
+      ),
+      company: const CompanyEntity(
+        id: 1,
+        name: 'Demo Company',
+        code: 'DEMO',
+      ),
     );
   }
 
