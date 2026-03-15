@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 // import 'package:sentry_flutter/sentry_flutter.dart';  // Temporarily disabled
-import 'core/config/app_config.dart';
 import 'core/routing/app_router.dart';
 import 'core/theme/app_theme.dart';
 
