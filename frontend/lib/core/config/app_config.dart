@@ -30,16 +30,17 @@ class AppConfig {
 
   // ── Base URLs per environment ──────────────────────────────────────
   static String get _devBaseUrl {
-    // Web uses window.location
+    // All traffic routed through Nginx (port 8080) so Python handles
+    // /inventory and /collect without bypassing the proxy layer.
     if (kIsWeb) {
-      return 'http://localhost:3000/api/v1';
+      return 'http://localhost:8080/api/v1';
     }
     // Android emulator needs 10.0.2.2 to reach host machine
     if (Platform.isAndroid) {
-      return 'http://10.0.2.2:3000/api/v1';
+      return 'http://10.0.2.2:8080/api/v1';
     }
     // iOS simulator, Windows, macOS, Linux use localhost
-    return 'http://localhost:3000/api/v1';
+    return 'http://localhost:8080/api/v1';
   }
 
   static final Map<Environment, String> _baseUrls = {

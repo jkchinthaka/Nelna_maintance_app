@@ -6,7 +6,7 @@ plugins {
 }
 
 android {
-    namespace = "com.example.nelna_maintenance"
+    namespace = "com.nelna.maintenance"
     compileSdk = flutter.compileSdkVersion
     ndkVersion = flutter.ndkVersion
 
@@ -20,8 +20,7 @@ android {
     }
 
     defaultConfig {
-        // TODO: Specify your own unique Application ID (https://developer.android.com/studio/build/application-id.html).
-        applicationId = "com.example.nelna_maintenance"
+        applicationId = "com.nelna.maintenance"
         // You can update the following values to match your application needs.
         // For more information, see: https://flutter.dev/to/review-gradle-config.
         minSdk = flutter.minSdkVersion
@@ -30,11 +29,37 @@ android {
         versionName = flutter.versionName
     }
 
+    signingConfigs {
+        create("release") {
+            // Set these four properties in your local ~/.gradle/gradle.properties
+            // (never commit the keystore or passwords to source control):
+            //   NELNA_KEY_STORE_PATH=/path/to/nelna-release.jks
+            //   NELNA_KEY_ALIAS=nelna
+            //   NELNA_KEY_PASSWORD=<key-password>
+            //   NELNA_STORE_PASSWORD=<store-password>
+            val keystorePath = System.getenv("NELNA_KEY_STORE_PATH")
+                ?: project.findProperty("NELNA_KEY_STORE_PATH") as String?
+            val keyAlias = System.getenv("NELNA_KEY_ALIAS")
+                ?: project.findProperty("NELNA_KEY_ALIAS") as String?
+            val keyPassword = System.getenv("NELNA_KEY_PASSWORD")
+                ?: project.findProperty("NELNA_KEY_PASSWORD") as String?
+            val storePassword = System.getenv("NELNA_STORE_PASSWORD")
+                ?: project.findProperty("NELNA_STORE_PASSWORD") as String?
+
+            if (keystorePath != null) {
+                storeFile = file(keystorePath)
+                this.storePassword = storePassword ?: ""
+                this.keyAlias = keyAlias ?: ""
+                this.keyPassword = keyPassword ?: ""
+            }
+        }
+    }
+
     buildTypes {
         release {
-            // TODO: Add your own signing config for the release build.
-            // Signing with the debug keys for now, so `flutter run --release` works.
-            signingConfig = signingConfigs.getByName("debug")
+            val releaseSigning = signingConfigs.findByName("release")
+            signingConfig = if (releaseSigning?.storeFile != null) releaseSigning
+                            else signingConfigs.getByName("debug")
         }
     }
 }

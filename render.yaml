@@ -37,3 +37,47 @@ services:
         value: info
     healthCheckPath: /api/v1/health
     autoDeploy: true
+
+  - type: web
+    name: nelna-maintenance-python-api
+    runtime: python
+    region: singapore
+    plan: free
+    rootDir: backend-python
+    buildCommand: pip install -r requirements.txt
+    startCommand: gunicorn app.main:app -k uvicorn.workers.UvicornWorker -c gunicorn.conf.py
+    envVars:
+      # ⚠️ Must match the value set on nelna-maintenance-api above
+      - key: JWT_SECRET
+        sync: false
+
+      # ⚠️ Set to the same Supabase/PostgreSQL URL as the Node service
+      # Use asyncpg driver prefix: postgresql+asyncpg://...
+      - key: DATABASE_URL
+        sync: false
+
+      - key: REDIS_URL
+        # Provision a Render Redis instance and paste the internal URL here
+        sync: false
+
+      # Internal Render URL of the Node service (for compat proxy)
+      - key: LEGACY_API_URL
+        fromService:
+          name: nelna-maintenance-api
+          type: web
+          property: host
+
+      - key: APP_ENV
+        value: production
+      - key: LOG_LEVEL
+        value: INFO
+      - key: GUNICORN_WORKERS
+        value: 2
+      - key: RATE_LIMIT_COLLECT
+        value: 200/minute
+      - key: MAX_BATCH_SIZE
+        value: 1000
+      - key: REDIS_STREAM_KEY
+        value: nelna:collect:events
+    healthCheckPath: /api/v1/health
+    autoDeploy: true
