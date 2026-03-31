@@ -31,7 +31,7 @@ router.get(
   checkPermission('inventory', 'read', 'stock_alert'),
   listQueryValidator,
   validate,
-  inventoryController.getLowStockAlerts
+  inventoryController.getLowStockAlerts,
 );
 
 // --------------------------------------------------------------------------
@@ -40,7 +40,7 @@ router.get(
 router.get(
   '/categories',
   checkPermission('inventory', 'read', 'product_category'),
-  inventoryController.getAllCategories
+  inventoryController.getAllCategories,
 );
 
 router.post(
@@ -48,7 +48,7 @@ router.post(
   checkPermission('inventory', 'create', 'product_category'),
   createCategoryValidator,
   validate,
-  inventoryController.createCategory
+  inventoryController.createCategory,
 );
 
 router.put(
@@ -56,7 +56,7 @@ router.put(
   checkPermission('inventory', 'update', 'product_category'),
   createCategoryValidator,
   validate,
-  inventoryController.updateCategory
+  inventoryController.updateCategory,
 );
 
 // --------------------------------------------------------------------------
@@ -67,7 +67,7 @@ router.post(
   checkPermission('inventory', 'create', 'stock_movement'),
   stockInValidator,
   validate,
-  inventoryController.stockIn
+  inventoryController.stockIn,
 );
 
 router.post(
@@ -75,7 +75,7 @@ router.post(
   checkPermission('inventory', 'create', 'stock_movement'),
   stockOutValidator,
   validate,
-  inventoryController.stockOut
+  inventoryController.stockOut,
 );
 
 router.post(
@@ -83,7 +83,7 @@ router.post(
   checkPermission('inventory', 'update', 'stock_movement'),
   stockInValidator,
   validate,
-  inventoryController.adjustStock
+  inventoryController.adjustStock,
 );
 
 router.get(
@@ -91,7 +91,7 @@ router.get(
   checkPermission('inventory', 'read', 'stock_movement'),
   listQueryValidator,
   validate,
-  inventoryController.getStockMovements
+  inventoryController.getStockMovements,
 );
 
 // --------------------------------------------------------------------------
@@ -102,13 +102,13 @@ router.get(
   checkPermission('inventory', 'read', 'supplier'),
   listQueryValidator,
   validate,
-  inventoryController.getAllSuppliers
+  inventoryController.getAllSuppliers,
 );
 
 router.get(
   '/suppliers/:id',
   checkPermission('inventory', 'read', 'supplier'),
-  inventoryController.getSupplierById
+  inventoryController.getSupplierById,
 );
 
 router.post(
@@ -116,7 +116,7 @@ router.post(
   checkPermission('inventory', 'create', 'supplier'),
   createSupplierValidator,
   validate,
-  inventoryController.createSupplier
+  inventoryController.createSupplier,
 );
 
 router.put(
@@ -124,13 +124,13 @@ router.put(
   checkPermission('inventory', 'update', 'supplier'),
   updateSupplierValidator,
   validate,
-  inventoryController.updateSupplier
+  inventoryController.updateSupplier,
 );
 
 router.delete(
   '/suppliers/:id',
   checkPermission('inventory', 'delete', 'supplier'),
-  inventoryController.deleteSupplier
+  inventoryController.deleteSupplier,
 );
 
 // --------------------------------------------------------------------------
@@ -141,13 +141,13 @@ router.get(
   checkPermission('inventory', 'read', 'purchase_order'),
   listQueryValidator,
   validate,
-  inventoryController.getAllPurchaseOrders
+  inventoryController.getAllPurchaseOrders,
 );
 
 router.get(
   '/purchase-orders/:id',
   checkPermission('inventory', 'read', 'purchase_order'),
-  inventoryController.getPurchaseOrderById
+  inventoryController.getPurchaseOrderById,
 );
 
 router.post(
@@ -155,19 +155,19 @@ router.post(
   checkPermission('inventory', 'create', 'purchase_order'),
   createPurchaseOrderValidator,
   validate,
-  inventoryController.createPurchaseOrder
+  inventoryController.createPurchaseOrder,
 );
 
 router.put(
   '/purchase-orders/:id/status',
   checkPermission('inventory', 'update', 'purchase_order'),
-  inventoryController.updatePOStatus
+  inventoryController.updatePOStatus,
 );
 
 router.put(
   '/purchase-orders/:id/approve',
   checkPermission('inventory', 'update', 'purchase_order_approval'),
-  inventoryController.approvePO
+  inventoryController.approvePO,
 );
 
 // --------------------------------------------------------------------------
@@ -178,13 +178,13 @@ router.post(
   checkPermission('inventory', 'create', 'grn'),
   createGRNValidator,
   validate,
-  inventoryController.createGRN
+  inventoryController.createGRN,
 );
 
 router.get(
   '/grn/po/:poId',
   checkPermission('inventory', 'read', 'grn'),
-  inventoryController.getGRNsByPO
+  inventoryController.getGRNsByPO,
 );
 
 // --------------------------------------------------------------------------
@@ -195,13 +195,13 @@ router.get(
   checkPermission('inventory', 'read', 'product'),
   listQueryValidator,
   validate,
-  inventoryController.getAllProducts
+  inventoryController.getAllProducts,
 );
 
 router.get(
   '/products/:id',
   checkPermission('inventory', 'read', 'product'),
-  inventoryController.getProductById
+  inventoryController.getProductById,
 );
 
 router.post(
@@ -209,7 +209,7 @@ router.post(
   checkPermission('inventory', 'create', 'product'),
   createProductValidator,
   validate,
-  inventoryController.createProduct
+  inventoryController.createProduct,
 );
 
 router.put(
@@ -217,13 +217,13 @@ router.put(
   checkPermission('inventory', 'update', 'product'),
   updateProductValidator,
   validate,
-  inventoryController.updateProduct
+  inventoryController.updateProduct,
 );
 
 router.delete(
   '/products/:id',
   checkPermission('inventory', 'delete', 'product'),
-  inventoryController.deleteProduct
+  inventoryController.deleteProduct,
 );
 
 module.exports = router;

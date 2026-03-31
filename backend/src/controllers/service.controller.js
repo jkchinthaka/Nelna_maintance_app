@@ -48,7 +48,7 @@ class ServiceController {
     const serviceRequest = await serviceService.reject(
       parseInt(req.params.id, 10),
       req.user.id,
-      req.body.rejectedReason
+      req.body.rejectedReason,
     );
     ApiResponse.success(res, serviceRequest, 'Service request rejected');
   });

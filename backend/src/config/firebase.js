@@ -18,8 +18,8 @@ function getFirebaseApp() {
 
   if (!projectId || !privateKey || !clientEmail) {
     logger.warn(
-      'Firebase credentials not configured – push notifications are disabled. ' +
-        'Set FIREBASE_PROJECT_ID, FIREBASE_PRIVATE_KEY, and FIREBASE_CLIENT_EMAIL.'
+      'Firebase credentials not configured – push notifications are disabled. '
+        + 'Set FIREBASE_PROJECT_ID, FIREBASE_PRIVATE_KEY, and FIREBASE_CLIENT_EMAIL.',
     );
     return null;
   }

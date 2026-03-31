@@ -30,7 +30,9 @@ class ReportController {
   });
 
   getExpenseReport = asyncHandler(async (req, res) => {
-    const { branchId, startDate, endDate, groupBy } = req.query;
+    const {
+      branchId, startDate, endDate, groupBy,
+    } = req.query;
     const report = await reportService.getExpenseReport(branchId, startDate, endDate, groupBy);
     ApiResponse.success(res, report);
   });

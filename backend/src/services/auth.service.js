@@ -81,20 +81,20 @@ class AuthService {
       // Public self-registration: only technician / driver
       if (!SELF_REGISTER_ROLES.includes(requestedRoleId)) {
         throw new ForbiddenError(
-          'Self-registration is only allowed for Technician and Driver roles'
+          'Self-registration is only allowed for Technician and Driver roles',
         );
       }
     } else {
       // Authenticated caller
       if (!ADMIN_ROLES.includes(caller.roleId)) {
         throw new ForbiddenError(
-          'Only Super Admin or Company Admin can create user accounts'
+          'Only Super Admin or Company Admin can create user accounts',
         );
       }
       // Prevent company_admin from creating super_admin
       if (caller.roleId !== 1 && requestedRoleId === 1) {
         throw new ForbiddenError(
-          'Only Super Admin can create another Super Admin account'
+          'Only Super Admin can create another Super Admin account',
         );
       }
       // ── Privilege escalation prevention: company_admin cannot create users
@@ -103,7 +103,7 @@ class AuthService {
         const targetCompanyId = parseInt(userData.companyId, 10);
         if (targetCompanyId !== caller.companyId) {
           throw new ForbiddenError(
-            'Company Admin cannot create users in a different company'
+            'Company Admin cannot create users in a different company',
           );
         }
       }
@@ -207,10 +207,9 @@ class AuthService {
       // prevents timing-based token oracle attacks)
       const incomingHash = this._hashToken(token);
       const storedHash = user.refreshToken || '';
-      const valid =
-        incomingHash.length === storedHash.length &&
-        incomingHash.length > 0 &&
-        crypto.timingSafeEqual(Buffer.from(incomingHash), Buffer.from(storedHash));
+      const valid = incomingHash.length === storedHash.length
+        && incomingHash.length > 0
+        && crypto.timingSafeEqual(Buffer.from(incomingHash), Buffer.from(storedHash));
       if (!valid) {
         throw new UnauthorizedError('Refresh token has been revoked');
       }
@@ -307,7 +306,7 @@ class AuthService {
         roleName: user.role.name,
       },
       config.jwt.secret,
-      { expiresIn: config.jwt.expiry, algorithm: 'HS256' }
+      { expiresIn: config.jwt.expiry, algorithm: 'HS256' },
     );
   }
 
@@ -320,7 +319,7 @@ class AuthService {
     const rawToken = jwt.sign(
       { userId: user.id },
       config.jwt.refreshSecret,
-      { expiresIn: config.jwt.refreshExpiry, algorithm: 'HS256' }
+      { expiresIn: config.jwt.refreshExpiry, algorithm: 'HS256' },
     );
     const tokenHash = this._hashToken(rawToken);
     return { rawToken, tokenHash };

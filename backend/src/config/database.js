@@ -8,9 +8,8 @@ const config = require('./index');
 // Prevent multiple PrismaClient instances in serverless hot-reloads
 const globalForPrisma = globalThis;
 
-const prisma =
-  globalForPrisma.prisma ||
-  new PrismaClient({
+const prisma = globalForPrisma.prisma
+  || new PrismaClient({
     log:
       config.app.env === 'development'
         ? ['query', 'info', 'warn', 'error']

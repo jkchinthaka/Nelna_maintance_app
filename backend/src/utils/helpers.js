@@ -83,21 +83,17 @@ const generateUUID = () => uuidv4();
 /**
  * Sanitize object - remove undefined/null fields
  */
-const sanitizeObject = (obj) => {
-  return Object.fromEntries(
-    Object.entries(obj).filter(([_, v]) => v !== undefined && v !== null && v !== '')
-  );
-};
+const sanitizeObject = (obj) => Object.fromEntries(
+  Object.entries(obj).filter(([_, v]) => v !== undefined && v !== null && v !== ''),
+);
 
 /**
  * Format currency
  */
-const formatCurrency = (amount, currency = 'LKR') => {
-  return new Intl.NumberFormat('en-LK', {
-    style: 'currency',
-    currency,
-  }).format(amount);
-};
+const formatCurrency = (amount, currency = 'LKR') => new Intl.NumberFormat('en-LK', {
+  style: 'currency',
+  currency,
+}).format(amount);
 
 module.exports = {
   generateReferenceNo,

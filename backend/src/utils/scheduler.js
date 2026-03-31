@@ -41,7 +41,7 @@ const initScheduledTasks = () => {
               'Vehicle Service Reminder',
               `Vehicle ${vehicle.registrationNo} service is due on ${vehicle.nextServiceDate.toISOString().split('T')[0]}`,
               'VEHICLE_SERVICE_REMINDER',
-              { vehicleId: vehicle.id }
+              { vehicleId: vehicle.id },
             );
           }
         }
@@ -61,7 +61,7 @@ const initScheduledTasks = () => {
               'Insurance Expiry Alert',
               `Vehicle ${vehicle.registrationNo} insurance expires on ${vehicle.insuranceExpiry.toISOString().split('T')[0]}`,
               'INSURANCE_EXPIRY',
-              { vehicleId: vehicle.id }
+              { vehicleId: vehicle.id },
             );
           }
         }
@@ -100,7 +100,7 @@ const initScheduledTasks = () => {
             `${overdueSchedules.length} Overdue Maintenance Tasks`,
             `There are ${overdueSchedules.length} overdue machine maintenance schedules that need attention.`,
             'OVERDUE_MAINTENANCE',
-            { count: overdueSchedules.length }
+            { count: overdueSchedules.length },
           );
         }
       }
@@ -136,7 +136,7 @@ const initScheduledTasks = () => {
             'Low Stock Alert',
             `${lowStockProducts.length} products are below reorder level and need restocking.`,
             'LOW_STOCK_ALERT',
-            { count: lowStockProducts.length }
+            { count: lowStockProducts.length },
           );
         }
       }
@@ -191,7 +191,7 @@ const initScheduledTasks = () => {
             `SLA Breach: ${request.ticketNo}`,
             `Service request ${request.ticketNo} has breached its SLA deadline.`,
             'SLA_BREACH',
-            { serviceRequestId: request.id, ticketNo: request.ticketNo }
+            { serviceRequestId: request.id, ticketNo: request.ticketNo },
           );
         }
       }
@@ -229,7 +229,7 @@ const initScheduledTasks = () => {
             `${expiringContracts.length} AMC Contracts Expiring`,
             `There are ${expiringContracts.length} AMC contracts expiring within the next 30 days.`,
             'AMC_EXPIRY',
-            { count: expiringContracts.length }
+            { count: expiringContracts.length },
           );
         }
       }

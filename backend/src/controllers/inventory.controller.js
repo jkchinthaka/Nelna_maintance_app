@@ -76,7 +76,7 @@ class InventoryController {
   getStockMovements = asyncHandler(async (req, res) => {
     const result = await inventoryService.getStockMovements(
       parseInt(req.params.productId, 10),
-      req.query
+      req.query,
     );
     ApiResponse.paginated(res, result.movements, result.pagination);
   });
@@ -137,7 +137,7 @@ class InventoryController {
   updatePOStatus = asyncHandler(async (req, res) => {
     const po = await inventoryService.updatePOStatus(
       parseInt(req.params.id, 10),
-      req.body.status
+      req.body.status,
     );
     ApiResponse.success(res, po, 'Purchase order status updated successfully');
   });

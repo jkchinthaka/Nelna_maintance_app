@@ -41,7 +41,7 @@ class MachineController {
   getMaintenanceSchedules = asyncHandler(async (req, res) => {
     const result = await machineService.getMaintenanceSchedules(
       parseInt(req.params.id, 10),
-      req.query
+      req.query,
     );
     ApiResponse.paginated(res, result.schedules, result.pagination);
   });
@@ -55,7 +55,7 @@ class MachineController {
   getBreakdowns = asyncHandler(async (req, res) => {
     const result = await machineService.getBreakdowns(
       parseInt(req.params.id, 10),
-      req.query
+      req.query,
     );
     ApiResponse.paginated(res, result.breakdowns, result.pagination);
   });
@@ -63,7 +63,7 @@ class MachineController {
   resolveBreakdown = asyncHandler(async (req, res) => {
     const resolved = await machineService.resolveBreakdown(
       parseInt(req.params.id, 10),
-      req.body
+      req.body,
     );
     ApiResponse.success(res, resolved, 'Breakdown resolved successfully');
   });
@@ -73,7 +73,7 @@ class MachineController {
     const result = await machineService.calculateDowntime(
       parseInt(req.params.id, 10),
       req.query.startDate,
-      req.query.endDate
+      req.query.endDate,
     );
     ApiResponse.success(res, result);
   });
@@ -87,7 +87,7 @@ class MachineController {
   getAMCContracts = asyncHandler(async (req, res) => {
     const result = await machineService.getAMCContracts(
       parseInt(req.params.id, 10),
-      req.query
+      req.query,
     );
     ApiResponse.paginated(res, result.contracts, result.pagination);
   });

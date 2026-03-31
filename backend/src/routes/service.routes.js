@@ -30,14 +30,14 @@ router.get(
   '/my-requests',
   listQueryValidator,
   validate,
-  serviceController.getMyRequests
+  serviceController.getMyRequests,
 );
 
 router.get(
   '/my-tasks',
   listQueryValidator,
   validate,
-  serviceController.getAssignedTasks
+  serviceController.getAssignedTasks,
 );
 
 router.get(
@@ -45,7 +45,7 @@ router.get(
   checkPermission('services', 'read', 'sla_breach'),
   listQueryValidator,
   validate,
-  serviceController.getSLABreaches
+  serviceController.getSLABreaches,
 );
 
 // --------------------------------------------------------------------------
@@ -56,13 +56,13 @@ router.get(
   checkPermission('services', 'read', 'service_request'),
   listQueryValidator,
   validate,
-  serviceController.getAll
+  serviceController.getAll,
 );
 
 router.get(
   '/:id',
   checkPermission('services', 'read', 'service_request'),
-  serviceController.getById
+  serviceController.getById,
 );
 
 router.post(
@@ -71,7 +71,7 @@ router.post(
   createServiceRequestValidator,
   validate,
   auditLog('CREATE', 'services', 'ServiceRequest'),
-  serviceController.create
+  serviceController.create,
 );
 
 router.put(
@@ -81,7 +81,7 @@ router.put(
   updateServiceRequestValidator,
   validate,
   auditLog('UPDATE', 'services', 'ServiceRequest'),
-  serviceController.update
+  serviceController.update,
 );
 
 router.delete(
@@ -89,7 +89,7 @@ router.delete(
   checkPermission('services', 'delete', 'service_request'),
   captureOldValues('serviceRequest'),
   auditLog('DELETE', 'services', 'ServiceRequest'),
-  serviceController.delete
+  serviceController.delete,
 );
 
 // --------------------------------------------------------------------------
@@ -101,7 +101,7 @@ router.put(
   approveRequestValidator,
   validate,
   auditLog('UPDATE', 'services', 'ServiceRequest'),
-  serviceController.approve
+  serviceController.approve,
 );
 
 router.put(
@@ -110,7 +110,7 @@ router.put(
   rejectRequestValidator,
   validate,
   auditLog('UPDATE', 'services', 'ServiceRequest'),
-  serviceController.reject
+  serviceController.reject,
 );
 
 // --------------------------------------------------------------------------
@@ -122,7 +122,7 @@ router.post(
   assignTaskValidator,
   validate,
   auditLog('CREATE', 'services', 'ServiceTask'),
-  serviceController.assignTask
+  serviceController.assignTask,
 );
 
 router.put(
@@ -131,7 +131,7 @@ router.put(
   updateTaskValidator,
   validate,
   auditLog('UPDATE', 'services', 'ServiceTask'),
-  serviceController.updateTask
+  serviceController.updateTask,
 );
 
 // --------------------------------------------------------------------------
@@ -143,7 +143,7 @@ router.post(
   addSparePartValidator,
   validate,
   auditLog('CREATE', 'services', 'ServiceSparePart'),
-  serviceController.addSparePart
+  serviceController.addSparePart,
 );
 
 // --------------------------------------------------------------------------
@@ -152,7 +152,7 @@ router.post(
 router.get(
   '/:id/cost',
   checkPermission('services', 'read', 'service_request'),
-  serviceController.calculateCost
+  serviceController.calculateCost,
 );
 
 router.put(
@@ -161,7 +161,7 @@ router.put(
   closeTicketValidator,
   validate,
   auditLog('UPDATE', 'services', 'ServiceRequest'),
-  serviceController.closeTicket
+  serviceController.closeTicket,
 );
 
 module.exports = router;

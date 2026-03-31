@@ -78,16 +78,14 @@ const authenticate = async (req, res, next) => {
  * Authorize by role names
  * @param {...string} roles - Allowed role names
  */
-const authorize = (...roles) => {
-  return (req, res, next) => {
-    if (!req.user) {
-      return next(new UnauthorizedError('Authentication required'));
-    }
-    if (!roles.includes(req.user.roleName)) {
-      return next(new ForbiddenError('You do not have permission to access this resource'));
-    }
-    next();
-  };
+const authorize = (...roles) => (req, res, next) => {
+  if (!req.user) {
+    return next(new UnauthorizedError('Authentication required'));
+  }
+  if (!roles.includes(req.user.roleName)) {
+    return next(new ForbiddenError('You do not have permission to access this resource'));
+  }
+  next();
 };
 
 /**
@@ -96,26 +94,24 @@ const authorize = (...roles) => {
  * @param {string} action - Action (create, read, update, delete)
  * @param {string} resource - Resource name
  */
-const checkPermission = (module, action, resource) => {
-  return (req, res, next) => {
-    if (!req.user) {
-      return next(new UnauthorizedError('Authentication required'));
-    }
+const checkPermission = (module, action, resource) => (req, res, next) => {
+  if (!req.user) {
+    return next(new UnauthorizedError('Authentication required'));
+  }
 
-    // Super Admin bypasses permission checks
-    if (req.user.roleName === 'super_admin') {
-      return next();
-    }
+  // Super Admin bypasses permission checks
+  if (req.user.roleName === 'super_admin') {
+    return next();
+  }
 
-    const hasPermission = req.user.permissions.some(
-      (p) => p.module === module && p.action === action && p.resource === resource
-    );
+  const hasPermission = req.user.permissions.some(
+    (p) => p.module === module && p.action === action && p.resource === resource,
+  );
 
-    if (!hasPermission) {
-      return next(new ForbiddenError(`Permission denied: ${module}.${action}.${resource}`));
-    }
-    next();
-  };
+  if (!hasPermission) {
+    return next(new ForbiddenError(`Permission denied: ${module}.${action}.${resource}`));
+  }
+  next();
 };
 
 /**
@@ -152,4 +148,6 @@ const optionalAuth = async (req, res, next) => {
   next();
 };
 
-module.exports = { authenticate, authorize, checkPermission, optionalAuth };
+module.exports = {
+  authenticate, authorize, checkPermission, optionalAuth,
+};

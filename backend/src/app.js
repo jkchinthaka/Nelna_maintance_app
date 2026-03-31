@@ -56,17 +56,17 @@ app.use(helmet({
   // This is an API-only server so a strict policy is safe.
   contentSecurityPolicy: {
     directives: {
-      defaultSrc:   ["'self'"],
-      scriptSrc:    ["'self'"],
-      styleSrc:     ["'self'"],
-      imgSrc:       ["'self'", 'data:', 'blob:'],
-      connectSrc:   ["'self'"],
-      fontSrc:      ["'self'"],
-      objectSrc:    ["'none'"],
-      mediaSrc:     ["'self'"],
-      frameSrc:     ["'none'"],
-      baseUri:      ["'self'"],
-      formAction:   ["'self'"],
+      defaultSrc: ["'self'"],
+      scriptSrc: ["'self'"],
+      styleSrc: ["'self'"],
+      imgSrc: ["'self'", 'data:', 'blob:'],
+      connectSrc: ["'self'"],
+      fontSrc: ["'self'"],
+      objectSrc: ["'none'"],
+      mediaSrc: ["'self'"],
+      frameSrc: ["'none'"],
+      baseUri: ["'self'"],
+      formAction: ["'self'"],
       frameAncestors: ["'none'"],
     },
   },
@@ -193,6 +193,7 @@ app.get(`${API_PREFIX}/health`, (req, res) => {
 // ============================================================================
 // System info: requires authentication + super_admin role
 const { authenticate, authorize } = require('./middleware/auth');
+
 app.get(`${API_PREFIX}/system/info`, authenticate, authorize('super_admin'), (req, res) => {
   res.status(200).json({
     success: true,

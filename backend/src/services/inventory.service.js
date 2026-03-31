@@ -3,7 +3,9 @@
 // ============================================================================
 const prisma = require('../config/database');
 const { NotFoundError, BadRequestError, ConflictError } = require('../utils/errors');
-const { generateReferenceNo, parsePagination, parseSort, buildSearchFilter } = require('../utils/helpers');
+const {
+  generateReferenceNo, parsePagination, parseSort, buildSearchFilter,
+} = require('../utils/helpers');
 
 class InventoryService {
   // ==========================================================================
@@ -38,12 +40,17 @@ class InventoryService {
           : '';
 
       const lowStockIds = await prisma.$queryRawUnsafe(
-        `SELECT id FROM products WHERE deleted_at IS NULL AND is_active = true AND current_stock <= reorder_level ${branchCondition} ORDER BY created_at DESC`
+        `SELECT id FROM products WHERE deleted_at IS NULL AND is_active = true AND current_stock <= reorder_level ${branchCondition} ORDER BY created_at DESC`,
       );
       const ids = lowStockIds.map((r) => r.id);
 
       if (ids.length === 0) {
-        return { data: [], pagination: { page, limit, total: 0, totalPages: 0 } };
+        return {
+          data: [],
+          pagination: {
+            page, limit, total: 0, totalPages: 0,
+          },
+        };
       }
 
       where.id = { in: ids };
@@ -54,10 +61,7 @@ class InventoryService {
       where.branchId = user.branchId;
     }
 
-    let products;
-    let total;
-
-    [products, total] = await Promise.all([
+    const [products, total] = await Promise.all([
       prisma.product.findMany({
         where,
         include: {
@@ -327,7 +331,7 @@ class InventoryService {
     // Check maximum stock
     if (product.maximumStock && newStock > parseFloat(product.maximumStock)) {
       throw new BadRequestError(
-        `Stock in would exceed maximum stock level (${product.maximumStock}). Current: ${previousStock}, Incoming: ${quantity}`
+        `Stock in would exceed maximum stock level (${product.maximumStock}). Current: ${previousStock}, Incoming: ${quantity}`,
       );
     }
 
@@ -375,7 +379,7 @@ class InventoryService {
 
     if (quantity > previousStock) {
       throw new BadRequestError(
-        `Insufficient stock. Available: ${previousStock}, Requested: ${quantity}`
+        `Insufficient stock. Available: ${previousStock}, Requested: ${quantity}`,
       );
     }
 
@@ -466,7 +470,11 @@ class InventoryService {
       prisma.stockMovement.findMany({
         where,
         include: {
-          product: { select: { id: true, sku: true, name: true, unit: true } },
+          product: {
+            select: {
+              id: true, sku: true, name: true, unit: true,
+            },
+          },
           performer: { select: { id: true, firstName: true, lastName: true } },
         },
         orderBy: { createdAt: 'desc' },
@@ -510,7 +518,7 @@ class InventoryService {
     });
 
     const lowStockProducts = allProducts.filter(
-      (p) => parseFloat(p.currentStock) <= parseFloat(p.reorderLevel)
+      (p) => parseFloat(p.currentStock) <= parseFloat(p.reorderLevel),
     );
 
     const total = lowStockProducts.length;
@@ -725,7 +733,11 @@ class InventoryService {
         supplier: true,
         items: {
           include: {
-            product: { select: { id: true, sku: true, name: true, unit: true } },
+            product: {
+              select: {
+                id: true, sku: true, name: true, unit: true,
+              },
+            },
           },
         },
         grns: {
@@ -806,7 +818,11 @@ class InventoryService {
           supplier: { select: { id: true, name: true, code: true } },
           items: {
             include: {
-              product: { select: { id: true, sku: true, name: true, unit: true } },
+              product: {
+                select: {
+                  id: true, sku: true, name: true, unit: true,
+                },
+              },
             },
           },
         },
@@ -841,7 +857,7 @@ class InventoryService {
     const allowed = validTransitions[po.status] || [];
     if (!allowed.includes(status)) {
       throw new BadRequestError(
-        `Cannot transition from ${po.status} to ${status}. Allowed: ${allowed.join(', ') || 'none'}`
+        `Cannot transition from ${po.status} to ${status}. Allowed: ${allowed.join(', ') || 'none'}`,
       );
     }
 
@@ -931,7 +947,11 @@ class InventoryService {
         include: {
           items: {
             include: {
-              product: { select: { id: true, sku: true, name: true, unit: true } },
+              product: {
+                select: {
+                  id: true, sku: true, name: true, unit: true,
+                },
+              },
             },
           },
           supplier: { select: { id: true, name: true, code: true } },
@@ -995,10 +1015,10 @@ class InventoryService {
       });
 
       const allFullyReceived = updatedPOItems.every(
-        (item) => parseFloat(item.receivedQty) >= parseFloat(item.quantity)
+        (item) => parseFloat(item.receivedQty) >= parseFloat(item.quantity),
       );
       const anyReceived = updatedPOItems.some(
-        (item) => parseFloat(item.receivedQty) > 0
+        (item) => parseFloat(item.receivedQty) > 0,
       );
 
       let newPOStatus = po.status;
@@ -1035,7 +1055,11 @@ class InventoryService {
       include: {
         items: {
           include: {
-            product: { select: { id: true, sku: true, name: true, unit: true } },
+            product: {
+              select: {
+                id: true, sku: true, name: true, unit: true,
+              },
+            },
           },
         },
         supplier: { select: { id: true, name: true, code: true } },

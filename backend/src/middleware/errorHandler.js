@@ -73,10 +73,9 @@ const errorHandler = (err, req, res, next) => {
 
   // Unhandled errors
   const statusCode = err.statusCode || 500;
-  const message =
-    config.app.env === 'production'
-      ? 'Internal server error'
-      : err.message || 'Internal server error';
+  const message = config.app.env === 'production'
+    ? 'Internal server error'
+    : err.message || 'Internal server error';
 
   return res.status(statusCode).json({
     success: false,
