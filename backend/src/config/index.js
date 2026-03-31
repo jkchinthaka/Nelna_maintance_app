@@ -16,6 +16,10 @@ const config = {
   db: {
     url: process.env.DATABASE_URL,
   },
+  mongo: {
+    mainAppUri: process.env.MAIN_APP_MONGODB_URI,
+    mainAppDbName: process.env.MAIN_APP_MONGODB_DB_NAME || 'main_app',
+  },
   jwt: {
     secret: process.env.JWT_SECRET,
     refreshSecret: process.env.JWT_REFRESH_SECRET,
@@ -59,7 +63,7 @@ const config = {
 };
 
 // Validate required configuration
-const requiredConfigs = ['jwt.secret', 'jwt.refreshSecret', 'db.url'];
+const requiredConfigs = ['jwt.secret', 'jwt.refreshSecret', 'db.url', 'mongo.mainAppUri'];
 for (const key of requiredConfigs) {
   const keys = key.split('.');
   let value = config;
