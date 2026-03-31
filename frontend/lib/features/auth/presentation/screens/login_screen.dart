@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:flutter_animate/flutter_animate.dart';
 
 import '../../../../core/constants/app_constants.dart';
 import '../../../../core/theme/app_colors.dart';
@@ -77,7 +78,10 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                   const SizedBox(height: 24),
 
                   // ── Logo & Title ───────────────────────────────────
-                  _LogoSection(size: size),
+                  _LogoSection(size: size).animate()
+                      .fadeIn(duration: 800.ms, curve: Curves.easeOutQuad)
+                      .slideY(begin: -0.1, end: 0),
+                  
                   const SizedBox(height: 40),
 
                   // ── Form Card ──────────────────────────────────────
@@ -107,7 +111,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                             ),
                             const SizedBox(height: 4),
                             Text(
-                              'Sign in to continue to ${AppConstants.appName}',
+                              'Sign in to continue to \',
                               style: theme.textTheme.bodyMedium?.copyWith(
                                 color: theme.colorScheme.onSurfaceVariant,
                               ),
@@ -129,7 +133,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                                   return 'Email is required';
                                 }
                                 final emailRegex = RegExp(
-                                  r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$',
+                                  r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}\$',
                                 );
                                 if (!emailRegex.hasMatch(value.trim())) {
                                   return 'Enter a valid email address';
@@ -139,7 +143,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                               onFieldSubmitted: (_) {
                                 _passwordFocus.requestFocus();
                               },
-                            ),
+                            ).animate(delay: 200.ms).fadeIn().slideY(begin: 0.1),
                             const SizedBox(height: 20),
 
                             // Password
@@ -162,7 +166,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                                 return null;
                               },
                               onFieldSubmitted: (_) => _onLogin(),
-                            ),
+                            ).animate(delay: 300.ms).fadeIn().slideY(begin: 0.1),
                             const SizedBox(height: 8),
 
                             // Forgot password
@@ -188,7 +192,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                                   ),
                                 ),
                               ),
-                            ),
+                            ).animate(delay: 400.ms).fadeIn(),
                             const SizedBox(height: 16),
 
                             // Login button
@@ -218,12 +222,12 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                                         fontWeight: FontWeight.w600,
                                       ),
                                     ),
-                            ),
+                            ).animate(delay: 500.ms).fadeIn().slideY(begin: 0.1),
                           ],
                         ),
                       ),
                     ),
-                  ),
+                  ).animate(delay: 100.ms).fadeIn().scale(begin: const Offset(0.95, 0.95)),
 
                   const SizedBox(height: 16),
 
@@ -256,7 +260,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                         ),
                       ],
                     ),
-                  ),
+                  ).animate(delay: 600.ms).fadeIn(),
 
                   const SizedBox(height: 24),
 
@@ -280,17 +284,17 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                         ),
                       ),
                     ],
-                  ),
+                  ).animate(delay: 700.ms).fadeIn(),
 
                   // ── Footer ─────────────────────────────────────────
                   Text(
-                    '© ${DateTime.now().year} ${AppConstants.appName}',
+                    '© \ \',
                     style: theme.textTheme.bodySmall?.copyWith(
                       color: theme.colorScheme.onSurfaceVariant.withOpacity(
                         0.6,
                       ),
                     ),
-                  ),
+                  ).animate(delay: 800.ms).fadeIn(),
                   const SizedBox(height: 16),
                 ],
               ),
@@ -334,7 +338,8 @@ class _LogoSection extends StatelessWidget {
             size: 42,
             color: Colors.white,
           ),
-        ),
+        ).animate(onPlay: (controller) => controller.repeat(reverse: true))
+         .shimmer(duration: 2000.ms, color: Colors.white24),
         const SizedBox(height: 16),
         Text(
           AppConstants.appName,

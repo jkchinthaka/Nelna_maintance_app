@@ -1,30 +1,47 @@
+import 'dart:ui';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-// import 'package:sentry_flutter/sentry_flutter.dart';  // Temporarily disabled
+import 'package:sentry_flutter/sentry_flutter.dart';
+import 'core/config/app_config.dart';
 import 'core/routing/app_router.dart';
 import 'core/theme/app_theme.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
-  // Sentry temporarily disabled due to path length issue
-  // final sentryDsn = AppConfig.sentryDsn;
+  final sentryDsn = AppConfig.sentryDsn;
 
-  // if (sentryDsn.isNotEmpty) {
-  //   await SentryFlutter.init(
-  //     (options) {
-  //       options.dsn = sentryDsn;
-  //       options.environment = AppConfig.envLabel.toLowerCase();
-  //       options.tracesSampleRate = AppConfig.isProduction ? 0.2 : 1.0;
-  //       options.debug = AppConfig.isDebug;
-  //     },
-  //     appRunner: () =>
-  //         runApp(const ProviderScope(child: NelnaMaintenanceApp())),
-  //   );
-  // } else {
-  // No Sentry DSN — run without error monitoring
+  if (sentryDsn.isNotEmpty) {
+    await SentryFlutter.init(
+      (options) {
+        options.dsn = sentryDsn;
+        options.environment = AppConfig.envLabel.toLowerCase();
+        options.tracesSampleRate = AppConfig.isProduction ? 0.2 : 1.0;
+        options.debug = AppConfig.isDebug;
+        options.sendDefaultPii = false;
+      },
+      appRunner: () => _runApp(),
+    );
+  } else {
+    _runApp();
+  }
+}
+
+void _runApp() {
+  // Capture Flutter framework errors (widget build failures, etc.)
+  FlutterError.onError = (FlutterErrorDetails details) {
+    FlutterError.presentError(details);
+    Sentry.captureException(details.exception, stackTrace: details.stack);
+  };
+
+  // Capture unhandled async / platform-thread errors
+  PlatformDispatcher.instance.onError = (error, stack) {
+    Sentry.captureException(error, stackTrace: stack);
+    return true; // mark as handled
+  };
+
   runApp(const ProviderScope(child: NelnaMaintenanceApp()));
-  // }
 }
 
 class NelnaMaintenanceApp extends ConsumerWidget {

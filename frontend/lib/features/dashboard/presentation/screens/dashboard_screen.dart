@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
+import 'package:flutter_animate/flutter_animate.dart';
 
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/widgets/error_widget.dart';
@@ -8,7 +9,7 @@ import '../../../../core/widgets/kpi_card.dart';
 import '../../../../core/widgets/loading_widget.dart';
 import '../../../auth/presentation/providers/auth_provider.dart';
 import '../../../notifications/presentation/providers/notification_provider.dart';
-import '../../../notifications/presentation/widgets/notification_panel.dart';
+import '../../../notifications/presentation/widgets/notification_panel.dart';   
 import '../../domain/entities/dashboard_entity.dart';
 import '../providers/dashboard_provider.dart';
 import '../widgets/monthly_trend_chart.dart';
@@ -20,7 +21,7 @@ class DashboardScreen extends ConsumerStatefulWidget {
   const DashboardScreen({super.key});
 
   @override
-  ConsumerState<DashboardScreen> createState() => _DashboardScreenState();
+  ConsumerState<DashboardScreen> createState() => _DashboardScreenState();      
 }
 
 class _DashboardScreenState extends ConsumerState<DashboardScreen> {
@@ -37,7 +38,7 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
     final authState = ref.watch(authStateProvider);
 
     final userName =
-        authState is AuthAuthenticated ? authState.user.firstName : 'User';
+        authState is AuthAuthenticated ? authState.user.firstName : 'User';     
 
     final isAdmin = authState is AuthAuthenticated &&
         (authState.user.roleName == 'super_admin' ||
@@ -61,32 +62,32 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    'Welcome back, $userName',
-                    style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                    'Welcome back, \',
+                    style: Theme.of(context).textTheme.titleLarge?.copyWith(    
                           fontWeight: FontWeight.w700,
                           color: AppColors.textPrimary,
                         ),
-                  ),
+                  ).animate().fadeIn(duration: 400.ms).slideX(begin: -0.1),
                   const SizedBox(height: 2),
                   Text(
-                    DateFormat('EEEE, d MMMM yyyy').format(DateTime.now()),
-                    style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                    DateFormat('EEEE, d MMMM yyyy').format(DateTime.now()),     
+                    style: Theme.of(context).textTheme.bodySmall?.copyWith(     
                           color: AppColors.textSecondary,
                         ),
-                  ),
+                  ).animate().fadeIn(delay: 200.ms, duration: 400.ms).slideX(begin: -0.1),
                 ],
               ),
               toolbarHeight: 72,
               actions: [
                 // Branch filter for admins
-                if (isAdmin) _buildBranchSelector(context),
+                if (isAdmin) _buildBranchSelector(context).animate().fadeIn(delay: 300.ms),
                 Consumer(
                   builder: (context, ref, _) {
-                    final unread = ref.watch(notificationProvider).unreadCount;
+                    final unread = ref.watch(notificationProvider).unreadCount; 
                     return IconButton(
                       icon: Badge(
                         isLabelVisible: unread > 0,
-                        label: Text('$unread'),
+                        label: Text('\'),
                         child: const Icon(
                           Icons.notifications_outlined,
                           color: AppColors.textPrimary,
@@ -95,7 +96,7 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
                       onPressed: () => NotificationPanel.show(context),
                     );
                   },
-                ),
+                ).animate().fadeIn(delay: 400.ms),
                 const SizedBox(width: 4),
               ],
             ),
@@ -106,19 +107,19 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
               sliver: SliverList(
                 delegate: SliverChildListDelegate([
                   // KPIs Section
-                  _buildKPIsSection(kpisAsync),
+                  _buildKPIsSection(kpisAsync).animate().fadeIn(delay: 100.ms).slideY(begin: 0.05),
                   const SizedBox(height: 20),
 
                   // Monthly Trends Chart
-                  _buildTrendsSection(trendsAsync),
+                  _buildTrendsSection(trendsAsync).animate().fadeIn(delay: 200.ms).slideY(begin: 0.1),
                   const SizedBox(height: 20),
 
                   // Service Request Stats Chart
-                  _buildStatsSection(statsAsync),
+                  _buildStatsSection(statsAsync).animate().fadeIn(delay: 300.ms).slideY(begin: 0.1),
                   const SizedBox(height: 20),
 
                   // Recent Activity
-                  _buildRecentActivitySection(kpisAsync),
+                  _buildRecentActivitySection(kpisAsync).animate().fadeIn(delay: 400.ms).slideY(begin: 0.1),
 
                   // Bottom padding
                   const SizedBox(height: 24),
@@ -131,7 +132,7 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
     );
   }
 
-  // ── Pull to Refresh ─────────────────────────────────────────────────
+  // ── Pull to Refresh ─────────────────────────────────────────────────       
 
   Future<void> _onRefresh() async {
     ref.invalidate(dashboardKPIsProvider);
@@ -155,7 +156,7 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
     ]);
   }
 
-  // ── Branch Selector (Admin only) ────────────────────────────────────
+  // ── Branch Selector (Admin only) ────────────────────────────────────       
 
   Widget _buildBranchSelector(BuildContext context) {
     final selectedBranch = ref.watch(selectedBranchIdProvider);
@@ -164,10 +165,10 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
       icon: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          const Icon(Icons.filter_list, color: AppColors.primary, size: 20),
+          const Icon(Icons.filter_list, color: AppColors.primary, size: 20),    
           const SizedBox(width: 4),
           Text(
-            selectedBranch == null ? 'All' : 'Branch $selectedBranch',
+            selectedBranch == null ? 'All' : 'Branch \',
             style: const TextStyle(
               fontSize: 12,
               color: AppColors.primary,
@@ -180,20 +181,20 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
         ref.read(selectedBranchIdProvider.notifier).set(value);
       },
       itemBuilder: (context) => [
-        const PopupMenuItem<int?>(value: null, child: Text('All Branches')),
+        const PopupMenuItem<int?>(value: null, child: Text('All Branches')),    
         // In a real app, populate from a branches provider
         ...List.generate(5, (i) {
           final branchId = i + 1;
           return PopupMenuItem<int?>(
             value: branchId,
-            child: Text('Branch $branchId'),
+            child: Text('Branch \'),
           );
         }),
       ],
     );
   }
 
-  // ── KPIs Grid ───────────────────────────────────────────────────────
+  // ── KPIs Grid ───────────────────────────────────────────────────────       
 
   Widget _buildKPIsSection(AsyncValue<DashboardKPIs> kpisAsync) {
     return kpisAsync.when(
@@ -210,35 +211,35 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
     final items = [
       _KpiItem(
         title: 'Active Vehicles',
-        value: '${kpis.activeVehicles}',
+        value: '\',
         icon: Icons.local_shipping_outlined,
         color: AppColors.primary,
       ),
       _KpiItem(
         title: 'Operational Machines',
-        value: '${kpis.operationalMachines}',
+        value: '\',
         icon: Icons.precision_manufacturing_outlined,
         color: AppColors.secondary,
       ),
       _KpiItem(
         title: 'Open Requests',
-        value: '${kpis.openServiceRequests}',
+        value: '\',
         icon: Icons.assignment_outlined,
         color: AppColors.warning,
-        trend: kpis.openServiceRequests > 10 ? KpiTrend.up : KpiTrend.neutral,
+        trend: kpis.openServiceRequests > 10 ? KpiTrend.up : KpiTrend.neutral,  
         trendLabel: kpis.openServiceRequests > 10 ? 'High' : null,
       ),
       _KpiItem(
         title: 'Low Stock Items',
-        value: '${kpis.lowStockItems}',
+        value: '\',
         icon: Icons.inventory_2_outlined,
-        color: kpis.lowStockItems > 0 ? AppColors.error : AppColors.success,
+        color: kpis.lowStockItems > 0 ? AppColors.error : AppColors.success,    
         trend: kpis.lowStockItems > 0 ? KpiTrend.up : KpiTrend.neutral,
         trendLabel: kpis.lowStockItems > 0 ? 'Alert' : null,
       ),
       _KpiItem(
         title: 'Pending POs',
-        value: '${kpis.pendingPOs}',
+        value: '\',
         icon: Icons.shopping_cart_outlined,
         color: AppColors.info,
       ),
@@ -250,16 +251,16 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
       ),
       _KpiItem(
         title: 'Total Assets',
-        value: '${kpis.totalAssets}',
+        value: '\',
         icon: Icons.category_outlined,
         color: AppColors.primaryLight,
       ),
       _KpiItem(
         title: 'Under Repair',
-        value: '${kpis.assetsUnderRepair}',
+        value: '\',
         icon: Icons.build_outlined,
         color:
-            kpis.assetsUnderRepair > 0 ? AppColors.warning : AppColors.success,
+            kpis.assetsUnderRepair > 0 ? AppColors.warning : AppColors.success, 
       ),
     ];
 
@@ -293,7 +294,7 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
               onTap: () {
                 // Navigate to the relevant detail screen
               },
-            );
+            ).animate().fadeIn(delay: Duration(milliseconds: 50 * index)).scale(begin: const Offset(0.9, 0.9));
           },
         );
       },
@@ -325,9 +326,9 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
     );
   }
 
-  // ── Trends Chart ────────────────────────────────────────────────────
+  // ── Trends Chart ────────────────────────────────────────────────────       
 
-  Widget _buildTrendsSection(AsyncValue<MonthlyTrendsResponse> trendsAsync) {
+  Widget _buildTrendsSection(AsyncValue<MonthlyTrendsResponse> trendsAsync) {   
     return trendsAsync.when(
       loading: () => const ShimmerLoading(height: 320),
       error: (error, _) => ErrorView(
@@ -338,9 +339,9 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
     );
   }
 
-  // ── Service Stats Chart ─────────────────────────────────────────────
+  // ── Service Stats Chart ─────────────────────────────────────────────       
 
-  Widget _buildStatsSection(AsyncValue<ServiceRequestStats> statsAsync) {
+  Widget _buildStatsSection(AsyncValue<ServiceRequestStats> statsAsync) {       
     return statsAsync.when(
       loading: () => const ShimmerLoading(height: 300),
       error: (error, _) => ErrorView(
@@ -351,11 +352,9 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
     );
   }
 
-  // ── Recent Activity ─────────────────────────────────────────────────
+  // ── Recent Activity ─────────────────────────────────────────────────       
 
-  Widget _buildRecentActivitySection(AsyncValue<DashboardKPIs> kpisAsync) {
-    // Build sample activity items based on KPI data for a realistic feed.
-    // In production, this would be its own endpoint.
+  Widget _buildRecentActivitySection(AsyncValue<DashboardKPIs> kpisAsync) {     
     final activities = <ActivityItem>[];
 
     kpisAsync.whenData((kpis) {
@@ -363,10 +362,10 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
         activities.add(
           ActivityItem(
             title: 'Open Service Requests',
-            subtitle: '${kpis.openServiceRequests} requests awaiting action',
+            subtitle: '\ requests awaiting action',   
             icon: Icons.assignment_late_outlined,
             color: AppColors.warning,
-            timestamp: DateTime.now().subtract(const Duration(minutes: 15)),
+            timestamp: DateTime.now().subtract(const Duration(minutes: 15)),    
             tag: 'PENDING',
           ),
         );
@@ -376,10 +375,10 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
         activities.add(
           ActivityItem(
             title: 'Low Stock Alert',
-            subtitle: '${kpis.lowStockItems} items below reorder level',
+            subtitle: '\ items below reorder level',        
             icon: Icons.warning_amber_outlined,
             color: AppColors.error,
-            timestamp: DateTime.now().subtract(const Duration(hours: 1)),
+            timestamp: DateTime.now().subtract(const Duration(hours: 1)),       
             tag: 'ALERT',
           ),
         );
@@ -390,10 +389,10 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
           ActivityItem(
             title: 'Assets Under Repair',
             subtitle:
-                '${kpis.assetsUnderRepair} assets currently being repaired',
+                '\ assets currently being repaired',    
             icon: Icons.build_circle_outlined,
             color: AppColors.info,
-            timestamp: DateTime.now().subtract(const Duration(hours: 2)),
+            timestamp: DateTime.now().subtract(const Duration(hours: 2)),       
             tag: 'REPAIR',
           ),
         );
@@ -403,42 +402,61 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
         activities.add(
           ActivityItem(
             title: 'Pending Purchase Orders',
-            subtitle: '${kpis.pendingPOs} POs require attention',
-            icon: Icons.receipt_long_outlined,
-            color: AppColors.primaryLight,
-            timestamp: DateTime.now().subtract(const Duration(hours: 3)),
+            subtitle: '\ POs awaiting approval',
+            icon: Icons.shopping_cart_checkout,
+            color: AppColors.primary,
+            timestamp: DateTime.now().subtract(const Duration(hours: 5)),
+            tag: 'APPROVAL',
           ),
         );
       }
-
-      activities.add(
-        ActivityItem(
-          title: 'System Status',
-          subtitle:
-              '${kpis.activeVehicles} vehicles and ${kpis.operationalMachines} machines operational',
-          icon: Icons.check_circle_outline,
-          color: AppColors.success,
-          timestamp: DateTime.now().subtract(const Duration(hours: 6)),
-          tag: 'OK',
-        ),
-      );
     });
 
-    // Show a placeholder if we're still loading
-    if (activities.isEmpty && kpisAsync.isLoading) {
-      return const ShimmerLoading(height: 200);
+    if (activities.isEmpty) {
+      activities.add(
+        ActivityItem(
+          title: 'System Online',
+          subtitle: 'All systems are operating normally',
+          icon: Icons.check_circle_outline,
+          color: AppColors.success,
+          timestamp: DateTime.now(),
+          tag: 'SYSTEM',
+        ),
+      );
     }
 
-    return RecentActivityCard(
-      activities: activities,
-      onViewAll: () {
-        // Navigate to full activity/audit log
-      },
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 8),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text(
+                'Recent Activity',
+                style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                      fontWeight: FontWeight.w700,
+                    ),
+              ),
+              TextButton(
+                onPressed: () {},
+                child: const Text('View All'),
+              ),
+            ],
+          ),
+        ),
+        ...activities.map((activity) => Padding(
+              padding: const EdgeInsets.only(bottom: 12),
+              child: RecentActivityCard(
+                item: activity,
+                onTap: () {},
+              ),
+            )),
+      ],
     );
   }
 }
-
-// ── Helper Model ──────────────────────────────────────────────────────
 
 class _KpiItem {
   final String title;
@@ -448,7 +466,7 @@ class _KpiItem {
   final KpiTrend trend;
   final String? trendLabel;
 
-  const _KpiItem({
+  _KpiItem({
     required this.title,
     required this.value,
     required this.icon,

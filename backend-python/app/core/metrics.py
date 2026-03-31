@@ -43,6 +43,27 @@ ACTIVE_REQUESTS = Gauge(
     'Number of requests currently being processed',
 )
 
+# ── AI / ML metrics ──────────────────────────────────────────────────────────
+
+AI_PREDICTION_TOTAL = Counter(
+    'nelna_ai_predictions_total',
+    'Total AI/ML prediction requests',
+    ['feature', 'outcome'],  # feature: maintenance|inventory|anomaly|assistant|image
+)                            # outcome: success|error|insufficient_data
+
+AI_PREDICTION_LATENCY = Histogram(
+    'nelna_ai_prediction_duration_seconds',
+    'AI/ML prediction request duration in seconds',
+    ['feature'],
+    buckets=(0.1, 0.5, 1.0, 2.0, 5.0, 10.0, 30.0, 60.0),
+)
+
+ANOMALY_ALERTS_TOTAL = Counter(
+    'nelna_anomaly_alerts_total',
+    'Total anomalies detected by IsolationForest',
+    ['stream_key'],
+)
+
 
 # ---------------------------------------------------------------------------
 # ASGI middleware

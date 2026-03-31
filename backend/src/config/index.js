@@ -58,7 +58,9 @@ const config = {
     clientEmail: process.env.FIREBASE_CLIENT_EMAIL,
   },
   sentry: {
-    dsn: process.env.SENTRY_DSN || '',
+    dsn: process.env.SENTRY_DSN_NODE || '',
+    tracesRate: parseFloat(process.env.SENTRY_TRACES_SAMPLE_RATE) || (process.env.NODE_ENV === 'production' ? 0.2 : 1.0),
+    profilesRate: parseFloat(process.env.SENTRY_PROFILES_SAMPLE_RATE) || 0.1,
   },
 };
 

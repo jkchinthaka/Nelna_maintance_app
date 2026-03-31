@@ -22,12 +22,17 @@ try {
     Sentry.init({
       dsn: config.sentry.dsn,
       environment: config.app.env,
-      tracesSampleRate: config.app.env === 'production' ? 0.2 : 1.0,
+      tracesSampleRate: config.sentry.tracesRate,
+      profilesSampleRate: config.sentry.profilesRate,
+      sendDefaultPii: false,
     });
     logger.info('Sentry error monitoring initialised');
+  } else {
+    Sentry = null; // DSN not set — disable Sentry entirely
   }
 } catch (err) {
   logger.warn('Sentry not available, skipping error monitoring');
+  Sentry = null;
 }
 
 // Import routes
@@ -40,6 +45,8 @@ const assetRoutes = require('./routes/asset.routes');
 const reportRoutes = require('./routes/report.routes');
 const uploadRoutes = require('./routes/upload.routes');
 const roleRoutes = require('./routes/role.routes');
+
+const { v4: uuidv4 } = require('uuid');
 
 const app = express();
 
@@ -91,8 +98,22 @@ app.use(cors({
   origin: config.cors.origin,
   credentials: true,
   methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
-  allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With'],
+  allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With', 'X-Request-ID'],
+  exposedHeaders: ['X-Correlation-ID'],
 }));
+
+// ── Correlation-ID middleware ─────────────────────────────────────────────
+// Reads X-Request-ID from the client (or generates a new one), binds it to
+// req.correlationId, tags the Sentry scope, and echoes it back in the response.
+app.use((req, res, next) => {
+  const id = req.headers['x-request-id'] || req.headers['x-correlation-id'] || uuidv4();
+  req.correlationId = id;
+  res.setHeader('X-Correlation-ID', id);
+  if (Sentry) {
+    Sentry.getCurrentScope().setTag('correlation_id', id);
+  }
+  next();
+});
 
 // Rate limiting
 const limiter = rateLimit({
@@ -133,7 +154,7 @@ app.use(compression());
 // ============================================================================
 const morganFormat = config.app.env === 'production' ? 'combined' : 'dev';
 app.use(morgan(morganFormat, {
-  stream: { write: (message) => logger.info(message.trim()) },
+  stream: logger.stream,
   skip: (req) => req.url === '/api/v1/health',
 }));
 
@@ -217,7 +238,7 @@ app.use('*', (req, res, next) => {
 // Global Error Handler
 // ============================================================================
 // Report errors to Sentry (when configured) before Express handles them
-if (Sentry && config.sentry.dsn) {
+if (Sentry) {
   Sentry.setupExpressErrorHandler(app);
 }
 app.use(errorHandler);

@@ -35,6 +35,25 @@ class Settings(BaseSettings):
     stream_consumer_name: str = Field(default='worker-1', alias='STREAM_CONSUMER_NAME')
     stream_batch_size: int = Field(default=50, alias='STREAM_BATCH_SIZE')
 
+    # ── AI / ML ───────────────────────────────────────────────────────────────
+    # LLM providers — leave unset to disable the corresponding provider
+    openai_api_key: str | None = Field(default=None, alias='OPENAI_API_KEY')
+    gemini_api_key: str | None = Field(default=None, alias='GEMINI_API_KEY')
+
+    # Google Cloud Vision API (image condition assessment cloud mode)
+    google_vision_api_key: str | None = Field(default=None, alias='GOOGLE_VISION_API_KEY')
+
+    # Anomaly detection: default contamination fraction (overridable per-request)
+    anomaly_contamination: float = Field(default=0.05, alias='ANOMALY_CONTAMINATION')
+
+    # Forecast horizon default in days
+    forecast_default_periods: int = Field(default=30, alias='FORECAST_DEFAULT_PERIODS')
+
+    # ── Error monitoring (Sentry) ─────────────────────────────────────────────
+    sentry_dsn: str | None = Field(default=None, alias='SENTRY_DSN_PYTHON')
+    sentry_traces_sample_rate: float = Field(default=0.2, alias='SENTRY_TRACES_SAMPLE_RATE')
+    sentry_profiles_sample_rate: float = Field(default=0.1, alias='SENTRY_PROFILES_SAMPLE_RATE')
+
 
 @lru_cache
 def get_settings() -> Settings:
