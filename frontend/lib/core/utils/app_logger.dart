@@ -95,7 +95,11 @@ class AppLogger {
   // ── Navigation breadcrumb ─────────────────────────────────────────────
   static void navigation(String from, String to) {
     Sentry.addBreadcrumb(
-      Breadcrumb.navigation(from: from, to: to),
+      Breadcrumb(
+        type: 'navigation',
+        data: {'from': from, 'to': to},
+        category: 'app.navigation',
+      ),
     );
   }
 }

@@ -1,4 +1,5 @@
-import 'package:flutter/material.dart';
+﻿import 'package:flutter/material.dart';
+import 'package:flutter_animate/flutter_animate.dart';
 
 import '../theme/app_colors.dart';
 
@@ -31,101 +32,96 @@ class KpiCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final surface = theme.colorScheme.surface;
+    final onSurface = theme.colorScheme.onSurface;
+    final variant = theme.colorScheme.onSurfaceVariant;
+
     return Container(
       decoration: BoxDecoration(
-        color: Theme.of(context).colorScheme.surface,
-        borderRadius: BorderRadius.circular(20),
+        borderRadius: BorderRadius.circular(24),
+        gradient: LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: [
+            surface,
+            theme.colorScheme.surfaceContainerHighest.withOpacity(0.28),
+          ],
+        ),
+        border: Border.all(color: color.withOpacity(0.12)),
         boxShadow: [
           BoxShadow(
-            color: color.withOpacity(0.08),
-            blurRadius: 20,
-            offset: const Offset(0, 4),
-          ),
-          BoxShadow(
-            color: Theme.of(context).colorScheme.shadow.withOpacity(0.05),
-            blurRadius: 10,
-            offset: const Offset(0, 2),
+            color: Colors.black.withOpacity(
+              theme.brightness == Brightness.dark ? 0.2 : 0.06,
+            ),
+            blurRadius: 22,
+            offset: const Offset(0, 10),
           ),
         ],
-        border: Border.all(
-          color: Theme.of(context).colorScheme.outlineVariant.withOpacity(0.5),
-          width: 1,
-        ),
       ),
       child: Material(
         color: Colors.transparent,
         child: InkWell(
+          borderRadius: BorderRadius.circular(24),
           onTap: onTap,
-          borderRadius: BorderRadius.circular(20),
-          highlightColor: color.withOpacity(0.05),
-          splashColor: color.withOpacity(0.1),
           child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 18),
+            padding: const EdgeInsets.all(18),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                // ── Header Row ─────────────────────────────────────────
                 Row(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Expanded(
-                      child: Text(
-                        title,
-                        style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                          color: Theme.of(context).colorScheme.onSurfaceVariant,
-                          fontWeight: FontWeight.w600,
-                          letterSpacing: 0.2,
-                        ),
-                        maxLines: 2,
-                        overflow: TextOverflow.ellipsis,
-                      ),
-                    ),
-                    const SizedBox(width: 8),
                     Container(
-                      padding: const EdgeInsets.all(10),
+                      width: 48,
+                      height: 48,
                       decoration: BoxDecoration(
-                        color: color.withOpacity(0.12),
-                        borderRadius: BorderRadius.circular(14),
+                        gradient: LinearGradient(
+                          colors: [
+                            color.withOpacity(0.2),
+                            color.withOpacity(0.1),
+                          ],
+                        ),
+                        borderRadius: BorderRadius.circular(16),
                       ),
                       child: Icon(icon, color: color, size: 22),
                     ),
+                    const Spacer(),
+                    if (trend != KpiTrend.neutral)
+                      _TrendChip(trend: trend, label: trendLabel),
                   ],
                 ),
-                
-                const Spacer(),
-
-                // ── Value ─────────────────────────────────────────────────
+                const SizedBox(height: 18),
+                Text(
+                  title,
+                  style: theme.textTheme.bodyMedium?.copyWith(
+                    color: variant,
+                    fontWeight: FontWeight.w600,
+                  ),
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
+                ),
+                const SizedBox(height: 8),
                 Text(
                   value,
-                  style: Theme.of(context).textTheme.headlineMedium?.copyWith(
+                  style: theme.textTheme.headlineMedium?.copyWith(
+                    color: onSurface,
                     fontWeight: FontWeight.w800,
-                    letterSpacing: -0.5,
-                    color: Theme.of(context).colorScheme.onSurface,
+                    letterSpacing: -0.8,
                   ),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
                 ),
-
-                // ── Subtitle + Trend ──────────────────────────────────────
-                if (subtitle != null || trendLabel != null) ...[
-                  const SizedBox(height: 10),
-                  Row(
-                    children: [
-                      if (trendLabel != null) ...[
-                        _TrendIndicator(trend: trend, label: trendLabel!),
-                        const SizedBox(width: 8),
-                      ],
-                      if (subtitle != null)
-                        Expanded(
-                          child: Text(
-                            subtitle!,
-                            style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                                color: Theme.of(context).colorScheme.onSurfaceVariant,
-                              ),
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
-                          ),
-                        ),
-                    ],
+                if (subtitle != null) ...[
+                  const SizedBox(height: 6),
+                  Text(
+                    subtitle!,
+                    style: theme.textTheme.bodySmall?.copyWith(
+                      color: variant,
+                    ),
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
                   ),
                 ],
               ],
@@ -133,16 +129,15 @@ class KpiCard extends StatelessWidget {
           ),
         ),
       ),
-    );
+    ).animate().fadeIn(duration: 240.ms).scale(begin: const Offset(0.98, 0.98));
   }
 }
 
-// ── Trend Indicator ───────────────────────────────────────────────────
-class _TrendIndicator extends StatelessWidget {
+class _TrendChip extends StatelessWidget {
   final KpiTrend trend;
-  final String label;
+  final String? label;
 
-  const _TrendIndicator({required this.trend, required this.label});
+  const _TrendChip({required this.trend, this.label});
 
   @override
   Widget build(BuildContext context) {
@@ -172,18 +167,19 @@ class _TrendIndicator extends StatelessWidget {
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
-        crossAxisAlignment: CrossAxisAlignment.center,
         children: [
           Icon(trendIcon, size: 14, color: trendColor),
-          const SizedBox(width: 4),
-          Text(
-            label,
-            style: TextStyle(
-              color: trendColor,
-              fontSize: 12,
-              fontWeight: FontWeight.w700,
+          if (label != null) ...[
+            const SizedBox(width: 4),
+            Text(
+              label!,
+              style: TextStyle(
+                color: trendColor,
+                fontSize: 12,
+                fontWeight: FontWeight.w700,
+              ),
             ),
-          ),
+          ],
         ],
       ),
     );

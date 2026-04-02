@@ -4,12 +4,10 @@ import 'package:go_router/go_router.dart';
 
 import '../../../../core/constants/app_constants.dart';
 import '../../../../core/theme/app_colors.dart';
+import '../../../../core/widgets/app_background.dart';
 import '../providers/auth_provider.dart';
 
-/// Splash screen displayed on cold-start.
-///
-/// Checks the persisted auth state and redirects to either
-/// the login screen or the dashboard.
+/// Splash screen displayed on cold start while auth state resolves.
 class SplashScreen extends ConsumerStatefulWidget {
   const SplashScreen({super.key});
 
@@ -20,7 +18,7 @@ class SplashScreen extends ConsumerStatefulWidget {
 class _SplashScreenState extends ConsumerState<SplashScreen>
     with SingleTickerProviderStateMixin {
   late final AnimationController _controller;
-  late final Animation<double> _fadeIn;
+  late final Animation<double> _fade;
   late final Animation<double> _scale;
 
   @override
@@ -29,18 +27,18 @@ class _SplashScreenState extends ConsumerState<SplashScreen>
 
     _controller = AnimationController(
       vsync: this,
-      duration: const Duration(milliseconds: 1200),
+      duration: const Duration(milliseconds: 1400),
     );
 
-    _fadeIn = CurvedAnimation(
+    _fade = CurvedAnimation(
       parent: _controller,
       curve: const Interval(0.0, 0.6, curve: Curves.easeOut),
     );
 
-    _scale = Tween<double>(begin: 0.8, end: 1.0).animate(
+    _scale = Tween<double>(begin: 0.82, end: 1.0).animate(
       CurvedAnimation(
         parent: _controller,
-        curve: const Interval(0.0, 0.6, curve: Curves.easeOutBack),
+        curve: const Interval(0.0, 0.65, curve: Curves.easeOutBack),
       ),
     );
 
@@ -49,11 +47,8 @@ class _SplashScreenState extends ConsumerState<SplashScreen>
   }
 
   Future<void> _initializeApp() async {
-    // Start checking auth status.
     await ref.read(authStateProvider.notifier).checkAuthStatus();
-
-    // Give the animation time to finish.
-    await Future.delayed(const Duration(milliseconds: 1500));
+    await Future.delayed(const Duration(milliseconds: 1200));
 
     if (!mounted) return;
 
@@ -76,103 +71,142 @@ class _SplashScreenState extends ConsumerState<SplashScreen>
     final theme = Theme.of(context);
 
     return Scaffold(
-      body: Container(
-        width: double.infinity,
-        decoration: const BoxDecoration(
-          gradient: LinearGradient(
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
-            colors: [
-              AppColors.primaryDark,
-              AppColors.primary,
-              AppColors.primaryLight,
-            ],
-          ),
-        ),
+      backgroundColor: Colors.transparent,
+      body: AppBackground(
         child: SafeArea(
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              const Spacer(flex: 3),
-
-              // ── Animated Logo ──────────────────────────────────────
-              FadeTransition(
-                opacity: _fadeIn,
-                child: ScaleTransition(
-                  scale: _scale,
-                  child: Container(
-                    width: 110,
-                    height: 110,
-                    decoration: BoxDecoration(
-                      color: Colors.white,
-                      borderRadius: BorderRadius.circular(28),
-                      boxShadow: [
-                        BoxShadow(
-                          color: Colors.black.withOpacity(0.15),
-                          blurRadius: 30,
-                          offset: const Offset(0, 10),
+          child: Center(
+            child: ConstrainedBox(
+              constraints: const BoxConstraints(maxWidth: 560),
+              child: Padding(
+                padding: const EdgeInsets.all(24),
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    const Spacer(flex: 2),
+                    FadeTransition(
+                      opacity: _fade,
+                      child: ScaleTransition(
+                        scale: _scale,
+                        child: Container(
+                          width: 118,
+                          height: 118,
+                          decoration: BoxDecoration(
+                            borderRadius: BorderRadius.circular(30),
+                            gradient: const LinearGradient(
+                              begin: Alignment.topLeft,
+                              end: Alignment.bottomRight,
+                              colors: [
+                                AppColors.primaryDark,
+                                AppColors.primary,
+                                AppColors.primaryLight,
+                              ],
+                            ),
+                            boxShadow: [
+                              BoxShadow(
+                                color: AppColors.primaryDark.withOpacity(0.24),
+                                blurRadius: 34,
+                                offset: const Offset(0, 18),
+                              ),
+                            ],
+                          ),
+                          child: const Icon(
+                            Icons.engineering_rounded,
+                            size: 58,
+                            color: Colors.white,
+                          ),
                         ),
-                      ],
+                      ),
                     ),
-                    child: const Icon(
-                      Icons.build_circle_outlined,
-                      size: 56,
-                      color: AppColors.primary,
+                    const SizedBox(height: 28),
+                    FadeTransition(
+                      opacity: _fade,
+                      child: Text(
+                        AppConstants.appName,
+                        textAlign: TextAlign.center,
+                        style: theme.textTheme.headlineMedium?.copyWith(
+                          color: theme.colorScheme.onSurface,
+                          fontWeight: FontWeight.w800,
+                          letterSpacing: -0.8,
+                        ),
+                      ),
                     ),
-                  ),
+                    const SizedBox(height: 8),
+                    FadeTransition(
+                      opacity: _fade,
+                      child: Text(
+                        'Maintenance Management System',
+                        textAlign: TextAlign.center,
+                        style: theme.textTheme.bodyLarge?.copyWith(
+                          color: theme.colorScheme.onSurfaceVariant,
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: 18),
+                    FadeTransition(
+                      opacity: _fade,
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 14, vertical: 8),
+                        decoration: BoxDecoration(
+                          color: theme.colorScheme.surface.withOpacity(0.78),
+                          borderRadius: BorderRadius.circular(999),
+                          border: Border.all(
+                              color:
+                                  theme.colorScheme.outline.withOpacity(0.38)),
+                        ),
+                        child: Text(
+                          'Preparing your workspace',
+                          style: theme.textTheme.bodySmall?.copyWith(
+                            color: theme.colorScheme.onSurfaceVariant,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                      ),
+                    ),
+                    const Spacer(flex: 2),
+                    FadeTransition(
+                      opacity: _fade,
+                      child: Container(
+                        width: double.infinity,
+                        padding: const EdgeInsets.all(20),
+                        decoration: BoxDecoration(
+                          color: theme.colorScheme.surface.withOpacity(0.88),
+                          borderRadius: BorderRadius.circular(24),
+                          border: Border.all(
+                              color:
+                                  theme.colorScheme.outline.withOpacity(0.4)),
+                        ),
+                        child: Column(
+                          children: [
+                            const SizedBox(
+                              width: 26,
+                              height: 26,
+                              child:
+                                  CircularProgressIndicator(strokeWidth: 2.5),
+                            ),
+                            const SizedBox(height: 16),
+                            Text(
+                              'Loading secure session...',
+                              style: theme.textTheme.bodyMedium?.copyWith(
+                                fontWeight: FontWeight.w600,
+                              ),
+                            ),
+                            const SizedBox(height: 4),
+                            Text(
+                              'Version ${AppConstants.appVersion}',
+                              style: theme.textTheme.bodySmall?.copyWith(
+                                color: theme.colorScheme.onSurfaceVariant,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                    const Spacer(flex: 1),
+                  ],
                 ),
               ),
-              const SizedBox(height: 28),
-
-              // ── App Name ───────────────────────────────────────────
-              FadeTransition(
-                opacity: _fadeIn,
-                child: Text(
-                  AppConstants.appName,
-                  style: theme.textTheme.headlineMedium?.copyWith(
-                    color: Colors.white,
-                    fontWeight: FontWeight.w800,
-                    letterSpacing: -0.5,
-                  ),
-                ),
-              ),
-              const SizedBox(height: 8),
-              FadeTransition(
-                opacity: _fadeIn,
-                child: Text(
-                  'Maintenance Management System',
-                  style: theme.textTheme.bodyLarge?.copyWith(
-                    color: Colors.white.withOpacity(0.85),
-                  ),
-                ),
-              ),
-
-              const Spacer(flex: 3),
-
-              // ── Loading Indicator ──────────────────────────────────
-              FadeTransition(
-                opacity: _fadeIn,
-                child: const SizedBox(
-                  width: 28,
-                  height: 28,
-                  child: CircularProgressIndicator(
-                    strokeWidth: 2.5,
-                    valueColor: AlwaysStoppedAnimation<Color>(Colors.white70),
-                  ),
-                ),
-              ),
-              const SizedBox(height: 16),
-              FadeTransition(
-                opacity: _fadeIn,
-                child: Text(
-                  'v${AppConstants.appVersion}',
-                  style: theme.textTheme.bodySmall?.copyWith(
-                    color: Colors.white54,
-                  ),
-                ),
-              ),
-              const SizedBox(height: 32),
-            ],
+            ),
           ),
         ),
       ),
