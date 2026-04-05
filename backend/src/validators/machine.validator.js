@@ -84,7 +84,8 @@ const amcContractValidator = [
   body('coverageDetails').optional().trim(),
   body('contactPerson').optional().trim().isLength({ min: 1 }),
   body('contactPhone').optional().trim().isLength({ min: 1 }),
-  body('documentUrl').optional().trim().isURL().withMessage('Valid URL required'),
+  body('documentUrl').optional().trim().isURL()
+    .withMessage('Valid URL required'),
   body('status').optional().isIn(['ACTIVE', 'EXPIRED', 'CANCELLED', 'PENDING_RENEWAL']).withMessage('Invalid AMC status'),
 ];
 

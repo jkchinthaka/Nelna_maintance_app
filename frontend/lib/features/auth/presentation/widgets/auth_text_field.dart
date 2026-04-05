@@ -47,6 +47,7 @@ class _AuthTextFieldState extends State<AuthTextField> {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
 
     return TextFormField(
       controller: widget.controller,
@@ -59,7 +60,7 @@ class _AuthTextFieldState extends State<AuthTextField> {
       enabled: widget.enabled,
       maxLines: widget.maxLines,
       style: theme.textTheme.bodyLarge?.copyWith(
-        color: theme.colorScheme.onSurface,
+        color: colorScheme.onSurface,
       ),
       decoration: InputDecoration(
         labelText: widget.label,
@@ -81,37 +82,39 @@ class _AuthTextFieldState extends State<AuthTextField> {
               )
             : null,
         filled: true,
-        fillColor: theme.colorScheme.surfaceContainerHighest.withOpacity(0.35),
+        fillColor: colorScheme.surfaceContainerHighest.withOpacity(
+          theme.brightness == Brightness.dark ? 0.22 : 0.45,
+        ),
         contentPadding: const EdgeInsets.symmetric(
-          horizontal: 16,
-          vertical: 16,
+          horizontal: 18,
+          vertical: 18,
         ),
         border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(12),
-          borderSide: BorderSide(color: theme.colorScheme.outline),
+          borderRadius: BorderRadius.circular(18),
+          borderSide: BorderSide(color: colorScheme.outline),
         ),
         enabledBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(12),
+          borderRadius: BorderRadius.circular(18),
           borderSide: BorderSide(
-            color: theme.colorScheme.outline.withOpacity(0.5),
+            color: colorScheme.outline.withOpacity(0.5),
           ),
         ),
         focusedBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(12),
-          borderSide: BorderSide(color: theme.colorScheme.primary, width: 2),
+          borderRadius: BorderRadius.circular(18),
+          borderSide: BorderSide(color: colorScheme.primary, width: 1.8),
         ),
         errorBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(12),
-          borderSide: BorderSide(color: theme.colorScheme.error),
+          borderRadius: BorderRadius.circular(18),
+          borderSide: BorderSide(color: colorScheme.error),
         ),
         focusedErrorBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(12),
-          borderSide: BorderSide(color: theme.colorScheme.error, width: 2),
+          borderRadius: BorderRadius.circular(18),
+          borderSide: BorderSide(color: colorScheme.error, width: 1.8),
         ),
         disabledBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(12),
+          borderRadius: BorderRadius.circular(18),
           borderSide: BorderSide(
-            color: theme.colorScheme.outline.withOpacity(0.2),
+            color: colorScheme.outline.withOpacity(0.2),
           ),
         ),
       ),

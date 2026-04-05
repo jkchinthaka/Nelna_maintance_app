@@ -3,7 +3,9 @@
 // ============================================================================
 const prisma = require('../config/database');
 const { NotFoundError, BadRequestError } = require('../utils/errors');
-const { generateReferenceNo, parsePagination, parseSort, buildSearchFilter } = require('../utils/helpers');
+const {
+  generateReferenceNo, parsePagination, parseSort, buildSearchFilter,
+} = require('../utils/helpers');
 
 // SLA deadline offsets in hours based on priority
 const SLA_HOURS = {
@@ -48,9 +50,21 @@ class ServiceService {
         where,
         include: {
           branch: { select: { id: true, name: true, code: true } },
-          requester: { select: { id: true, firstName: true, lastName: true, email: true } },
-          approver: { select: { id: true, firstName: true, lastName: true, email: true } },
-          vehicle: { select: { id: true, registrationNo: true, make: true, model: true } },
+          requester: {
+            select: {
+              id: true, firstName: true, lastName: true, email: true,
+            },
+          },
+          approver: {
+            select: {
+              id: true, firstName: true, lastName: true, email: true,
+            },
+          },
+          vehicle: {
+            select: {
+              id: true, registrationNo: true, make: true, model: true,
+            },
+          },
           machine: { select: { id: true, machineCode: true, name: true } },
           asset: { select: { id: true, assetCode: true, name: true } },
           _count: { select: { tasks: true, spareParts: true } },
@@ -73,20 +87,48 @@ class ServiceService {
       where: { id, deletedAt: null },
       include: {
         branch: true,
-        requester: { select: { id: true, firstName: true, lastName: true, email: true, phone: true } },
-        approver: { select: { id: true, firstName: true, lastName: true, email: true } },
-        vehicle: { select: { id: true, registrationNo: true, make: true, model: true, vehicleType: true } },
-        machine: { select: { id: true, machineCode: true, name: true, category: true, location: true } },
-        asset: { select: { id: true, assetCode: true, name: true, category: true } },
+        requester: {
+          select: {
+            id: true, firstName: true, lastName: true, email: true, phone: true,
+          },
+        },
+        approver: {
+          select: {
+            id: true, firstName: true, lastName: true, email: true,
+          },
+        },
+        vehicle: {
+          select: {
+            id: true, registrationNo: true, make: true, model: true, vehicleType: true,
+          },
+        },
+        machine: {
+          select: {
+            id: true, machineCode: true, name: true, category: true, location: true,
+          },
+        },
+        asset: {
+          select: {
+            id: true, assetCode: true, name: true, category: true,
+          },
+        },
         tasks: {
           include: {
-            technician: { select: { id: true, firstName: true, lastName: true, email: true } },
+            technician: {
+              select: {
+                id: true, firstName: true, lastName: true, email: true,
+              },
+            },
           },
           orderBy: { createdAt: 'desc' },
         },
         spareParts: {
           include: {
-            product: { select: { id: true, sku: true, name: true, unit: true } },
+            product: {
+              select: {
+                id: true, sku: true, name: true, unit: true,
+              },
+            },
           },
           orderBy: { createdAt: 'desc' },
         },
@@ -141,7 +183,11 @@ class ServiceService {
       },
       include: {
         branch: { select: { id: true, name: true, code: true } },
-        requester: { select: { id: true, firstName: true, lastName: true, email: true } },
+        requester: {
+          select: {
+            id: true, firstName: true, lastName: true, email: true,
+          },
+        },
       },
     });
 
@@ -186,7 +232,11 @@ class ServiceService {
       },
       include: {
         branch: { select: { id: true, name: true, code: true } },
-        requester: { select: { id: true, firstName: true, lastName: true, email: true } },
+        requester: {
+          select: {
+            id: true, firstName: true, lastName: true, email: true,
+          },
+        },
       },
     });
   }
@@ -213,8 +263,16 @@ class ServiceService {
       },
       include: {
         branch: { select: { id: true, name: true, code: true } },
-        requester: { select: { id: true, firstName: true, lastName: true, email: true } },
-        approver: { select: { id: true, firstName: true, lastName: true, email: true } },
+        requester: {
+          select: {
+            id: true, firstName: true, lastName: true, email: true,
+          },
+        },
+        approver: {
+          select: {
+            id: true, firstName: true, lastName: true, email: true,
+          },
+        },
       },
     });
   }
@@ -241,8 +299,16 @@ class ServiceService {
       },
       include: {
         branch: { select: { id: true, name: true, code: true } },
-        requester: { select: { id: true, firstName: true, lastName: true, email: true } },
-        approver: { select: { id: true, firstName: true, lastName: true, email: true } },
+        requester: {
+          select: {
+            id: true, firstName: true, lastName: true, email: true,
+          },
+        },
+        approver: {
+          select: {
+            id: true, firstName: true, lastName: true, email: true,
+          },
+        },
       },
     });
   }
@@ -282,7 +348,11 @@ class ServiceService {
           status: 'ASSIGNED',
         },
         include: {
-          technician: { select: { id: true, firstName: true, lastName: true, email: true } },
+          technician: {
+            select: {
+              id: true, firstName: true, lastName: true, email: true,
+            },
+          },
           serviceRequest: { select: { id: true, ticketNo: true } },
         },
       }),
@@ -331,7 +401,11 @@ class ServiceService {
       where: { id: taskId },
       data: updateData,
       include: {
-        technician: { select: { id: true, firstName: true, lastName: true, email: true } },
+        technician: {
+          select: {
+            id: true, firstName: true, lastName: true, email: true,
+          },
+        },
         serviceRequest: { select: { id: true, ticketNo: true, status: true } },
       },
     });
@@ -394,7 +468,7 @@ class ServiceService {
 
       if (parseFloat(freshProduct.currentStock) < quantity) {
         throw new BadRequestError(
-          `Insufficient stock for ${freshProduct.name}. Available: ${freshProduct.currentStock}, Requested: ${quantity}`
+          `Insufficient stock for ${freshProduct.name}. Available: ${freshProduct.currentStock}, Requested: ${quantity}`,
         );
       }
 
@@ -407,7 +481,11 @@ class ServiceService {
           totalCost,
         },
         include: {
-          product: { select: { id: true, sku: true, name: true, unit: true } },
+          product: {
+            select: {
+              id: true, sku: true, name: true, unit: true,
+            },
+          },
         },
       });
 
@@ -482,7 +560,11 @@ class ServiceService {
       },
       include: {
         branch: { select: { id: true, name: true, code: true } },
-        requester: { select: { id: true, firstName: true, lastName: true, email: true } },
+        requester: {
+          select: {
+            id: true, firstName: true, lastName: true, email: true,
+          },
+        },
       },
     });
   }
@@ -604,7 +686,11 @@ class ServiceService {
         where,
         include: {
           branch: { select: { id: true, name: true, code: true } },
-          requester: { select: { id: true, firstName: true, lastName: true, email: true } },
+          requester: {
+            select: {
+              id: true, firstName: true, lastName: true, email: true,
+            },
+          },
           vehicle: { select: { id: true, registrationNo: true } },
           machine: { select: { id: true, machineCode: true, name: true } },
           asset: { select: { id: true, assetCode: true, name: true } },

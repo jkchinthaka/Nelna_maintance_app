@@ -22,7 +22,7 @@ async function connectWithRetry() {
       }
       const delay = RETRY_DELAY_MS * attempt;
       logger.warn(
-        `⏳ Database connection attempt ${attempt}/${MAX_RETRIES} failed: ${error.message}. Retrying in ${delay / 1000}s...`
+        `⏳ Database connection attempt ${attempt}/${MAX_RETRIES} failed: ${error.message}. Retrying in ${delay / 1000}s...`,
       );
       await new Promise((resolve) => setTimeout(resolve, delay));
     }
@@ -74,7 +74,6 @@ async function startServer() {
       logger.error('Uncaught Exception:', { message: error.message, stack: error.stack });
       gracefulShutdown('uncaughtException');
     });
-
   } catch (error) {
     logger.error('❌ Failed to start server:', { message: error.message, stack: error.stack });
     await prisma.$disconnect();

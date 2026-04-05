@@ -10,16 +10,18 @@ const logDir = config.logging.dir;
 const logFormat = winston.format.combine(
   winston.format.timestamp({ format: 'YYYY-MM-DD HH:mm:ss' }),
   winston.format.errors({ stack: true }),
-  winston.format.json()
+  winston.format.json(),
 );
 
 const consoleFormat = winston.format.combine(
   winston.format.colorize(),
   winston.format.timestamp({ format: 'HH:mm:ss' }),
-  winston.format.printf(({ timestamp, level, message, ...meta }) => {
+  winston.format.printf(({
+    timestamp, level, message, ...meta
+  }) => {
     const metaStr = Object.keys(meta).length ? JSON.stringify(meta) : '';
     return `${timestamp} [${level}]: ${message} ${metaStr}`;
-  })
+  }),
 );
 
 // Vercel / serverless environments have a read-only filesystem.
@@ -58,15 +60,26 @@ if (config.app.env !== 'production' || isServerless) {
   transports.push(
     new winston.transports.Console({
       format: consoleFormat,
-    })
+    }),
   );
 }
 
 const logger = winston.createLogger({
   level: config.logging.level,
   format: logFormat,
-  defaultMeta: { service: config.app.name },
+  defaultMeta: { service: config.app.name, env: config.app.env },
   transports,
 });
+
+// Morgan-compatible write stream — routes HTTP access logs through Winston
+logger.stream = {
+  write: (message) => logger.info(message.trim(), { type: 'http_access' }),
+};
+
+// Attach correlationId from the active request to every log entry.
+// Call logger.child({ correlationId: req.correlationId }) in routes, or
+// use the withCorrelation() helper below.
+logger.withCorrelation = (correlationId) =>
+  logger.child({ correlationId });
 
 module.exports = logger;

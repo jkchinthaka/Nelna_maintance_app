@@ -56,9 +56,9 @@ class MachineService {
   async getById(id, user) {
     const where = { id, deletedAt: null };
     if (
-      user &&
-      user.roleName !== 'super_admin' &&
-      user.roleName !== 'company_admin'
+      user
+      && user.roleName !== 'super_admin'
+      && user.roleName !== 'company_admin'
     ) {
       where.branchId = user.branchId;
     }
@@ -516,7 +516,7 @@ class MachineService {
         ...(data.hoursAtService && { operatingHours: data.hoursAtService }),
         ...(machine.maintenanceInterval && {
           nextMaintenanceDate: new Date(
-            new Date(data.serviceDate).getTime() + machine.maintenanceInterval * 24 * 60 * 60 * 1000
+            new Date(data.serviceDate).getTime() + machine.maintenanceInterval * 24 * 60 * 60 * 1000,
           ),
         }),
       },

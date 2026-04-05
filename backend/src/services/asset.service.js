@@ -3,7 +3,9 @@
 // ============================================================================
 const prisma = require('../config/database');
 const { NotFoundError, ConflictError, BadRequestError } = require('../utils/errors');
-const { generateReferenceNo, parsePagination, parseSort, buildSearchFilter } = require('../utils/helpers');
+const {
+  generateReferenceNo, parsePagination, parseSort, buildSearchFilter,
+} = require('../utils/helpers');
 
 class AssetService {
   // ==========================================================================

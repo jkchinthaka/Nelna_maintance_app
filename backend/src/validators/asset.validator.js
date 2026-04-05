@@ -27,7 +27,8 @@ const createAssetValidator = [
     .isIn(['IN_USE', 'IN_STORAGE', 'UNDER_REPAIR', 'DISPOSED', 'TRANSFERRED', 'LOST'])
     .withMessage('Invalid asset status'),
   body('assignedTo').optional().trim().isLength({ min: 1 }),
-  body('imageUrl').optional().trim().isURL().withMessage('Valid URL required'),
+  body('imageUrl').optional().trim().isURL()
+    .withMessage('Valid URL required'),
   body('notes').optional().trim(),
 ];
 
@@ -55,7 +56,8 @@ const updateAssetValidator = [
     .isIn(['IN_USE', 'IN_STORAGE', 'UNDER_REPAIR', 'DISPOSED', 'TRANSFERRED', 'LOST'])
     .withMessage('Invalid asset status'),
   body('assignedTo').optional().trim().isLength({ min: 1 }),
-  body('imageUrl').optional().trim().isURL().withMessage('Valid URL required'),
+  body('imageUrl').optional().trim().isURL()
+    .withMessage('Valid URL required'),
   body('notes').optional().trim(),
 ];
 

@@ -3,12 +3,11 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 
 import '../../../../core/theme/app_colors.dart';
+import '../../../../core/widgets/app_background.dart';
 import '../../../../core/widgets/error_widget.dart';
 import '../../../../core/widgets/kpi_card.dart';
 import '../../../../core/widgets/loading_widget.dart';
 import '../../../auth/presentation/providers/auth_provider.dart';
-import '../../../notifications/presentation/providers/notification_provider.dart';
-import '../../../notifications/presentation/widgets/notification_panel.dart';
 import '../../domain/entities/dashboard_entity.dart';
 import '../providers/dashboard_provider.dart';
 import '../widgets/monthly_trend_chart.dart';
@@ -38,106 +37,173 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
 
     final userName =
         authState is AuthAuthenticated ? authState.user.firstName : 'User';
-
     final isAdmin = authState is AuthAuthenticated &&
         (authState.user.roleName == 'super_admin' ||
             authState.user.roleName == 'admin');
 
     return Scaffold(
-      backgroundColor: AppColors.background,
-      body: RefreshIndicator(
-        color: AppColors.primary,
-        onRefresh: _onRefresh,
-        child: CustomScrollView(
-          physics: const AlwaysScrollableScrollPhysics(),
-          slivers: [
-            // ── App Bar ─────────────────────────────────────────────
-            SliverAppBar(
-              floating: true,
-              snap: true,
-              backgroundColor: AppColors.surface,
-              elevation: 0,
-              title: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    'Welcome back, $userName',
-                    style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                          fontWeight: FontWeight.w700,
-                          color: AppColors.textPrimary,
-                        ),
-                  ),
-                  const SizedBox(height: 2),
-                  Text(
-                    DateFormat('EEEE, d MMMM yyyy').format(DateTime.now()),
-                    style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                          color: AppColors.textSecondary,
-                        ),
-                  ),
-                ],
-              ),
-              toolbarHeight: 72,
-              actions: [
-                // Branch filter for admins
-                if (isAdmin) _buildBranchSelector(context),
-                Consumer(
-                  builder: (context, ref, _) {
-                    final unread = ref.watch(notificationProvider).unreadCount;
-                    return IconButton(
-                      icon: Badge(
-                        isLabelVisible: unread > 0,
-                        label: Text('$unread'),
-                        child: const Icon(
-                          Icons.notifications_outlined,
-                          color: AppColors.textPrimary,
-                        ),
-                      ),
-                      onPressed: () => NotificationPanel.show(context),
-                    );
-                  },
+      backgroundColor: Colors.transparent,
+      body: AppBackground(
+        child: RefreshIndicator(
+          color: AppColors.primary,
+          onRefresh: _onRefresh,
+          child: CustomScrollView(
+            physics: const AlwaysScrollableScrollPhysics(),
+            slivers: [
+              SliverPadding(
+                padding: const EdgeInsets.fromLTRB(0, 0, 0, 24),
+                sliver: SliverList(
+                  delegate: SliverChildListDelegate([
+                    const SizedBox(height: 8),
+                    _buildHeroSection(context, userName, isAdmin, kpisAsync),
+                    const SizedBox(height: 24),
+                    _buildKPIsSection(kpisAsync),
+                    const SizedBox(height: 24),
+                    _buildAnalyticsSection(trendsAsync, statsAsync),
+                    const SizedBox(height: 24),
+                    _buildRecentActivitySection(kpisAsync),
+                    const SizedBox(height: 24),
+                  ]),
                 ),
-                const SizedBox(width: 4),
-              ],
-            ),
-
-            // ── Content ─────────────────────────────────────────────
-            SliverPadding(
-              padding: const EdgeInsets.all(16),
-              sliver: SliverList(
-                delegate: SliverChildListDelegate([
-                  // KPIs Section
-                  _buildKPIsSection(kpisAsync),
-                  const SizedBox(height: 20),
-
-                  // Monthly Trends Chart
-                  _buildTrendsSection(trendsAsync),
-                  const SizedBox(height: 20),
-
-                  // Service Request Stats Chart
-                  _buildStatsSection(statsAsync),
-                  const SizedBox(height: 20),
-
-                  // Recent Activity
-                  _buildRecentActivitySection(kpisAsync),
-
-                  // Bottom padding
-                  const SizedBox(height: 24),
-                ]),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );
   }
 
-  // ── Pull to Refresh ─────────────────────────────────────────────────
+  Widget _buildHeroSection(
+    BuildContext context,
+    String userName,
+    bool isAdmin,
+    AsyncValue<DashboardKPIs> kpisAsync,
+  ) {
+    final theme = Theme.of(context);
+    final today = DateFormat('EEEE, d MMMM yyyy').format(DateTime.now());
+
+    return Container(
+      padding: const EdgeInsets.all(24),
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(32),
+        gradient: const LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: [
+            AppColors.primaryDark,
+            AppColors.primary,
+            AppColors.primaryLight,
+          ],
+        ),
+        boxShadow: [
+          BoxShadow(
+            color: AppColors.primaryDark.withOpacity(0.18),
+            blurRadius: 30,
+            offset: const Offset(0, 16),
+          ),
+        ],
+      ),
+      child: Stack(
+        children: [
+          Positioned(
+            top: -40,
+            right: -20,
+            child: _HeroOrb(size: 180, color: Colors.white.withOpacity(0.12)),
+          ),
+          Positioned(
+            bottom: -50,
+            left: -30,
+            child: _HeroOrb(size: 220, color: Colors.white.withOpacity(0.08)),
+          ),
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Container(
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 12, vertical: 8),
+                          decoration: BoxDecoration(
+                            color: Colors.white.withOpacity(0.12),
+                            borderRadius: BorderRadius.circular(999),
+                            border: Border.all(
+                                color: Colors.white.withOpacity(0.14)),
+                          ),
+                          child: Text(
+                            today,
+                            style: theme.textTheme.bodySmall?.copyWith(
+                              color: Colors.white,
+                              fontWeight: FontWeight.w700,
+                            ),
+                          ),
+                        ),
+                        const SizedBox(height: 18),
+                        Text(
+                          'Welcome back, $userName',
+                          style: theme.textTheme.displaySmall?.copyWith(
+                            color: Colors.white,
+                            fontWeight: FontWeight.w800,
+                            letterSpacing: -0.8,
+                          ),
+                        ),
+                        const SizedBox(height: 10),
+                        Text(
+                          'Monitor work orders, inventory pressure, and equipment health from a single responsive workspace.',
+                          style: theme.textTheme.bodyLarge?.copyWith(
+                            color: Colors.white.withOpacity(0.88),
+                            height: 1.6,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  if (isAdmin) _buildBranchSelector(context),
+                ],
+              ),
+              const SizedBox(height: 20),
+              kpisAsync.when(
+                loading: () => const SizedBox.shrink(),
+                error: (_, __) => const SizedBox.shrink(),
+                data: (kpis) {
+                  final quickStats = [
+                    _HeroStat(
+                        label: 'Open requests',
+                        value: '${kpis.openServiceRequests}'),
+                    _HeroStat(
+                        label: 'Low stock', value: '${kpis.lowStockItems}'),
+                    _HeroStat(
+                        label: 'POs pending', value: '${kpis.pendingPOs}'),
+                    _HeroStat(
+                        label: 'Monthly expenses',
+                        value: _currencyFormat.format(kpis.expensesThisMonth)),
+                  ];
+
+                  return Wrap(
+                    spacing: 12,
+                    runSpacing: 12,
+                    children: quickStats
+                        .map((stat) => _HeroMetricChip(stat: stat))
+                        .toList(),
+                  );
+                },
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
 
   Future<void> _onRefresh() async {
     ref.invalidate(dashboardKPIsProvider);
     ref.invalidate(monthlyTrendsProvider);
     ref.invalidate(serviceRequestStatsProvider);
-    // Wait for the providers to re-fetch
+
     await Future.wait<dynamic>([
       ref
           .read(dashboardKPIsProvider.future)
@@ -155,35 +221,47 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
     ]);
   }
 
-  // ── Branch Selector (Admin only) ────────────────────────────────────
-
   Widget _buildBranchSelector(BuildContext context) {
     final selectedBranch = ref.watch(selectedBranchIdProvider);
+    final theme = Theme.of(context);
 
     return PopupMenuButton<int?>(
-      icon: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          const Icon(Icons.filter_list, color: AppColors.primary, size: 20),
-          const SizedBox(width: 4),
-          Text(
-            selectedBranch == null ? 'All' : 'Branch $selectedBranch',
-            style: const TextStyle(
-              fontSize: 12,
-              color: AppColors.primary,
-              fontWeight: FontWeight.w600,
+      offset: const Offset(0, 52),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(18)),
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+        decoration: BoxDecoration(
+          color: Colors.white.withOpacity(0.12),
+          borderRadius: BorderRadius.circular(18),
+          border: Border.all(color: Colors.white.withOpacity(0.14)),
+        ),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const Icon(Icons.filter_list_rounded,
+                color: Colors.white, size: 20),
+            const SizedBox(width: 8),
+            Text(
+              selectedBranch == null
+                  ? 'All branches'
+                  : 'Branch $selectedBranch',
+              style: theme.textTheme.bodyMedium?.copyWith(
+                color: Colors.white,
+                fontWeight: FontWeight.w700,
+              ),
             ),
-          ),
-        ],
+            const SizedBox(width: 6),
+            const Icon(Icons.expand_more_rounded, color: Colors.white),
+          ],
+        ),
       ),
       onSelected: (value) {
         ref.read(selectedBranchIdProvider.notifier).set(value);
       },
       itemBuilder: (context) => [
-        const PopupMenuItem<int?>(value: null, child: Text('All Branches')),
-        // In a real app, populate from a branches provider
-        ...List.generate(5, (i) {
-          final branchId = i + 1;
+        const PopupMenuItem<int?>(value: null, child: Text('All branches')),
+        ...List.generate(5, (index) {
+          final branchId = index + 1;
           return PopupMenuItem<int?>(
             value: branchId,
             child: Text('Branch $branchId'),
@@ -192,8 +270,6 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
       ],
     );
   }
-
-  // ── KPIs Grid ───────────────────────────────────────────────────────
 
   Widget _buildKPIsSection(AsyncValue<DashboardKPIs> kpisAsync) {
     return kpisAsync.when(
@@ -265,9 +341,9 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
 
     return LayoutBuilder(
       builder: (context, constraints) {
-        final crossAxisCount = constraints.maxWidth > 900
+        final crossAxisCount = constraints.maxWidth > 1200
             ? 4
-            : constraints.maxWidth > 600
+            : constraints.maxWidth > 800
                 ? 3
                 : 2;
 
@@ -278,7 +354,7 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
             crossAxisCount: crossAxisCount,
             crossAxisSpacing: 12,
             mainAxisSpacing: 12,
-            childAspectRatio: constraints.maxWidth > 600 ? 1.6 : 1.45,
+            childAspectRatio: constraints.maxWidth > 800 ? 1.65 : 1.45,
           ),
           itemCount: items.length,
           itemBuilder: (context, index) {
@@ -290,9 +366,6 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
               color: item.color,
               trend: item.trend,
               trendLabel: item.trendLabel,
-              onTap: () {
-                // Navigate to the relevant detail screen
-              },
             );
           },
         );
@@ -303,9 +376,9 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
   Widget _buildKPIsShimmer() {
     return LayoutBuilder(
       builder: (context, constraints) {
-        final crossAxisCount = constraints.maxWidth > 900
+        final crossAxisCount = constraints.maxWidth > 1200
             ? 4
-            : constraints.maxWidth > 600
+            : constraints.maxWidth > 800
                 ? 3
                 : 2;
 
@@ -316,7 +389,7 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
             crossAxisCount: crossAxisCount,
             crossAxisSpacing: 12,
             mainAxisSpacing: 12,
-            childAspectRatio: constraints.maxWidth > 600 ? 1.6 : 1.45,
+            childAspectRatio: constraints.maxWidth > 800 ? 1.65 : 1.45,
           ),
           itemCount: 8,
           itemBuilder: (_, __) => const ShimmerLoading(height: 140),
@@ -325,45 +398,63 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
     );
   }
 
-  // ── Trends Chart ────────────────────────────────────────────────────
+  Widget _buildAnalyticsSection(
+    AsyncValue<MonthlyTrendsResponse> trendsAsync,
+    AsyncValue<ServiceRequestStats> statsAsync,
+  ) {
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final isWide = constraints.maxWidth >= 1100;
 
-  Widget _buildTrendsSection(AsyncValue<MonthlyTrendsResponse> trendsAsync) {
-    return trendsAsync.when(
-      loading: () => const ShimmerLoading(height: 320),
-      error: (error, _) => ErrorView(
-        message: error.toString().replaceFirst('Exception: ', ''),
-        onRetry: () => ref.invalidate(monthlyTrendsProvider),
-      ),
-      data: (response) => MonthlyTrendChart(trends: response.months),
+        final trendsCard = trendsAsync.when(
+          loading: () => const ShimmerLoading(height: 320),
+          error: (error, _) => ErrorView(
+            message: error.toString().replaceFirst('Exception: ', ''),
+            onRetry: () => ref.invalidate(monthlyTrendsProvider),
+          ),
+          data: (response) => MonthlyTrendChart(trends: response.months),
+        );
+
+        final statsCard = statsAsync.when(
+          loading: () => const ShimmerLoading(height: 320),
+          error: (error, _) => ErrorView(
+            message: error.toString().replaceFirst('Exception: ', ''),
+            onRetry: () => ref.invalidate(serviceRequestStatsProvider),
+          ),
+          data: (stats) => ServiceStatsChart(stats: stats),
+        );
+
+        if (isWide) {
+          return Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Expanded(child: trendsCard),
+              const SizedBox(width: 16),
+              Expanded(child: statsCard),
+            ],
+          );
+        }
+
+        return Column(
+          children: [
+            trendsCard,
+            const SizedBox(height: 16),
+            statsCard,
+          ],
+        );
+      },
     );
   }
-
-  // ── Service Stats Chart ─────────────────────────────────────────────
-
-  Widget _buildStatsSection(AsyncValue<ServiceRequestStats> statsAsync) {
-    return statsAsync.when(
-      loading: () => const ShimmerLoading(height: 300),
-      error: (error, _) => ErrorView(
-        message: error.toString().replaceFirst('Exception: ', ''),
-        onRetry: () => ref.invalidate(serviceRequestStatsProvider),
-      ),
-      data: (stats) => ServiceStatsChart(stats: stats),
-    );
-  }
-
-  // ── Recent Activity ─────────────────────────────────────────────────
 
   Widget _buildRecentActivitySection(AsyncValue<DashboardKPIs> kpisAsync) {
-    // Build sample activity items based on KPI data for a realistic feed.
-    // In production, this would be its own endpoint.
     final activities = <ActivityItem>[];
 
     kpisAsync.whenData((kpis) {
       if (kpis.openServiceRequests > 0) {
         activities.add(
           ActivityItem(
-            title: 'Open Service Requests',
-            subtitle: '${kpis.openServiceRequests} requests awaiting action',
+            title: 'Open service requests',
+            subtitle: ' requests awaiting action',
             icon: Icons.assignment_late_outlined,
             color: AppColors.warning,
             timestamp: DateTime.now().subtract(const Duration(minutes: 15)),
@@ -375,8 +466,8 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
       if (kpis.lowStockItems > 0) {
         activities.add(
           ActivityItem(
-            title: 'Low Stock Alert',
-            subtitle: '${kpis.lowStockItems} items below reorder level',
+            title: 'Low stock alert',
+            subtitle: ' items below reorder level',
             icon: Icons.warning_amber_outlined,
             color: AppColors.error,
             timestamp: DateTime.now().subtract(const Duration(hours: 1)),
@@ -388,9 +479,8 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
       if (kpis.assetsUnderRepair > 0) {
         activities.add(
           ActivityItem(
-            title: 'Assets Under Repair',
-            subtitle:
-                '${kpis.assetsUnderRepair} assets currently being repaired',
+            title: 'Assets under repair',
+            subtitle: ' assets currently being repaired',
             icon: Icons.build_circle_outlined,
             color: AppColors.info,
             timestamp: DateTime.now().subtract(const Duration(hours: 2)),
@@ -402,43 +492,59 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
       if (kpis.pendingPOs > 0) {
         activities.add(
           ActivityItem(
-            title: 'Pending Purchase Orders',
-            subtitle: '${kpis.pendingPOs} POs require attention',
-            icon: Icons.receipt_long_outlined,
-            color: AppColors.primaryLight,
-            timestamp: DateTime.now().subtract(const Duration(hours: 3)),
+            title: 'Pending purchase orders',
+            subtitle: ' POs awaiting approval',
+            icon: Icons.shopping_cart_checkout,
+            color: AppColors.primary,
+            timestamp: DateTime.now().subtract(const Duration(hours: 5)),
+            tag: 'APPROVAL',
           ),
         );
       }
-
-      activities.add(
-        ActivityItem(
-          title: 'System Status',
-          subtitle:
-              '${kpis.activeVehicles} vehicles and ${kpis.operationalMachines} machines operational',
-          icon: Icons.check_circle_outline,
-          color: AppColors.success,
-          timestamp: DateTime.now().subtract(const Duration(hours: 6)),
-          tag: 'OK',
-        ),
-      );
     });
 
-    // Show a placeholder if we're still loading
-    if (activities.isEmpty && kpisAsync.isLoading) {
-      return const ShimmerLoading(height: 200);
+    if (activities.isEmpty) {
+      activities.add(
+        ActivityItem(
+          title: 'System online',
+          subtitle: 'All systems are operating normally',
+          icon: Icons.check_circle_outline,
+          color: AppColors.success,
+          timestamp: DateTime.now(),
+          tag: 'SYSTEM',
+        ),
+      );
     }
 
-    return RecentActivityCard(
-      activities: activities,
-      onViewAll: () {
-        // Navigate to full activity/audit log
-      },
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 8),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text(
+                'Recent activity',
+                style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                      fontWeight: FontWeight.w800,
+                    ),
+              ),
+              TextButton(
+                onPressed: () {},
+                child: const Text('View all'),
+              ),
+            ],
+          ),
+        ),
+        RecentActivityCard(
+          activities: activities,
+          onViewAll: () {},
+        ),
+      ],
     );
   }
 }
-
-// ── Helper Model ──────────────────────────────────────────────────────
 
 class _KpiItem {
   final String title;
@@ -448,7 +554,7 @@ class _KpiItem {
   final KpiTrend trend;
   final String? trendLabel;
 
-  const _KpiItem({
+  _KpiItem({
     required this.title,
     required this.value,
     required this.icon,
@@ -456,4 +562,71 @@ class _KpiItem {
     this.trend = KpiTrend.neutral,
     this.trendLabel,
   });
+}
+
+class _HeroStat {
+  final String label;
+  final String value;
+
+  const _HeroStat({required this.label, required this.value});
+}
+
+class _HeroMetricChip extends StatelessWidget {
+  final _HeroStat stat;
+
+  const _HeroMetricChip({required this.stat});
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+      decoration: BoxDecoration(
+        color: Colors.white.withOpacity(0.12),
+        borderRadius: BorderRadius.circular(18),
+        border: Border.all(color: Colors.white.withOpacity(0.14)),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Text(
+            stat.label,
+            style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                  color: Colors.white.withOpacity(0.82),
+                  fontWeight: FontWeight.w600,
+                ),
+          ),
+          const SizedBox(height: 4),
+          Text(
+            stat.value,
+            style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                  color: Colors.white,
+                  fontWeight: FontWeight.w800,
+                ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _HeroOrb extends StatelessWidget {
+  final double size;
+  final Color color;
+
+  const _HeroOrb({required this.size, required this.color});
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: size,
+      height: size,
+      decoration: BoxDecoration(
+        shape: BoxShape.circle,
+        gradient: RadialGradient(
+          colors: [color, color.withOpacity(0.02)],
+        ),
+      ),
+    );
+  }
 }

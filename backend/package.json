@@ -12,6 +12,9 @@
     "prisma:migrate:prod": "npx prisma migrate deploy",
     "prisma:seed": "node prisma/seed.js",
     "prisma:studio": "npx prisma studio",
+    "mongo:mainapp:init": "mongosh \"%MAIN_APP_MONGODB_URI%\" scripts/init-main-app-mongo.js --quiet",
+    "mongo:mainapp:setup": "mongosh \"%MAIN_APP_MONGODB_URI%\" scripts/setup-main-app-mongo.js --quiet",
+    "mongo:mainapp:validators": "mongosh \"%MAIN_APP_MONGODB_URI%\" scripts/apply-main-app-validators.js --quiet",
     "test": "jest --coverage",
     "test:unit": "jest --testPathPattern=tests/unit",
     "test:integration": "jest --testPathPattern=tests/integration",
@@ -42,6 +45,8 @@
   },
   "devDependencies": {
     "eslint": "^8.57.0",
+    "eslint-config-airbnb-base": "^15.0.0",
+    "eslint-plugin-import": "^2.32.0",
     "jest": "^29.7.0",
     "nodemon": "^3.1.0",
     "supertest": "^6.3.4"

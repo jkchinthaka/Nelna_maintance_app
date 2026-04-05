@@ -230,7 +230,7 @@ class NotificationService {
         entityId: serviceRequest.id,
         ticketNo: serviceRequest.ticketNo,
         status: serviceRequest.status,
-      }
+      },
     );
   }
 
@@ -249,7 +249,7 @@ class NotificationService {
         sku: product.sku,
         currentStock: product.currentStock,
         reorderLevel: product.reorderLevel,
-      }
+      },
     );
   }
 
@@ -268,7 +268,7 @@ class NotificationService {
         machineId: machine.id,
         machineCode: machine.machineCode,
         severity: breakdown.severity,
-      }
+      },
     );
   }
 
@@ -286,7 +286,7 @@ class NotificationService {
         entityId: transfer.id,
         assetId: asset.id,
         assetCode: asset.assetCode,
-      }
+      },
     );
   }
 
@@ -304,7 +304,7 @@ class NotificationService {
         entityType: asset.assetCode ? 'Asset' : asset.machineCode ? 'Machine' : 'Vehicle',
         entityId: asset.id,
         warrantyExpiry: asset.warrantyExpiry,
-      }
+      },
     );
   }
 
@@ -326,8 +326,8 @@ class NotificationService {
         notification: { title, body },
         data: data
           ? Object.fromEntries(
-              Object.entries(data).map(([k, v]) => [k, String(v)])
-            )
+            Object.entries(data).map(([k, v]) => [k, String(v)]),
+          )
           : {},
         token: fcmToken,
         android: {
@@ -344,8 +344,8 @@ class NotificationService {
     } catch (error) {
       // If the token is invalid, clear it from the user record
       if (
-        error.code === 'messaging/invalid-registration-token' ||
-        error.code === 'messaging/registration-token-not-registered'
+        error.code === 'messaging/invalid-registration-token'
+        || error.code === 'messaging/registration-token-not-registered'
       ) {
         logger.warn(`Invalid FCM token detected, clearing: ${fcmToken}`);
         await prisma.user.updateMany({

@@ -11,7 +11,7 @@
   },
   "rules": {
     "no-console": ["warn", { "allow": ["warn", "error"] }],
-    "no-unused-vars": ["error", { "argsIgnorePattern": "^_" }],
+    "no-unused-vars": ["warn", { "argsIgnorePattern": "^_", "varsIgnorePattern": "^_", "ignoreRestSiblings": true }],
     "func-names": "off",
     "object-shorthand": "warn",
     "prefer-destructuring": "warn",
@@ -19,7 +19,16 @@
     "consistent-return": "warn",
     "max-classes-per-file": "off",
     "class-methods-use-this": "warn",
-    "no-underscore-dangle": "off"
+    "no-underscore-dangle": "off",
+    "global-require": "warn",
+    "no-restricted-syntax": "warn",
+    "max-len": ["warn", { "code": 120 }],
+    "no-plusplus": "warn",
+    "no-await-in-loop": "warn",
+    "no-promise-executor-return": "warn",
+    "no-nested-ternary": "warn",
+    "no-restricted-globals": "warn",
+    "no-continue": "warn"
   },
   "overrides": [
     {

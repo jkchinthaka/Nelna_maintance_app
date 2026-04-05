@@ -41,7 +41,7 @@ class AssetController {
   getRepairHistory = asyncHandler(async (req, res) => {
     const result = await assetService.getRepairHistory(
       parseInt(req.params.id, 10),
-      req.query
+      req.query,
     );
     ApiResponse.paginated(res, result.repairLogs, result.pagination);
   });

@@ -42,38 +42,36 @@ const AUDITABLE_MODELS = new Set([
  * @param {string} module - Module name
  * @param {string} entityType - Entity type (e.g., 'Vehicle')
  */
-const auditLog = (action, module, entityType) => {
-  return async (req, res, next) => {
-    // Store original json method
-    const originalJson = res.json.bind(res);
+const auditLog = (action, module, entityType) => async (req, res, next) => {
+  // Store original json method
+  const originalJson = res.json.bind(res);
 
-    res.json = async function (body) {
-      try {
-        if (body.success && req.user) {
-          await prisma.auditLog.create({
-            data: {
-              userId: req.user.id,
-              action,
-              module,
-              entityType,
-              entityId: body.data?.id || parseInt(req.params.id, 10) || null,
-              // Stored as NVarChar(Max) JSON strings in SQL Server
-              oldValues: toAuditJson(req._auditOldValues || null),
-              newValues: action !== 'DELETE' ? toAuditJson(req.body || null) : null,
-              ipAddress: req.ip || req.socket?.remoteAddress || null,
-              userAgent: (req.headers['user-agent'] || '').slice(0, 500) || null,
-            },
-          });
-        }
-      } catch (error) {
-        logger.error('Audit log creation failed', { error: error.message });
+  res.json = async function (body) {
+    try {
+      if (body.success && req.user) {
+        await prisma.auditLog.create({
+          data: {
+            userId: req.user.id,
+            action,
+            module,
+            entityType,
+            entityId: body.data?.id || parseInt(req.params.id, 10) || null,
+            // Stored as NVarChar(Max) JSON strings in SQL Server
+            oldValues: toAuditJson(req._auditOldValues || null),
+            newValues: action !== 'DELETE' ? toAuditJson(req.body || null) : null,
+            ipAddress: req.ip || req.socket?.remoteAddress || null,
+            userAgent: (req.headers['user-agent'] || '').slice(0, 500) || null,
+          },
+        });
       }
+    } catch (error) {
+      logger.error('Audit log creation failed', { error: error.message });
+    }
 
-      return originalJson(body);
-    };
-
-    next();
+    return originalJson(body);
   };
+
+  next();
 };
 
 /**
@@ -81,25 +79,23 @@ const auditLog = (action, module, entityType) => {
  * Only operates on allowlisted model names to prevent prototype injection.
  * @param {string} model - Prisma model name (must be in AUDITABLE_MODELS)
  */
-const captureOldValues = (model) => {
-  return async (req, res, next) => {
-    try {
-      const id = parseInt(req.params.id, 10);
+const captureOldValues = (model) => async (req, res, next) => {
+  try {
+    const id = parseInt(req.params.id, 10);
 
-      if (!AUDITABLE_MODELS.has(model)) {
-        logger.warn(`Audit: Model "${model}" is not in the audit allowlist — skipping.`);
-        return next();
-      }
-
-      if (id && prisma[model] && typeof prisma[model].findUnique === 'function') {
-        const oldRecord = await prisma[model].findUnique({ where: { id } });
-        req._auditOldValues = oldRecord;
-      }
-    } catch (error) {
-      logger.error('Capture old values failed', { error: error.message, model });
+    if (!AUDITABLE_MODELS.has(model)) {
+      logger.warn(`Audit: Model "${model}" is not in the audit allowlist — skipping.`);
+      return next();
     }
-    next();
-  };
+
+    if (id && prisma[model] && typeof prisma[model].findUnique === 'function') {
+      const oldRecord = await prisma[model].findUnique({ where: { id } });
+      req._auditOldValues = oldRecord;
+    }
+  } catch (error) {
+    logger.error('Capture old values failed', { error: error.message, model });
+  }
+  next();
 };
 
 module.exports = { auditLog, captureOldValues };

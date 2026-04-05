@@ -1,7 +1,5 @@
 import 'package:flutter/material.dart';
 
-import '../theme/app_colors.dart';
-
 // ═══════════════════════════════════════════════════════════════════════════
 //  Loading Overlay
 // ═══════════════════════════════════════════════════════════════════════════
@@ -21,32 +19,45 @@ class LoadingOverlay extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+
     return Stack(
       children: [
         child,
         if (isLoading)
           Container(
-            color: Colors.black.withOpacity(0.35),
+            color: Colors.black
+                .withOpacity(theme.brightness == Brightness.dark ? 0.44 : 0.30),
             child: Center(
               child: Card(
                 elevation: 4,
                 shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(16),
+                  borderRadius: BorderRadius.circular(24),
+                  side: BorderSide(
+                      color: theme.colorScheme.outline.withOpacity(0.45)),
                 ),
                 child: Padding(
                   padding: const EdgeInsets.symmetric(
-                    horizontal: 32,
-                    vertical: 24,
+                    horizontal: 28,
+                    vertical: 22,
                   ),
                   child: Column(
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      const CircularProgressIndicator(color: AppColors.primary),
+                      const SizedBox(
+                        width: 26,
+                        height: 26,
+                        child: CircularProgressIndicator(strokeWidth: 2.5),
+                      ),
                       if (message != null) ...[
                         const SizedBox(height: 16),
                         Text(
                           message!,
-                          style: Theme.of(context).textTheme.bodyMedium,
+                          style: theme.textTheme.bodyMedium?.copyWith(
+                            color: theme.colorScheme.onSurface,
+                            fontWeight: FontWeight.w600,
+                          ),
+                          textAlign: TextAlign.center,
                         ),
                       ],
                     ],
@@ -106,6 +117,8 @@ class _ShimmerLoadingState extends State<ShimmerLoading>
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+
     return AnimatedBuilder(
       listenable: _animation,
       builder: (context, _) {
@@ -117,10 +130,10 @@ class _ShimmerLoadingState extends State<ShimmerLoading>
             gradient: LinearGradient(
               begin: Alignment(_animation.value - 1, 0),
               end: Alignment(_animation.value + 1, 0),
-              colors: const [
-                Color(0xFFE8EAED),
-                Color(0xFFF5F6FA),
-                Color(0xFFE8EAED),
+              colors: [
+                theme.colorScheme.surfaceContainerHighest.withOpacity(0.28),
+                theme.colorScheme.surfaceContainerHighest.withOpacity(0.62),
+                theme.colorScheme.surfaceContainerHighest.withOpacity(0.28),
               ],
             ),
           ),
@@ -149,15 +162,15 @@ class ShimmerCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 6),
+      padding: const EdgeInsets.symmetric(vertical: 8),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: const [
-          ShimmerLoading(height: 20, width: 200),
+          ShimmerLoading(height: 20, width: 200, borderRadius: 12),
           SizedBox(height: 8),
-          ShimmerLoading(height: 14),
+          ShimmerLoading(height: 14, borderRadius: 10),
           SizedBox(height: 6),
-          ShimmerLoading(height: 14, width: 250),
+          ShimmerLoading(height: 14, width: 250, borderRadius: 10),
         ],
       ),
     );

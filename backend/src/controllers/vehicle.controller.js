@@ -69,7 +69,7 @@ class VehicleController {
     const analytics = await vehicleService.getCostAnalytics(
       parseInt(req.params.id, 10),
       req.query.startDate,
-      req.query.endDate
+      req.query.endDate,
     );
     ApiResponse.success(res, analytics);
   });

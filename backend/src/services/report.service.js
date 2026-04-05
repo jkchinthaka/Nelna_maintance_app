@@ -143,11 +143,11 @@ class ReportService {
     const report = vehicles.map((v) => {
       const maintenanceCost = v.serviceHistory.reduce(
         (sum, sh) => sum + parseFloat(sh.cost || 0),
-        0
+        0,
       );
       const fuelCost = v.fuelLogs.reduce(
         (sum, fl) => sum + parseFloat(fl.totalCost || 0),
-        0
+        0,
       );
 
       return {
@@ -174,7 +174,9 @@ class ReportService {
         totalCost: acc.totalCost + v.totalCost,
         totalServiceCount: acc.totalServiceCount + v.serviceCount,
       }),
-      { totalMaintenanceCost: 0, totalFuelCost: 0, totalCost: 0, totalServiceCount: 0 }
+      {
+        totalMaintenanceCost: 0, totalFuelCost: 0, totalCost: 0, totalServiceCount: 0,
+      },
     );
 
     return {
@@ -232,11 +234,11 @@ class ReportService {
     const report = machines.map((m) => {
       const totalDowntimeMinutes = m.breakdownLogs.reduce(
         (sum, bl) => sum + (bl.downtimeMinutes || 0),
-        0
+        0,
       );
       const totalRepairCost = m.breakdownLogs.reduce(
         (sum, bl) => sum + (bl.costOfRepair ? parseFloat(bl.costOfRepair) : 0),
-        0
+        0,
       );
       const unresolvedCount = m.breakdownLogs.filter((bl) => !bl.resolvedAt).length;
 
@@ -265,7 +267,7 @@ class ReportService {
         totalDowntimeMinutes: acc.totalDowntimeMinutes + m.totalDowntimeMinutes,
         totalRepairCost: acc.totalRepairCost + m.totalRepairCost,
       }),
-      { totalBreakdowns: 0, totalDowntimeMinutes: 0, totalRepairCost: 0 }
+      { totalBreakdowns: 0, totalDowntimeMinutes: 0, totalRepairCost: 0 },
     );
 
     return {
@@ -324,7 +326,9 @@ class ReportService {
     const productIds = topConsumedProducts.map((p) => p.productId);
     const products = await prisma.product.findMany({
       where: { id: { in: productIds } },
-      select: { id: true, sku: true, name: true, unit: true, currentStock: true },
+      select: {
+        id: true, sku: true, name: true, unit: true, currentStock: true,
+      },
     });
     const productMap = Object.fromEntries(products.map((p) => [p.id, p]));
 
@@ -470,11 +474,11 @@ class ReportService {
 
       const totalExpenseAmount = monthExpenses.reduce(
         (sum, e) => sum + parseFloat(e.amount || 0),
-        0
+        0,
       );
       const totalServiceCost = monthRequests.reduce(
         (sum, sr) => sum + parseFloat(sr.actualCost || 0),
-        0
+        0,
       );
 
       return {

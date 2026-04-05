@@ -3,7 +3,9 @@
 // ============================================================================
 const prisma = require('../config/database');
 const { NotFoundError, ConflictError, BadRequestError } = require('../utils/errors');
-const { parsePagination, parseSort, buildSearchFilter, isWithinDays } = require('../utils/helpers');
+const {
+  parsePagination, parseSort, buildSearchFilter, isWithinDays,
+} = require('../utils/helpers');
 
 class VehicleService {
   /**
@@ -63,7 +65,11 @@ class VehicleService {
         serviceHistory: { orderBy: { serviceDate: 'desc' }, take: 20 },
         drivers: {
           include: {
-            driver: { select: { id: true, firstName: true, lastName: true, phone: true } },
+            driver: {
+              select: {
+                id: true, firstName: true, lastName: true, phone: true,
+              },
+            },
           },
           orderBy: { assignedDate: 'desc' },
         },
@@ -387,8 +393,8 @@ class VehicleService {
         entries: serviceCosts._count,
       },
       totalCost:
-        (parseFloat(fuelCosts._sum.totalCost) || 0) +
-        (parseFloat(serviceCosts._sum.cost) || 0),
+        (parseFloat(fuelCosts._sum.totalCost) || 0)
+        + (parseFloat(serviceCosts._sum.cost) || 0),
     };
   }
 }

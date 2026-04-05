@@ -5,7 +5,9 @@ const express = require('express');
 const path = require('path');
 const fs = require('fs');
 const { authenticate } = require('../middleware/auth');
-const { uploadSingle, uploadMultiple, withCategory, CATEGORIES } = require('../middleware/upload');
+const {
+  uploadSingle, uploadMultiple, withCategory, CATEGORIES,
+} = require('../middleware/upload');
 const { success } = require('../utils/apiResponse');
 const { BadRequestError, NotFoundError } = require('../utils/errors');
 const asyncHandler = require('../utils/asyncHandler');
@@ -46,9 +48,9 @@ router.post(
         size: req.file.size,
         url: fileUrl,
         category: req.params.category,
-      }, 'File uploaded successfully', 201)
+      }, 'File uploaded successfully', 201),
     );
-  })
+  }),
 );
 
 // ── POST /uploads/:category/multiple ── Multiple files upload ─────────────
@@ -81,9 +83,9 @@ router.post(
     }));
 
     res.status(201).json(
-      success(files, `${files.length} file(s) uploaded successfully`, 201)
+      success(files, `${files.length} file(s) uploaded successfully`, 201),
     );
-  })
+  }),
 );
 
 // ── DELETE /uploads/:category/:fileName ── Remove a file ──────────────────
@@ -106,7 +108,7 @@ router.delete(
     fs.unlinkSync(filePath);
 
     res.json(success(null, 'File deleted successfully'));
-  })
+  }),
 );
 
 module.exports = router;

@@ -1,6 +1,7 @@
 import 'package:dio/dio.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+import 'package:sentry_flutter/sentry_flutter.dart';
 
 import '../constants/api_constants.dart';
 import '../constants/app_constants.dart';
@@ -136,6 +137,22 @@ class ApiClient {
   InterceptorsWrapper _errorInterceptor() {
     return InterceptorsWrapper(
       onError: (error, handler) {
+        // Capture unexpected server/network errors in Sentry.
+        // 401 is intentionally excluded — it triggers a token refresh and
+        // is not an unhandled error.
+        final statusCode = error.response?.statusCode;
+        if (statusCode == null || statusCode >= 500) {
+          Sentry.captureException(
+            error,
+            stackTrace: error.stackTrace,
+            hint: Hint.withMap({
+              'url': error.requestOptions.uri.toString(),
+              'method': error.requestOptions.method,
+              'status_code': statusCode?.toString() ?? 'no_response',
+            }),
+          );
+        }
+
         // For badResponse, enrich the message from the JSON body and
         // reject with the same type so the datasource can inspect it.
         if (error.type == DioExceptionType.badResponse) {

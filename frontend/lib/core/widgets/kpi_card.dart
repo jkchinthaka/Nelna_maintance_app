@@ -1,4 +1,5 @@
-import 'package:flutter/material.dart';
+﻿import 'package:flutter/material.dart';
+import 'package:flutter_animate/flutter_animate.dart';
 
 import '../theme/app_colors.dart';
 
@@ -31,88 +32,112 @@ class KpiCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Card(
-      child: InkWell(
-        onTap: onTap,
-        borderRadius: BorderRadius.circular(12),
-        child: Padding(
-          padding: const EdgeInsets.all(20),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              // ── Header Row: icon + title ──────────────────────────────
-              Row(
-                children: [
-                  Container(
-                    width: 44,
-                    height: 44,
-                    decoration: BoxDecoration(
-                      color: color.withOpacity(0.1),
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                    child: Icon(icon, color: color, size: 24),
-                  ),
-                  const SizedBox(width: 12),
-                  Expanded(
-                    child: Text(
-                      title,
-                      style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                        color: AppColors.textSecondary,
-                        fontWeight: FontWeight.w500,
-                      ),
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 16),
+    final theme = Theme.of(context);
+    final surface = theme.colorScheme.surface;
+    final onSurface = theme.colorScheme.onSurface;
+    final variant = theme.colorScheme.onSurfaceVariant;
 
-              // ── Value ─────────────────────────────────────────────────
-              Text(
-                value,
-                style: Theme.of(context).textTheme.headlineMedium?.copyWith(
-                  fontWeight: FontWeight.w700,
-                  color: AppColors.textPrimary,
-                ),
-              ),
-
-              // ── Subtitle + Trend ──────────────────────────────────────
-              if (subtitle != null || trendLabel != null) ...[
-                const SizedBox(height: 8),
+    return Container(
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(24),
+        gradient: LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: [
+            surface,
+            theme.colorScheme.surfaceContainerHighest.withOpacity(0.28),
+          ],
+        ),
+        border: Border.all(color: color.withOpacity(0.12)),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(
+              theme.brightness == Brightness.dark ? 0.2 : 0.06,
+            ),
+            blurRadius: 22,
+            offset: const Offset(0, 10),
+          ),
+        ],
+      ),
+      child: Material(
+        color: Colors.transparent,
+        child: InkWell(
+          borderRadius: BorderRadius.circular(24),
+          onTap: onTap,
+          child: Padding(
+            padding: const EdgeInsets.all(18),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
                 Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    if (trendLabel != null) ...[
-                      _TrendIndicator(trend: trend, label: trendLabel!),
-                      const SizedBox(width: 8),
-                    ],
-                    if (subtitle != null)
-                      Expanded(
-                        child: Text(
-                          subtitle!,
-                          style: Theme.of(context).textTheme.bodySmall
-                              ?.copyWith(color: AppColors.textSecondary),
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
+                    Container(
+                      width: 48,
+                      height: 48,
+                      decoration: BoxDecoration(
+                        gradient: LinearGradient(
+                          colors: [
+                            color.withOpacity(0.2),
+                            color.withOpacity(0.1),
+                          ],
                         ),
+                        borderRadius: BorderRadius.circular(16),
                       ),
+                      child: Icon(icon, color: color, size: 22),
+                    ),
+                    const Spacer(),
+                    if (trend != KpiTrend.neutral)
+                      _TrendChip(trend: trend, label: trendLabel),
                   ],
                 ),
+                const SizedBox(height: 18),
+                Text(
+                  title,
+                  style: theme.textTheme.bodyMedium?.copyWith(
+                    color: variant,
+                    fontWeight: FontWeight.w600,
+                  ),
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
+                ),
+                const SizedBox(height: 8),
+                Text(
+                  value,
+                  style: theme.textTheme.headlineMedium?.copyWith(
+                    color: onSurface,
+                    fontWeight: FontWeight.w800,
+                    letterSpacing: -0.8,
+                  ),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                ),
+                if (subtitle != null) ...[
+                  const SizedBox(height: 6),
+                  Text(
+                    subtitle!,
+                    style: theme.textTheme.bodySmall?.copyWith(
+                      color: variant,
+                    ),
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                ],
               ],
-            ],
+            ),
           ),
         ),
       ),
-    );
+    ).animate().fadeIn(duration: 240.ms).scale(begin: const Offset(0.98, 0.98));
   }
 }
 
-// ── Trend Indicator ───────────────────────────────────────────────────
-class _TrendIndicator extends StatelessWidget {
+class _TrendChip extends StatelessWidget {
   final KpiTrend trend;
-  final String label;
+  final String? label;
 
-  const _TrendIndicator({required this.trend, required this.label});
+  const _TrendChip({required this.trend, this.label});
 
   @override
   Widget build(BuildContext context) {
@@ -122,37 +147,39 @@ class _TrendIndicator extends StatelessWidget {
     switch (trend) {
       case KpiTrend.up:
         trendColor = AppColors.success;
-        trendIcon = Icons.trending_up;
+        trendIcon = Icons.trending_up_rounded;
         break;
       case KpiTrend.down:
         trendColor = AppColors.error;
-        trendIcon = Icons.trending_down;
+        trendIcon = Icons.trending_down_rounded;
         break;
       case KpiTrend.neutral:
         trendColor = AppColors.textSecondary;
-        trendIcon = Icons.trending_flat;
+        trendIcon = Icons.trending_flat_rounded;
         break;
     }
 
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
       decoration: BoxDecoration(
-        color: trendColor.withOpacity(0.1),
-        borderRadius: BorderRadius.circular(12),
+        color: trendColor.withOpacity(0.12),
+        borderRadius: BorderRadius.circular(20),
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
           Icon(trendIcon, size: 14, color: trendColor),
-          const SizedBox(width: 4),
-          Text(
-            label,
-            style: TextStyle(
-              color: trendColor,
-              fontSize: 12,
-              fontWeight: FontWeight.w600,
+          if (label != null) ...[
+            const SizedBox(width: 4),
+            Text(
+              label!,
+              style: TextStyle(
+                color: trendColor,
+                fontSize: 12,
+                fontWeight: FontWeight.w700,
+              ),
             ),
-          ),
+          ],
         ],
       ),
     );

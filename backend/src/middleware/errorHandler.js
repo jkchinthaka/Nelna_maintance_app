@@ -5,7 +5,30 @@ const logger = require('../config/logger');
 const { AppError } = require('../utils/errors');
 const config = require('../config');
 
+// Sentry is optionally available — only capture if initialised
+let Sentry = null;
+try {
+  if (config.sentry.dsn) {
+    Sentry = require('@sentry/node');
+  }
+} catch (_) { /* Sentry not installed */ }
+
 const errorHandler = (err, req, res, next) => {
+  // ── Forward to Sentry (non-operational errors only) ────────────────────
+  // Skip 4xx client errors — those are expected and not actionable noise.
+  const status = err.statusCode || 500;
+  if (Sentry && status >= 500) {
+    Sentry.captureException(err, {
+      user: req.user ? { id: req.user.id, email: req.user.email } : undefined,
+      extra: {
+        correlationId: req.correlationId,
+        path: req.path,
+        method: req.method,
+        body: config.app.env !== 'production' ? req.body : undefined,
+      },
+    });
+  }
+
   // Log error
   logger.error('Error occurred', {
     message: err.message,
@@ -15,6 +38,7 @@ const errorHandler = (err, req, res, next) => {
     method: req.method,
     ip: req.ip,
     userId: req.user?.id,
+    correlationId: req.correlationId,
   });
 
   // Prisma-specific errors
@@ -73,10 +97,9 @@ const errorHandler = (err, req, res, next) => {
 
   // Unhandled errors
   const statusCode = err.statusCode || 500;
-  const message =
-    config.app.env === 'production'
-      ? 'Internal server error'
-      : err.message || 'Internal server error';
+  const message = config.app.env === 'production'
+    ? 'Internal server error'
+    : err.message || 'Internal server error';
 
   return res.status(statusCode).json({
     success: false,
